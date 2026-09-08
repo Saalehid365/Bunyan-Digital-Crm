@@ -44,6 +44,14 @@ enum Priority {
   URGENT
 }
 
+enum Recurrence {
+  NONE
+  DAILY
+  WEEKLY
+  FORTNIGHTLY
+  MONTHLY
+}
+
 enum ActivityType {
   NOTE
   STAGE_CHANGE
@@ -176,19 +184,20 @@ model ClientMember {
 /// table view, e.g. "eBay Management – September". Contains Tasks (a checklist
 /// of the actual sub-items of work) which is where time gets logged.
 model Job {
-  id              String    @id @default(cuid())
+  id              String     @id @default(cuid())
   clientId        String
   clientServiceId String?
   title           String
-  description     String?   @db.Text
-  stage           JobStage  @default(BACKLOG)
-  position        Float     @default(0)
-  priority        Priority  @default(MEDIUM)
+  description     String?    @db.Text
+  stage           JobStage   @default(BACKLOG)
+  position        Float      @default(0)
+  priority        Priority   @default(MEDIUM)
+  recurrence      Recurrence @default(NONE)
   assignedToId    String?
   dueDate         DateTime?
   completedAt     DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   client        Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientService ClientService? @relation(fields: [clientServiceId], references: [id], onDelete: SetNull)

@@ -1,4 +1,4 @@
-import type { ClientStatus, JobStage, Priority, ServiceStatus } from "@prisma/client";
+import type { ClientStatus, JobStage, Priority, Recurrence, ServiceStatus } from "@prisma/client";
 
 export const JOB_STAGES: { value: JobStage; label: string }[] = [
   { value: "BACKLOG", label: "Backlog" },
@@ -26,6 +26,22 @@ export const PRIORITY_ORDER: Record<Priority, number> = {
   HIGH: 1,
   MEDIUM: 2,
   LOW: 3,
+};
+
+export const RECURRENCE_TABS: { value: Recurrence | "ALL"; label: string }[] = [
+  { value: "ALL", label: "All" },
+  { value: "DAILY", label: "Daily" },
+  { value: "WEEKLY", label: "Weekly" },
+  { value: "FORTNIGHTLY", label: "Fortnightly" },
+  { value: "MONTHLY", label: "Monthly" },
+];
+
+export const RECURRENCE_LABEL: Record<Recurrence, string> = {
+  NONE: "One-off",
+  DAILY: "Daily",
+  WEEKLY: "Weekly",
+  FORTNIGHTLY: "Fortnightly",
+  MONTHLY: "Monthly",
 };
 
 export const CLIENT_STATUS_LABEL: Record<ClientStatus, string> = {

@@ -30,6 +30,7 @@ export async function getKanbanJobs(clientIds: string[] | undefined): Promise<Ka
     stage: job.stage,
     position: job.position,
     priority: job.priority,
+    recurrence: job.recurrence,
     dueDate: job.dueDate ? job.dueDate.toISOString() : null,
     clientId: job.clientId,
     clientName: job.client.name,

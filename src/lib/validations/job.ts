@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const jobStageEnum = z.enum(["BACKLOG", "IN_PROGRESS", "IN_REVIEW", "DONE"]);
 export const priorityEnum = z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]);
+export const recurrenceEnum = z.enum(["NONE", "DAILY", "WEEKLY", "FORTNIGHTLY", "MONTHLY"]);
 
 export const jobSchema = z.object({
   clientId: z.string().min(1),
@@ -9,6 +10,7 @@ export const jobSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(160),
   description: z.string().trim().max(4000).optional().or(z.literal("")),
   priority: priorityEnum.default("MEDIUM"),
+  recurrence: recurrenceEnum.default("NONE"),
   assignedToId: z.string().optional().or(z.literal("")),
   dueDate: z.string().trim().optional().or(z.literal("")),
 });

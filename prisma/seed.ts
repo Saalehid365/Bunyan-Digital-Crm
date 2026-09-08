@@ -197,6 +197,9 @@ async function main() {
                 | "MEDIUM"
                 | "HIGH"
                 | "URGENT",
+              recurrence: ["NONE", "NONE", "DAILY", "WEEKLY", "FORTNIGHTLY", "MONTHLY"][
+                Math.floor(Math.random() * 6)
+              ] as "NONE" | "DAILY" | "WEEKLY" | "FORTNIGHTLY" | "MONTHLY",
               assignedToId,
               dueDate,
               completedAt: stage === "DONE" ? new Date() : undefined,

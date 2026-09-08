@@ -21,6 +21,7 @@ export async function createJob(formData: FormData) {
     title: formData.get("title"),
     description: formData.get("description"),
     priority: formData.get("priority") || "MEDIUM",
+    recurrence: formData.get("recurrence") || "NONE",
     assignedToId: clearSentinel(formData.get("assignedToId")),
     dueDate: formData.get("dueDate"),
   });
@@ -47,6 +48,7 @@ export async function createJob(formData: FormData) {
       title: data.title,
       description: data.description || undefined,
       priority: data.priority,
+      recurrence: data.recurrence,
       assignedToId: data.assignedToId || undefined,
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
       stage,
@@ -118,6 +120,7 @@ export async function updateJob(jobId: string, formData: FormData) {
     title: formData.get("title"),
     description: formData.get("description"),
     priority: formData.get("priority") || "MEDIUM",
+    recurrence: formData.get("recurrence") || "NONE",
     assignedToId: clearSentinel(formData.get("assignedToId")),
     dueDate: formData.get("dueDate"),
   });
@@ -135,6 +138,7 @@ export async function updateJob(jobId: string, formData: FormData) {
       title: data.title,
       description: data.description || null,
       priority: data.priority,
+      recurrence: data.recurrence,
       assignedToId: data.assignedToId || null,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
     },

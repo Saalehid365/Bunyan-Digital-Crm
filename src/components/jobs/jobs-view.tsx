@@ -5,7 +5,7 @@ import { Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { JOB_STAGES, PRIORITY_LABEL } from "@/lib/constants";
+import { JOB_STAGES, PRIORITY_LABEL, RECURRENCE_TABS } from "@/lib/constants";
 import { STAGE_DOT } from "@/components/jobs/status-cell";
 import { MultiSelectFilter } from "@/components/jobs/multi-select-filter";
 import { Board } from "@/components/kanban/board";
@@ -13,7 +13,7 @@ import { JobsTable } from "@/components/jobs/jobs-table";
 import { JobFormDialog } from "@/components/kanban/job-form-dialog";
 import { JobDetailSheet } from "@/components/kanban/job-detail-sheet";
 import type { KanbanJob } from "@/components/kanban/types";
-import type { JobStage, Priority } from "@prisma/client";
+import type { JobStage, Priority, Recurrence } from "@prisma/client";
 
 type AssignableUser = { id: string; name: string | null; email: string };
 type ClientServiceOption = { id: string; name: string };
@@ -61,6 +61,7 @@ export function JobsView({
   const [stageFilter, setStageFilter] = useState<string[]>([]);
   const [assigneeFilter, setAssigneeFilter] = useState<string[]>([]);
   const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
+  const [recurrenceTab, setRecurrenceTab] = useState<Recurrence | "ALL">("ALL");
   const [createState, setCreateState] = useState<{ open: boolean; stage: JobStage }>({
     open: false,
     stage: "BACKLOG",
@@ -110,9 +111,10 @@ export function JobsView({
         const assigneeKey = j.assignedTo?.id ?? "unassigned";
         if (!assigneeFilter.includes(assigneeKey)) return false;
       }
+      if (recurrenceTab !== "ALL" && j.recurrence !== recurrenceTab) return false;
       return true;
     });
-  }, [jobs, search, clientFilter, stageFilter, assigneeFilter, priorityFilter]);
+  }, [jobs, search, clientFilter, stageFilter, assigneeFilter, priorityFilter, recurrenceTab]);
 
   function openCreate(stage: JobStage) {
     setCreateState({ open: true, stage });
@@ -195,6 +197,23 @@ export function JobsView({
           ) : null}
         </div>
         {extraControls}
+      </div>
+
+      <div className="flex items-center gap-1 border-b border-border px-4 py-2 md:px-6">
+        {RECURRENCE_TABS.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setRecurrenceTab(tab.value)}
+            className={cn(
+              "rounded-[var(--radius-sm)] px-2.5 py-1 text-xs font-medium transition-colors",
+              recurrenceTab === tab.value
+                ? "bg-accent text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {view === "board" ? (

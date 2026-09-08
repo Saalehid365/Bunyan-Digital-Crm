@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PRIORITY_LABEL, JOB_STAGE_LABEL } from "@/lib/constants";
+import { PRIORITY_LABEL, RECURRENCE_LABEL, JOB_STAGE_LABEL } from "@/lib/constants";
 import { createJob } from "@/server/actions/jobs";
 import type { JobStage } from "@prisma/client";
 
@@ -130,12 +130,27 @@ export function JobFormDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dueDate">Due date</Label>
-              <Input id="dueDate" name="dueDate" type="date" />
+              <Label htmlFor="recurrence">Repeats</Label>
+              <Select name="recurrence" defaultValue="NONE">
+                <SelectTrigger id="recurrence" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(RECURRENCE_LABEL).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="dueDate">Due date</Label>
+              <Input id="dueDate" name="dueDate" type="date" />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="assignedToId">Assignee</Label>
               <Select name="assignedToId" defaultValue="unassigned">
@@ -152,6 +167,9 @@ export function JobFormDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             {clientServices.length > 0 ? (
               <div className="space-y-2">
                 <Label htmlFor="clientServiceId">Service</Label>

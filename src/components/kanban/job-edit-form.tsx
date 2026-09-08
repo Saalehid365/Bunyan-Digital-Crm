@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PRIORITY_LABEL } from "@/lib/constants";
+import { PRIORITY_LABEL, RECURRENCE_LABEL } from "@/lib/constants";
 import { updateJob } from "@/server/actions/jobs";
 import type { KanbanJob } from "./types";
 
@@ -69,6 +69,24 @@ export function JobEditForm({
           </Select>
         </div>
         <div className="space-y-2">
+          <Label htmlFor={`recurrence-${job.id}`}>Repeats</Label>
+          <Select name="recurrence" defaultValue={job.recurrence}>
+            <SelectTrigger id={`recurrence-${job.id}`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(RECURRENCE_LABEL).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
           <Label htmlFor={`dueDate-${job.id}`}>Due date</Label>
           <Input
             id={`dueDate-${job.id}`}
@@ -77,9 +95,6 @@ export function JobEditForm({
             defaultValue={job.dueDate ? job.dueDate.slice(0, 10) : ""}
           />
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor={`assignedToId-${job.id}`}>Assignee</Label>
           <Select name="assignedToId" defaultValue={job.assignedTo?.id ?? "unassigned"}>
@@ -96,7 +111,10 @@ export function JobEditForm({
             </SelectContent>
           </Select>
         </div>
-        {clientServices.length > 0 ? (
+      </div>
+
+      {clientServices.length > 0 ? (
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor={`clientServiceId-${job.id}`}>Service</Label>
             <Select name="clientServiceId" defaultValue={job.clientServiceId ?? "none"}>
@@ -113,8 +131,8 @@ export function JobEditForm({
               </SelectContent>
             </Select>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 

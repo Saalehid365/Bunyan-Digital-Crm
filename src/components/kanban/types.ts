@@ -1,4 +1,4 @@
-import type { JobStage, Priority } from "@prisma/client";
+import type { JobStage, Priority, Recurrence } from "@prisma/client";
 
 export type JobTimeEntry = {
   id: string;
@@ -24,6 +24,7 @@ export type KanbanJob = {
   stage: JobStage;
   position: number;
   priority: Priority;
+  recurrence: Recurrence;
   dueDate: string | null;
   clientId: string;
   clientName: string;

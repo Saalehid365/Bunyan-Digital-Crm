@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { format, isPast, isToday } from "date-fns";
-import { AlertTriangle, ChevronDown, ListChecks, Plus } from "lucide-react";
+import { AlertTriangle, ChevronDown, ListChecks, Plus, Repeat } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { JOB_STAGES, PRIORITY_LABEL, formatMinutes } from "@/lib/constants";
+import { JOB_STAGES, PRIORITY_LABEL, RECURRENCE_LABEL, formatMinutes } from "@/lib/constants";
 import { EmptyState } from "@/components/empty-state";
 import { StatusCell, STAGE_DOT } from "@/components/jobs/status-cell";
 import type { KanbanJob } from "@/components/kanban/types";
@@ -120,6 +120,14 @@ export function JobsTable({
                                 title={PRIORITY_LABEL[job.priority]}
                               />
                               <span className="truncate font-medium text-foreground">{job.title}</span>
+                              {job.recurrence !== "NONE" ? (
+                                <span
+                                  className="inline-flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground"
+                                  title={RECURRENCE_LABEL[job.recurrence]}
+                                >
+                                  <Repeat className="h-3 w-3" />
+                                </span>
+                              ) : null}
                             </div>
                           </TableCell>
                           {showClient ? (

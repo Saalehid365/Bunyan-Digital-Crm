@@ -3,9 +3,9 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { isPast, isToday, format } from "date-fns";
-import { AlertTriangle, Clock, ListChecks } from "lucide-react";
+import { AlertTriangle, Clock, ListChecks, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PRIORITY_LABEL, formatMinutes } from "@/lib/constants";
+import { PRIORITY_LABEL, RECURRENCE_LABEL, formatMinutes } from "@/lib/constants";
 import type { KanbanJob } from "./types";
 import type { Priority } from "@prisma/client";
 
@@ -85,8 +85,14 @@ export function JobCard({
         </div>
       ) : null}
 
-      {job.tasks.length > 0 || totalMinutes > 0 ? (
+      {job.tasks.length > 0 || totalMinutes > 0 || job.recurrence !== "NONE" ? (
         <div className="mb-2 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+          {job.recurrence !== "NONE" ? (
+            <span className="inline-flex items-center gap-1">
+              <Repeat className="h-3 w-3" />
+              {RECURRENCE_LABEL[job.recurrence]}
+            </span>
+          ) : null}
           {job.tasks.length > 0 ? (
             <span className="inline-flex items-center gap-1">
               <ListChecks className="h-3 w-3" />
