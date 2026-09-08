@@ -24,6 +24,7 @@ import type { JobStage } from "@prisma/client";
 
 type AssignableUser = { id: string; name: string | null; email: string };
 type ClientServiceOption = { id: string; name: string };
+type ClientOption = { id: string; name: string };
 
 const initialState: { error?: string; id?: string } = {};
 
@@ -31,19 +32,30 @@ export function JobFormDialog({
   open,
   onOpenChange,
   clientId,
+  clients,
   defaultStage,
   assignableUsers,
-  clientServices,
+  clientServicesByClient,
   onDone,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  clientId: string;
+  /** Fixed client — hides the client picker. Omit (with `clients`) to let the user choose. */
+  clientId?: string;
+  /** Clients the user can create a job for, used only when `clientId` isn't fixed. */
+  clients?: ClientOption[];
   defaultStage: JobStage;
   assignableUsers: AssignableUser[];
-  clientServices: ClientServiceOption[];
+  clientServicesByClient: Record<string, ClientServiceOption[]>;
   onDone: () => void;
 }) {
+  const [selectedClientId, setSelectedClientId] = useState(clientId ?? clients?.[0]?.id ?? "");
+  const [seenOpen, setSeenOpen] = useState(open);
+  if (open !== seenOpen) {
+    setSeenOpen(open);
+    if (open) setSelectedClientId(clientId ?? clients?.[0]?.id ?? "");
+  }
+
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initialState, formData: FormData): Promise<typeof initialState> => {
       return await createJob(formData);
@@ -57,6 +69,8 @@ export function JobFormDialog({
     if (state.id) onDone();
   }
 
+  const clientServices = clientServicesByClient[selectedClientId] ?? [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -64,8 +78,30 @@ export function JobFormDialog({
           <DialogTitle>New job</DialogTitle>
         </DialogHeader>
         <form action={formAction} className="space-y-4">
-          <input type="hidden" name="clientId" value={clientId} />
+          {clientId ? (
+            <input type="hidden" name="clientId" value={clientId} />
+          ) : (
+            <input type="hidden" name="clientId" value={selectedClientId} />
+          )}
           <input type="hidden" name="stage" value={defaultStage} />
+
+          {!clientId && clients ? (
+            <div className="space-y-2">
+              <Label htmlFor="clientPicker">Client</Label>
+              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                <SelectTrigger id="clientPicker" className="w-full">
+                  <SelectValue placeholder="Choose a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
 
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
@@ -119,7 +155,7 @@ export function JobFormDialog({
             {clientServices.length > 0 ? (
               <div className="space-y-2">
                 <Label htmlFor="clientServiceId">Service</Label>
-                <Select name="clientServiceId" defaultValue="none">
+                <Select key={selectedClientId} name="clientServiceId" defaultValue="none">
                   <SelectTrigger id="clientServiceId" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -139,7 +175,7 @@ export function JobFormDialog({
           {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={pending}>
+            <Button type="submit" disabled={pending || !selectedClientId}>
               {pending ? "Creating…" : `Add to ${JOB_STAGE_LABEL[defaultStage]}`}
             </Button>
           </div>

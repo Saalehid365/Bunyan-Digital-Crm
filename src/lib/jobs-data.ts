@@ -54,6 +54,18 @@ export async function getKanbanJobs(clientIds: string[] | undefined): Promise<Ka
   }));
 }
 
+/** Every client the user can see, for the "which client is this job for" picker —
+ * independent of who already has jobs, so a brand-new client is still selectable. */
+export async function getAccessibleClients(
+  clientIds: string[] | undefined,
+): Promise<{ id: string; name: string }[]> {
+  return prisma.client.findMany({
+    where: clientIds ? { id: { in: clientIds } } : {},
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+}
+
 export async function getClientServicesByClient(
   clientIds: string[] | undefined,
 ): Promise<Record<string, { id: string; name: string }[]>> {

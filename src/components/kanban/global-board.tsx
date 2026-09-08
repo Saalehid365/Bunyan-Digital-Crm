@@ -11,12 +11,14 @@ type ClientServiceOption = { id: string; name: string };
 
 export function GlobalBoard({
   jobs,
+  clients,
   currentUserId,
   isAdmin,
   assignableUsers,
   clientServicesByClient,
 }: {
   jobs: KanbanJob[];
+  clients: { id: string; name: string }[];
   currentUserId: string;
   isAdmin: boolean;
   assignableUsers: AssignableUser[];
@@ -33,6 +35,7 @@ export function GlobalBoard({
     <JobsView
       initialJobs={filtered}
       showClient
+      clients={clients}
       currentUserId={currentUserId}
       isAdmin={isAdmin}
       assignableUsers={assignableUsers}

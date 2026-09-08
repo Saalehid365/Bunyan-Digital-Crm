@@ -29,6 +29,7 @@ export function JobsView({
   initialJobs,
   showClient,
   clientId,
+  clients,
   currentUserId,
   isAdmin,
   assignableUsers,
@@ -37,8 +38,10 @@ export function JobsView({
 }: {
   initialJobs: KanbanJob[];
   showClient: boolean;
-  /** Fixed client scope for a per-client board. Omit for the cross-client global board. */
+  /** Fixed client scope for a per-client board. Omit (with `clients`) for the cross-client global board. */
   clientId?: string;
+  /** Every client the user can create a job for — required when `clientId` isn't fixed. */
+  clients?: { id: string; name: string }[];
   currentUserId: string;
   isAdmin: boolean;
   assignableUsers: AssignableUser[];
@@ -142,11 +145,13 @@ export function JobsView({
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 md:px-6">
         <div className="flex flex-wrap items-center gap-2">
-          {clientId ? (
-            <Button size="sm" onClick={() => openCreate("BACKLOG")}>
-              <Plus className="h-3.5 w-3.5" /> New job
-            </Button>
-          ) : null}
+          <Button
+            size="sm"
+            onClick={() => openCreate("BACKLOG")}
+            disabled={!clientId && (!clients || clients.length === 0)}
+          >
+            <Plus className="h-3.5 w-3.5" /> New job
+          </Button>
           <div className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -210,17 +215,16 @@ export function JobsView({
         />
       )}
 
-      {clientId ? (
-        <JobFormDialog
-          open={createState.open}
-          onOpenChange={(open) => setCreateState((s) => ({ ...s, open }))}
-          clientId={clientId}
-          defaultStage={createState.stage}
-          assignableUsers={assignableUsers}
-          clientServices={clientServicesByClient[clientId] ?? []}
-          onDone={() => setCreateState((s) => ({ ...s, open: false }))}
-        />
-      ) : null}
+      <JobFormDialog
+        open={createState.open}
+        onOpenChange={(open) => setCreateState((s) => ({ ...s, open }))}
+        clientId={clientId}
+        clients={clients}
+        defaultStage={createState.stage}
+        assignableUsers={assignableUsers}
+        clientServicesByClient={clientServicesByClient}
+        onDone={() => setCreateState((s) => ({ ...s, open: false }))}
+      />
 
       <JobDetailSheet
         job={detailJob}

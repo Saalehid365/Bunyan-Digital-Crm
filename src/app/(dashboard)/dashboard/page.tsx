@@ -2,7 +2,7 @@ import { addDays } from "date-fns";
 import { requireUser, getVisibleClientIds } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { GBP, formatMinutes } from "@/lib/constants";
-import { getKanbanJobs, getClientServicesByClient } from "@/lib/jobs-data";
+import { getKanbanJobs, getClientServicesByClient, getAccessibleClients } from "@/lib/jobs-data";
 import { MetricPanel } from "@/components/dashboard/metric-panel";
 import { GlobalBoard } from "@/components/kanban/global-board";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,9 +13,10 @@ export default async function DashboardPage() {
   const clientIds = isAdmin ? undefined : await getVisibleClientIds(user.id);
   const clientFilter = clientIds ? { id: { in: clientIds } } : {};
 
-  const [activeClients, jobs, clientServicesByClient, activeUsers] = await Promise.all([
+  const [activeClients, jobs, clients, clientServicesByClient, activeUsers] = await Promise.all([
     prisma.client.count({ where: { ...clientFilter, status: "ACTIVE" } }),
     getKanbanJobs(clientIds),
+    getAccessibleClients(clientIds),
     getClientServicesByClient(clientIds),
     prisma.user.findMany({
       where: { disabledAt: null },
@@ -78,6 +79,7 @@ export default async function DashboardPage() {
           <CardContent className="flex flex-1 flex-col p-0">
             <GlobalBoard
               jobs={jobs}
+              clients={clients}
               currentUserId={user.id}
               isAdmin={isAdmin}
               assignableUsers={activeUsers}
@@ -136,6 +138,7 @@ export default async function DashboardPage() {
         <CardContent className="flex flex-1 flex-col p-0">
           <GlobalBoard
             jobs={jobs}
+            clients={clients}
             currentUserId={user.id}
             isAdmin={isAdmin}
             assignableUsers={activeUsers}
