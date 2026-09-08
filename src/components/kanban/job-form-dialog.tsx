@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { Trash2 } from "lucide-react";
+import { useActionState, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,22 +18,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PRIORITY_LABEL, TASK_STAGE_LABEL } from "@/lib/constants";
-import { createTask, updateTask, deleteTask } from "@/server/actions/tasks";
-import type { KanbanTask } from "./types";
-import type { TaskStage } from "@prisma/client";
+import { PRIORITY_LABEL, JOB_STAGE_LABEL } from "@/lib/constants";
+import { createJob } from "@/server/actions/jobs";
+import type { JobStage } from "@prisma/client";
 
 type AssignableUser = { id: string; name: string | null; email: string };
 type ClientServiceOption = { id: string; name: string };
 
-const initialState: { error?: string; id?: string; ok?: boolean } = {};
+const initialState: { error?: string; id?: string } = {};
 
-export function TaskFormDialog({
+export function JobFormDialog({
   open,
   onOpenChange,
   clientId,
   defaultStage,
-  task,
   assignableUsers,
   clientServices,
   onDone,
@@ -42,50 +39,48 @@ export function TaskFormDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   clientId: string;
-  defaultStage: TaskStage;
-  task?: KanbanTask | null;
+  defaultStage: JobStage;
   assignableUsers: AssignableUser[];
   clientServices: ClientServiceOption[];
   onDone: () => void;
 }) {
-  const isEdit = Boolean(task);
-
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initialState, formData: FormData): Promise<typeof initialState> => {
-      if (isEdit && task) return await updateTask(task.id, formData);
-      return await createTask(formData);
+      return await createJob(formData);
     },
     initialState,
   );
 
-  useEffect(() => {
-    if (state.ok || state.id) onDone();
-  }, [state, onDone]);
+  const [seenState, setSeenState] = useState(state);
+  if (state !== seenState) {
+    setSeenState(state);
+    if (state.id) onDone();
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit task" : "New task"}</DialogTitle>
+          <DialogTitle>New job</DialogTitle>
         </DialogHeader>
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="clientId" value={clientId} />
-          {!isEdit ? <input type="hidden" name="stage" value={defaultStage} /> : null}
+          <input type="hidden" name="stage" value={defaultStage} />
 
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" defaultValue={task?.title} required autoFocus />
+            <Input id="title" name="title" placeholder='e.g. "eBay Management – September"' required autoFocus />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" rows={3} defaultValue={task?.description ?? ""} />
+            <Textarea id="description" name="description" rows={3} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
-              <Select name="priority" defaultValue={task?.priority ?? "MEDIUM"}>
+              <Select name="priority" defaultValue="MEDIUM">
                 <SelectTrigger id="priority" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -100,19 +95,14 @@ export function TaskFormDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor="dueDate">Due date</Label>
-              <Input
-                id="dueDate"
-                name="dueDate"
-                type="date"
-                defaultValue={task?.dueDate ? task.dueDate.slice(0, 10) : ""}
-              />
+              <Input id="dueDate" name="dueDate" type="date" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="assignedToId">Assignee</Label>
-              <Select name="assignedToId" defaultValue={task?.assignedTo?.id ?? "unassigned"}>
+              <Select name="assignedToId" defaultValue="unassigned">
                 <SelectTrigger id="assignedToId" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -129,7 +119,7 @@ export function TaskFormDialog({
             {clientServices.length > 0 ? (
               <div className="space-y-2">
                 <Label htmlFor="clientServiceId">Service</Label>
-                <Select name="clientServiceId" defaultValue={task?.clientServiceId ?? "none"}>
+                <Select name="clientServiceId" defaultValue="none">
                   <SelectTrigger id="clientServiceId" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -148,25 +138,9 @@ export function TaskFormDialog({
 
           {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 
-          <div className="flex items-center justify-between pt-1">
-            {isEdit && task ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-destructive"
-                onClick={async () => {
-                  await deleteTask(task.id, clientId);
-                  onDone();
-                }}
-              >
-                <Trash2 className="h-3.5 w-3.5" /> Delete
-              </Button>
-            ) : (
-              <span />
-            )}
+          <div className="flex justify-end">
             <Button type="submit" disabled={pending}>
-              {pending ? "Saving…" : isEdit ? "Save changes" : `Add to ${TASK_STAGE_LABEL[defaultStage]}`}
+              {pending ? "Creating…" : `Add to ${JOB_STAGE_LABEL[defaultStage]}`}
             </Button>
           </div>
         </form>

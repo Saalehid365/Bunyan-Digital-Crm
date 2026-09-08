@@ -3,10 +3,10 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { isPast, isToday, format } from "date-fns";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Clock, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PRIORITY_LABEL } from "@/lib/constants";
-import type { KanbanTask } from "./types";
+import { PRIORITY_LABEL, formatMinutes } from "@/lib/constants";
+import type { KanbanJob } from "./types";
 import type { Priority } from "@prisma/client";
 
 const PRIORITY_DOT: Record<Priority, string> = {
@@ -21,20 +21,20 @@ function initials(name: string | null) {
   return name.split(/\s+/).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 }
 
-export function TaskCard({
-  task,
+export function JobCard({
+  job,
   showClient,
   onClick,
   overlay,
 }: {
-  task: KanbanTask;
+  job: KanbanJob;
   showClient: boolean;
   onClick?: () => void;
   overlay?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: task.id,
-    data: { stage: task.stage },
+    id: job.id,
+    data: { stage: job.stage },
   });
 
   const style = {
@@ -42,8 +42,10 @@ export function TaskCard({
     transition,
   };
 
-  const dueDate = task.dueDate ? new Date(task.dueDate) : null;
-  const overdue = dueDate && isPast(dueDate) && !isToday(dueDate) && task.stage !== "DONE";
+  const dueDate = job.dueDate ? new Date(job.dueDate) : null;
+  const overdue = dueDate && isPast(dueDate) && !isToday(dueDate) && job.stage !== "DONE";
+  const totalMinutes = job.tasks.reduce((sum, t) => sum + t.totalMinutes, 0);
+  const doneTasks = job.tasks.filter((t) => t.done).length;
 
   return (
     <div
@@ -59,25 +61,42 @@ export function TaskCard({
       )}
     >
       <div className="mb-2 flex items-start justify-between gap-2">
-        <p className="text-sm font-medium leading-snug text-foreground">{task.title}</p>
+        <p className="text-sm font-medium leading-snug text-foreground">{job.title}</p>
         <span
-          className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT[task.priority])}
-          title={PRIORITY_LABEL[task.priority]}
+          className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT[job.priority])}
+          title={PRIORITY_LABEL[job.priority]}
         />
       </div>
 
-      {showClient || task.serviceTypeName ? (
+      {showClient || job.serviceTypeName ? (
         <div className="mb-2 flex flex-wrap items-center gap-1.5">
           {showClient ? (
-            <span className="text-xs text-muted-foreground">{task.clientName}</span>
+            <span className="text-xs text-muted-foreground">{job.clientName}</span>
           ) : null}
-          {task.serviceTypeName ? (
+          {job.serviceTypeName ? (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <span
                 className="h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: task.serviceTypeColor ?? "var(--muted-foreground)" }}
+                style={{ backgroundColor: job.serviceTypeColor ?? "var(--muted-foreground)" }}
               />
-              {task.serviceTypeName}
+              {job.serviceTypeName}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {job.tasks.length > 0 || totalMinutes > 0 ? (
+        <div className="mb-2 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+          {job.tasks.length > 0 ? (
+            <span className="inline-flex items-center gap-1">
+              <ListChecks className="h-3 w-3" />
+              {doneTasks}/{job.tasks.length}
+            </span>
+          ) : null}
+          {totalMinutes > 0 ? (
+            <span className="inline-flex items-center gap-1 font-mono tabular-nums">
+              <Clock className="h-3 w-3" />
+              {formatMinutes(totalMinutes)}
             </span>
           ) : null}
         </div>
@@ -97,12 +116,12 @@ export function TaskCard({
         ) : (
           <span />
         )}
-        {task.assignedTo ? (
+        {job.assignedTo ? (
           <span
             className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[9px] font-medium text-primary"
-            title={task.assignedTo.name ?? ""}
+            title={job.assignedTo.name ?? ""}
           >
-            {initials(task.assignedTo.name)}
+            {initials(job.assignedTo.name)}
           </span>
         ) : null}
       </div>

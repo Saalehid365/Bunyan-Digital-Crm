@@ -8,13 +8,13 @@ CREATE TYPE "ClientStatus" AS ENUM ('LEAD', 'ACTIVE', 'PAUSED', 'CHURNED');
 CREATE TYPE "ServiceStatus" AS ENUM ('ACTIVE', 'PAUSED', 'COMPLETED');
 
 -- CreateEnum
-CREATE TYPE "TaskStage" AS ENUM ('BACKLOG', 'IN_PROGRESS', 'IN_REVIEW', 'DONE');
+CREATE TYPE "JobStage" AS ENUM ('BACKLOG', 'IN_PROGRESS', 'IN_REVIEW', 'DONE');
 
 -- CreateEnum
 CREATE TYPE "Priority" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'URGENT');
 
 -- CreateEnum
-CREATE TYPE "ActivityType" AS ENUM ('NOTE', 'STAGE_CHANGE', 'CREATED', 'COMPLETED', 'CLIENT_UPDATED');
+CREATE TYPE "ActivityType" AS ENUM ('NOTE', 'STAGE_CHANGE', 'CREATED', 'COMPLETED', 'CLIENT_UPDATED', 'TIME_LOGGED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -24,6 +24,7 @@ CREATE TABLE "User" (
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
     "role" "Role" NOT NULL DEFAULT 'MEMBER',
+    "passwordHash" TEXT,
     "disabledAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -121,13 +122,13 @@ CREATE TABLE "ClientMember" (
 );
 
 -- CreateTable
-CREATE TABLE "Task" (
+CREATE TABLE "Job" (
     "id" TEXT NOT NULL,
     "clientId" TEXT NOT NULL,
     "clientServiceId" TEXT,
     "title" TEXT NOT NULL,
     "description" TEXT,
-    "stage" "TaskStage" NOT NULL DEFAULT 'BACKLOG',
+    "stage" "JobStage" NOT NULL DEFAULT 'BACKLOG',
     "position" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "priority" "Priority" NOT NULL DEFAULT 'MEDIUM',
     "assignedToId" TEXT,
@@ -136,14 +137,41 @@ CREATE TABLE "Task" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
+    CONSTRAINT "Job_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Task" (
+    "id" TEXT NOT NULL,
+    "jobId" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "done" BOOLEAN NOT NULL DEFAULT false,
+    "position" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "completedAt" TIMESTAMP(3),
+
     CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TimeEntry" (
+    "id" TEXT NOT NULL,
+    "taskId" TEXT NOT NULL,
+    "userId" TEXT,
+    "minutes" INTEGER NOT NULL,
+    "note" TEXT,
+    "workDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "TimeEntry_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Activity" (
     "id" TEXT NOT NULL,
     "clientId" TEXT NOT NULL,
-    "taskId" TEXT,
+    "jobId" TEXT,
     "userId" TEXT,
     "type" "ActivityType" NOT NULL,
     "message" TEXT NOT NULL,
@@ -180,13 +208,19 @@ CREATE INDEX "ClientService_clientId_idx" ON "ClientService"("clientId");
 CREATE UNIQUE INDEX "ClientMember_clientId_userId_key" ON "ClientMember"("clientId", "userId");
 
 -- CreateIndex
-CREATE INDEX "Task_clientId_stage_idx" ON "Task"("clientId", "stage");
+CREATE INDEX "Job_clientId_stage_idx" ON "Job"("clientId", "stage");
 
 -- CreateIndex
-CREATE INDEX "Task_assignedToId_idx" ON "Task"("assignedToId");
+CREATE INDEX "Job_assignedToId_idx" ON "Job"("assignedToId");
 
 -- CreateIndex
-CREATE INDEX "Task_dueDate_idx" ON "Task"("dueDate");
+CREATE INDEX "Job_dueDate_idx" ON "Job"("dueDate");
+
+-- CreateIndex
+CREATE INDEX "Task_jobId_idx" ON "Task"("jobId");
+
+-- CreateIndex
+CREATE INDEX "TimeEntry_taskId_idx" ON "TimeEntry"("taskId");
 
 -- CreateIndex
 CREATE INDEX "Activity_clientId_createdAt_idx" ON "Activity"("clientId", "createdAt");
@@ -210,19 +244,28 @@ ALTER TABLE "ClientMember" ADD CONSTRAINT "ClientMember_clientId_fkey" FOREIGN K
 ALTER TABLE "ClientMember" ADD CONSTRAINT "ClientMember_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Job" ADD CONSTRAINT "Job_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_clientServiceId_fkey" FOREIGN KEY ("clientServiceId") REFERENCES "ClientService"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Job" ADD CONSTRAINT "Job_clientServiceId_fkey" FOREIGN KEY ("clientServiceId") REFERENCES "ClientService"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_assignedToId_fkey" FOREIGN KEY ("assignedToId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Job" ADD CONSTRAINT "Job_assignedToId_fkey" FOREIGN KEY ("assignedToId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "Job"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TimeEntry" ADD CONSTRAINT "TimeEntry_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "Task"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TimeEntry" ADD CONSTRAINT "TimeEntry_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Activity" ADD CONSTRAINT "Activity_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Activity" ADD CONSTRAINT "Activity_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "Task"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Activity" ADD CONSTRAINT "Activity_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "Job"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Activity" ADD CONSTRAINT "Activity_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

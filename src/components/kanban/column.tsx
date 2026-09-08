@@ -4,24 +4,24 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { TaskCard } from "./task-card";
-import type { KanbanTask } from "./types";
-import type { TaskStage } from "@prisma/client";
+import { JobCard } from "./job-card";
+import type { KanbanJob } from "./types";
+import type { JobStage } from "@prisma/client";
 
 export function Column({
   stage,
   label,
-  tasks,
+  jobs,
   showClient,
-  onAddTask,
-  onTaskClick,
+  onAddJob,
+  onJobClick,
 }: {
-  stage: TaskStage;
+  stage: JobStage;
   label: string;
-  tasks: KanbanTask[];
+  jobs: KanbanJob[];
   showClient: boolean;
-  onAddTask?: (stage: TaskStage) => void;
-  onTaskClick: (task: KanbanTask) => void;
+  onAddJob?: (stage: JobStage) => void;
+  onJobClick: (job: KanbanJob) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `col-${stage}` });
 
@@ -30,11 +30,11 @@ export function Column({
       <div className="mb-3 flex items-center justify-between px-0.5">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-foreground">{label}</h3>
-          <span className="font-mono text-xs tabular-nums text-muted-foreground">{tasks.length}</span>
+          <span className="font-mono text-xs tabular-nums text-muted-foreground">{jobs.length}</span>
         </div>
-        {onAddTask ? (
+        {onAddJob ? (
           <button
-            onClick={() => onAddTask(stage)}
+            onClick={() => onAddJob(stage)}
             className="rounded-[var(--radius-sm)] p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -49,13 +49,13 @@ export function Column({
           isOver ? "bg-accent/40" : "",
         )}
       >
-        <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          {tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
+        <SortableContext items={jobs.map((j) => j.id)} strategy={verticalListSortingStrategy}>
+          {jobs.map((job) => (
+            <JobCard
+              key={job.id}
+              job={job}
               showClient={showClient}
-              onClick={() => onTaskClick(task)}
+              onClick={() => onJobClick(job)}
             />
           ))}
         </SortableContext>

@@ -1,7 +1,7 @@
 import { addDays } from "date-fns";
 import { requireUser, getVisibleClientIds } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { GBP } from "@/lib/constants";
+import { GBP, formatMinutes } from "@/lib/constants";
 import { MetricPanel } from "@/components/dashboard/metric-panel";
 import { RevenueByServiceChart } from "@/components/dashboard/revenue-by-service-chart";
 import { UpcomingDeadlinesList } from "@/components/dashboard/upcoming-deadlines-list";
@@ -13,13 +13,13 @@ export default async function DashboardPage() {
   const isAdmin = user.role === "ADMIN";
   const clientIds = isAdmin ? undefined : await getVisibleClientIds(user.id);
   const clientFilter = clientIds ? { id: { in: clientIds } } : {};
-  const taskClientFilter = clientIds ? { clientId: { in: clientIds } } : {};
+  const jobClientFilter = clientIds ? { clientId: { in: clientIds } } : {};
 
-  const [activeClients, dueSoonTasks, recentActivity] = await Promise.all([
+  const [activeClients, dueSoonJobs, recentActivity] = await Promise.all([
     prisma.client.count({ where: { ...clientFilter, status: "ACTIVE" } }),
-    prisma.task.findMany({
+    prisma.job.findMany({
       where: {
-        ...taskClientFilter,
+        ...jobClientFilter,
         stage: { not: "DONE" },
         dueDate: { gte: new Date(new Date().setHours(0, 0, 0, 0)), lte: addDays(new Date(), 14) },
       },
@@ -35,14 +35,14 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  const deadlineTasks = dueSoonTasks
-    .filter((t) => t.dueDate)
-    .map((t) => ({
-      id: t.id,
-      title: t.title,
-      dueDate: t.dueDate as Date,
-      clientId: t.client.id,
-      clientName: t.client.name,
+  const deadlineJobs = dueSoonJobs
+    .filter((j) => j.dueDate)
+    .map((j) => ({
+      id: j.id,
+      title: j.title,
+      dueDate: j.dueDate as Date,
+      clientId: j.client.id,
+      clientName: j.client.name,
     }));
 
   const timelineEntries = recentActivity.map((a) => ({
@@ -55,14 +55,18 @@ export default async function DashboardPage() {
   }));
 
   if (isAdmin) {
-    const [openTasks, doneThisWeek, activeServices] = await Promise.all([
-      prisma.task.count({ where: { stage: { not: "DONE" } } }),
-      prisma.task.count({
+    const [openJobs, doneThisWeek, activeServices, minutesThisWeekAgg] = await Promise.all([
+      prisma.job.count({ where: { stage: { not: "DONE" } } }),
+      prisma.job.count({
         where: { stage: "DONE", completedAt: { gte: addDays(new Date(), -7) } },
       }),
       prisma.clientService.findMany({
         where: { status: "ACTIVE" },
         include: { serviceType: true },
+      }),
+      prisma.timeEntry.aggregate({
+        where: { workDate: { gte: addDays(new Date(), -7) } },
+        _sum: { minutes: true },
       }),
     ]);
 
@@ -96,9 +100,9 @@ export default async function DashboardPage() {
           heroSublabel={`Across ${activeServices.length} active service${activeServices.length === 1 ? "" : "s"}`}
           ledger={[
             { label: "Active clients", value: String(activeClients) },
-            { label: "Open tasks", value: String(openTasks) },
+            { label: "Open jobs", value: String(openJobs) },
             { label: "Completed this week", value: String(doneThisWeek) },
-            { label: "Due within 14 days", value: String(deadlineTasks.length) },
+            { label: "Logged this week", value: formatMinutes(minutesThisWeekAgg._sum.minutes ?? 0) },
           ]}
         />
 
@@ -123,7 +127,7 @@ export default async function DashboardPage() {
               <CardTitle className="text-sm font-medium">Upcoming deadlines</CardTitle>
             </CardHeader>
             <CardContent>
-              <UpcomingDeadlinesList tasks={deadlineTasks} />
+              <UpcomingDeadlinesList jobs={deadlineJobs} />
             </CardContent>
           </Card>
         </div>
@@ -140,17 +144,23 @@ export default async function DashboardPage() {
     );
   }
 
-  const myOpenTasks = await prisma.task.count({
-    where: { ...taskClientFilter, assignedToId: user.id, stage: { not: "DONE" } },
-  });
-  const myCompletedThisWeek = await prisma.task.count({
-    where: {
-      ...taskClientFilter,
-      assignedToId: user.id,
-      stage: "DONE",
-      completedAt: { gte: addDays(new Date(), -7) },
-    },
-  });
+  const [myOpenJobs, myCompletedThisWeek, myMinutesThisWeekAgg] = await Promise.all([
+    prisma.job.count({
+      where: { ...jobClientFilter, assignedToId: user.id, stage: { not: "DONE" } },
+    }),
+    prisma.job.count({
+      where: {
+        ...jobClientFilter,
+        assignedToId: user.id,
+        stage: "DONE",
+        completedAt: { gte: addDays(new Date(), -7) },
+      },
+    }),
+    prisma.timeEntry.aggregate({
+      where: { userId: user.id, workDate: { gte: addDays(new Date(), -7) } },
+      _sum: { minutes: true },
+    }),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
@@ -162,12 +172,13 @@ export default async function DashboardPage() {
       </div>
 
       <MetricPanel
-        heroLabel="Your open tasks"
-        heroValue={String(myOpenTasks)}
+        heroLabel="Your open jobs"
+        heroValue={String(myOpenJobs)}
         heroSublabel={`${myCompletedThisWeek} completed this week`}
         ledger={[
           { label: "Assigned clients", value: String(activeClients) },
-          { label: "Due within 14 days", value: String(deadlineTasks.length) },
+          { label: "Due within 14 days", value: String(deadlineJobs.length) },
+          { label: "Logged this week", value: formatMinutes(myMinutesThisWeekAgg._sum.minutes ?? 0) },
         ]}
       />
 
@@ -177,7 +188,7 @@ export default async function DashboardPage() {
             <CardTitle className="text-sm font-medium">Upcoming deadlines</CardTitle>
           </CardHeader>
           <CardContent>
-            <UpcomingDeadlinesList tasks={deadlineTasks} />
+            <UpcomingDeadlinesList jobs={deadlineJobs} />
           </CardContent>
         </Card>
 

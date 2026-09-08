@@ -1,13 +1,13 @@
-import type { ClientStatus, Priority, ServiceStatus, TaskStage } from "@prisma/client";
+import type { ClientStatus, JobStage, Priority, ServiceStatus } from "@prisma/client";
 
-export const TASK_STAGES: { value: TaskStage; label: string }[] = [
+export const JOB_STAGES: { value: JobStage; label: string }[] = [
   { value: "BACKLOG", label: "Backlog" },
   { value: "IN_PROGRESS", label: "In progress" },
   { value: "IN_REVIEW", label: "In review" },
   { value: "DONE", label: "Done" },
 ];
 
-export const TASK_STAGE_LABEL: Record<TaskStage, string> = {
+export const JOB_STAGE_LABEL: Record<JobStage, string> = {
   BACKLOG: "Backlog",
   IN_PROGRESS: "In progress",
   IN_REVIEW: "In review",
@@ -46,3 +46,13 @@ export const GBP = new Intl.NumberFormat("en-GB", {
   currency: "GBP",
   maximumFractionDigits: 0,
 });
+
+/** Formats a minute count as "2h 30m" / "45m" / "3h". */
+export function formatMinutes(totalMinutes: number): string {
+  if (totalMinutes <= 0) return "0m";
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
+}

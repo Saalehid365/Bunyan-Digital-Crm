@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientFormDialog } from "@/components/clients/client-form-dialog";
 import { AssignMembers } from "@/components/clients/assign-members";
+import { formatMinutes } from "@/lib/constants";
 
 export default async function ClientOverviewPage({
   params,
@@ -15,7 +16,7 @@ export default async function ClientOverviewPage({
   const client = await getClientForUser(user, clientId);
   if (!client) notFound();
 
-  const [members, allUsers, taskCounts] = await Promise.all([
+  const [members, allUsers, jobCounts, timeAgg] = await Promise.all([
     prisma.clientMember.findMany({
       where: { clientId },
       include: { user: { select: { id: true, name: true, email: true } } },
@@ -27,17 +28,22 @@ export default async function ClientOverviewPage({
           orderBy: { name: "asc" },
         })
       : Promise.resolve([]),
-    prisma.task.groupBy({
+    prisma.job.groupBy({
       by: ["stage"],
       where: { clientId },
       _count: true,
     }),
+    prisma.timeEntry.aggregate({
+      where: { task: { job: { clientId } } },
+      _sum: { minutes: true },
+    }),
   ]);
 
-  const openTasks = taskCounts
-    .filter((t) => t.stage !== "DONE")
-    .reduce((sum, t) => sum + t._count, 0);
-  const doneTasks = taskCounts.find((t) => t.stage === "DONE")?._count ?? 0;
+  const openJobs = jobCounts
+    .filter((j) => j.stage !== "DONE")
+    .reduce((sum, j) => sum + j._count, 0);
+  const doneJobs = jobCounts.find((j) => j.stage === "DONE")?._count ?? 0;
+  const totalMinutes = timeAgg._sum.minutes ?? 0;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 md:p-6">
@@ -83,15 +89,21 @@ export default async function ClientOverviewPage({
             <CardContent>
               <dl className="grid grid-cols-2 gap-4">
                 <div>
-                  <dt className="text-xs text-muted-foreground">Open tasks</dt>
+                  <dt className="text-xs text-muted-foreground">Open jobs</dt>
                   <dd className="mt-1 font-mono text-2xl font-semibold tabular-nums text-foreground">
-                    {openTasks}
+                    {openJobs}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Completed</dt>
                   <dd className="mt-1 font-mono text-2xl font-semibold tabular-nums text-foreground">
-                    {doneTasks}
+                    {doneJobs}
+                  </dd>
+                </div>
+                <div className="col-span-2">
+                  <dt className="text-xs text-muted-foreground">Time logged</dt>
+                  <dd className="mt-1 font-mono text-2xl font-semibold tabular-nums text-foreground">
+                    {formatMinutes(totalMinutes)}
                   </dd>
                 </div>
               </dl>

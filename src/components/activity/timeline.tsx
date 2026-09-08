@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { CheckCircle2, MessageSquare, MoveRight, PlusCircle, Pencil } from "lucide-react";
+import { CheckCircle2, Clock, MessageSquare, MoveRight, PlusCircle, Pencil } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import type { ActivityType } from "@prisma/client";
 
@@ -18,6 +18,7 @@ const ICONS: Record<ActivityType, React.ComponentType<{ className?: string }>> =
   CREATED: PlusCircle,
   COMPLETED: CheckCircle2,
   CLIENT_UPDATED: Pencil,
+  TIME_LOGGED: Clock,
 };
 
 export function Timeline({ entries }: { entries: TimelineEntry[] }) {

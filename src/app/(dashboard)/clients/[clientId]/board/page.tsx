@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireUser, getClientForUser } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { Board } from "@/components/kanban/board";
-import type { KanbanTask } from "@/components/kanban/types";
+import { JobsView } from "@/components/jobs/jobs-view";
+import type { KanbanJob } from "@/components/kanban/types";
 
 export default async function ClientBoardPage({
   params,
@@ -14,12 +14,21 @@ export default async function ClientBoardPage({
   const client = await getClientForUser(user, clientId);
   if (!client) notFound();
 
-  const [tasks, members, clientServices] = await Promise.all([
-    prisma.task.findMany({
+  const [jobs, members, clientServices] = await Promise.all([
+    prisma.job.findMany({
       where: { clientId },
       include: {
         assignedTo: { select: { id: true, name: true } },
         clientService: { include: { serviceType: true } },
+        tasks: {
+          orderBy: { position: "asc" },
+          include: {
+            timeEntries: {
+              orderBy: { workDate: "desc" },
+              include: { user: { select: { id: true, name: true } } },
+            },
+          },
+        },
       },
     }),
     prisma.clientMember.findMany({
@@ -40,36 +49,50 @@ export default async function ClientBoardPage({
     [...members.map((m) => m.user), ...admins].map((u) => [u.id, u]),
   );
 
-  const kanbanTasks: KanbanTask[] = tasks.map((t) => ({
-    id: t.id,
-    title: t.title,
-    description: t.description,
-    stage: t.stage,
-    position: t.position,
-    priority: t.priority,
-    dueDate: t.dueDate ? t.dueDate.toISOString() : null,
-    clientId: t.clientId,
+  const kanbanJobs: KanbanJob[] = jobs.map((job) => ({
+    id: job.id,
+    title: job.title,
+    description: job.description,
+    stage: job.stage,
+    position: job.position,
+    priority: job.priority,
+    dueDate: job.dueDate ? job.dueDate.toISOString() : null,
+    clientId: job.clientId,
     clientName: client.name,
-    clientServiceId: t.clientServiceId,
-    serviceTypeName: t.clientService?.serviceType.name ?? null,
-    serviceTypeColor: t.clientService?.serviceType.colorHex ?? null,
-    assignedTo: t.assignedTo,
+    clientServiceId: job.clientServiceId,
+    serviceTypeName: job.clientService?.serviceType.name ?? null,
+    serviceTypeColor: job.clientService?.serviceType.colorHex ?? null,
+    assignedTo: job.assignedTo,
+    tasks: job.tasks.map((task) => ({
+      id: task.id,
+      title: task.title,
+      done: task.done,
+      totalMinutes: task.timeEntries.reduce((sum, e) => sum + e.minutes, 0),
+      timeEntries: task.timeEntries.map((e) => ({
+        id: e.id,
+        minutes: e.minutes,
+        note: e.note,
+        workDate: e.workDate.toISOString(),
+        userId: e.userId,
+        userName: e.user?.name ?? null,
+      })),
+    })),
   }));
 
   return (
-    <div className="flex flex-1 flex-col">
-      <Board
-        initialTasks={kanbanTasks}
-        showClient={false}
-        clientId={clientId}
-        assignableUsers={Array.from(assignableMap.values())}
-        clientServicesByClient={{
-          [clientId]: clientServices.map((s) => ({
-            id: s.id,
-            name: s.label ? `${s.serviceType.name} (${s.label})` : s.serviceType.name,
-          })),
-        }}
-      />
-    </div>
+    <JobsView
+      initialJobs={kanbanJobs}
+      showClient={false}
+      clientId={clientId}
+      currentUserId={user.id}
+      isAdmin={user.role === "ADMIN"}
+      assignableUsers={Array.from(assignableMap.values())}
+      clientServicesByClient={{
+        [clientId]: clientServices.map((s) => ({
+          id: s.id,
+          name: s.label ? `${s.serviceType.name} (${s.label})` : s.serviceType.name,
+        })),
+      }}
+    />
   );
 }

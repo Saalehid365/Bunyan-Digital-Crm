@@ -101,12 +101,20 @@ async function main() {
     },
   ];
 
-  const taskTitles: Record<string, string[]> = {
-    BACKLOG: ["Audit current listing titles", "Plan Q3 content calendar", "Research competitor pricing"],
-    IN_PROGRESS: ["Optimise top 10 product listings", "Rebuild homepage hero section", "Set up abandoned cart flow"],
-    IN_REVIEW: ["Client sign-off on new banner ads", "Review keyword targeting doc"],
-    DONE: ["Migrate store to new template", "Fix broken checkout redirect", "Publish September newsletter"],
+  const jobsByStage: Record<string, string[]> = {
+    BACKLOG: ["Audit current listing titles", "Plan Q3 content calendar"],
+    IN_PROGRESS: ["Optimise top 10 product listings", "Rebuild homepage hero section"],
+    IN_REVIEW: ["Client sign-off on new banner ads"],
+    DONE: ["Migrate store to new template", "Fix broken checkout redirect"],
   };
+
+  const taskTitles = [
+    "Draft copy",
+    "Get client approval",
+    "Publish live",
+    "QA on mobile",
+    "Update tracking sheet",
+  ];
 
   let clientIndex = 0;
   for (const def of clientDefs) {
@@ -148,39 +156,66 @@ async function main() {
     }
 
     if (def.services.length > 0) {
-      let pos = 0;
-      for (const [stage, titles] of Object.entries(taskTitles)) {
-        for (const title of titles.slice(0, stage === "DONE" ? 1 : 2)) {
+      let jobPos = 0;
+      for (const [stage, titles] of Object.entries(jobsByStage)) {
+        for (const title of titles) {
           const dueDate =
             stage !== "DONE"
               ? new Date(Date.now() + (Math.random() * 20 - 5) * 24 * 60 * 60 * 1000)
               : undefined;
-          await prisma.task.create({
+          const assignedToId = def.assignMember && Math.random() > 0.4 ? member.id : admin.id;
+
+          const job = await prisma.job.create({
             data: {
               clientId: client.id,
               clientServiceId: createdServices[0]?.id,
               title: `${title} — ${def.name}`,
               stage: stage as "BACKLOG" | "IN_PROGRESS" | "IN_REVIEW" | "DONE",
-              position: pos * 1024,
+              position: jobPos * 1024,
               priority: ["LOW", "MEDIUM", "HIGH", "URGENT"][Math.floor(Math.random() * 4)] as
                 | "LOW"
                 | "MEDIUM"
                 | "HIGH"
                 | "URGENT",
-              assignedToId: def.assignMember && Math.random() > 0.4 ? member.id : admin.id,
+              assignedToId,
               dueDate,
               completedAt: stage === "DONE" ? new Date() : undefined,
               activities: {
                 create: {
                   clientId: client.id,
                   type: "CREATED",
-                  message: `Task "${title}" created`,
+                  message: `Job "${title}" created`,
                   userId: admin.id,
                 },
               },
             },
           });
-          pos++;
+          jobPos++;
+
+          const numTasks = 2 + Math.floor(Math.random() * 3);
+          for (let i = 0; i < numTasks; i++) {
+            const done = stage === "DONE" || (stage === "IN_PROGRESS" && Math.random() > 0.5);
+            const task = await prisma.task.create({
+              data: {
+                jobId: job.id,
+                title: taskTitles[i % taskTitles.length],
+                position: i * 1024,
+                done,
+                completedAt: done ? new Date() : undefined,
+              },
+            });
+
+            if (done || Math.random() > 0.5) {
+              await prisma.timeEntry.create({
+                data: {
+                  taskId: task.id,
+                  userId: assignedToId,
+                  minutes: [15, 30, 45, 60, 90, 120][Math.floor(Math.random() * 6)],
+                  workDate: new Date(Date.now() - Math.random() * 5 * 24 * 60 * 60 * 1000),
+                },
+              });
+            }
+          }
         }
       }
     }

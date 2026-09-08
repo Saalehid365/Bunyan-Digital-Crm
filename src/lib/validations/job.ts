@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-export const taskStageEnum = z.enum(["BACKLOG", "IN_PROGRESS", "IN_REVIEW", "DONE"]);
+export const jobStageEnum = z.enum(["BACKLOG", "IN_PROGRESS", "IN_REVIEW", "DONE"]);
 export const priorityEnum = z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]);
 
-export const taskSchema = z.object({
+export const jobSchema = z.object({
   clientId: z.string().min(1),
   clientServiceId: z.string().optional().or(z.literal("")),
   title: z.string().trim().min(1, "Title is required").max(160),
@@ -12,11 +12,11 @@ export const taskSchema = z.object({
   assignedToId: z.string().optional().or(z.literal("")),
   dueDate: z.string().trim().optional().or(z.literal("")),
 });
-export type TaskInput = z.infer<typeof taskSchema>;
+export type JobInput = z.infer<typeof jobSchema>;
 
-export const moveTaskSchema = z.object({
-  taskId: z.string().min(1),
-  stage: taskStageEnum,
+export const moveJobSchema = z.object({
+  jobId: z.string().min(1),
+  stage: jobStageEnum,
   position: z.number(),
 });
-export type MoveTaskInput = z.infer<typeof moveTaskSchema>;
+export type MoveJobInput = z.infer<typeof moveJobSchema>;

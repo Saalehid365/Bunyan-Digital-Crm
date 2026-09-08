@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser, canAccessClient } from "@/lib/permissions";
-import { taskSchema, moveTaskSchema, taskStageEnum } from "@/lib/validations/task";
-import { TASK_STAGE_LABEL } from "@/lib/constants";
+import { jobSchema, moveJobSchema, jobStageEnum } from "@/lib/validations/job";
+import { JOB_STAGE_LABEL } from "@/lib/constants";
 
 /** Radix Select can't carry an empty-string item value, so forms send these sentinels instead. */
 function clearSentinel(value: FormDataEntryValue | null) {
@@ -12,10 +12,10 @@ function clearSentinel(value: FormDataEntryValue | null) {
   return value || undefined;
 }
 
-export async function createTask(formData: FormData) {
+export async function createJob(formData: FormData) {
   const user = await requireUser();
 
-  const parsed = taskSchema.safeParse({
+  const parsed = jobSchema.safeParse({
     clientId: formData.get("clientId"),
     clientServiceId: clearSentinel(formData.get("clientServiceId")),
     title: formData.get("title"),
@@ -31,16 +31,16 @@ export async function createTask(formData: FormData) {
     return { error: "You don't have access to this client." };
   }
 
-  const stageParsed = taskStageEnum.safeParse(formData.get("stage"));
+  const stageParsed = jobStageEnum.safeParse(formData.get("stage"));
   const stage = stageParsed.success ? stageParsed.data : "BACKLOG";
 
-  const last = await prisma.task.findFirst({
+  const last = await prisma.job.findFirst({
     where: { clientId: data.clientId, stage },
     orderBy: { position: "desc" },
     select: { position: true },
   });
 
-  const task = await prisma.task.create({
+  const job = await prisma.job.create({
     data: {
       clientId: data.clientId,
       clientServiceId: data.clientServiceId || undefined,
@@ -55,7 +55,7 @@ export async function createTask(formData: FormData) {
         create: {
           clientId: data.clientId,
           type: "CREATED",
-          message: `Task "${data.title}" created by ${user.name ?? user.email}`,
+          message: `Job "${data.title}" created by ${user.name ?? user.email}`,
           userId: user.id,
         },
       },
@@ -65,54 +65,54 @@ export async function createTask(formData: FormData) {
   revalidatePath(`/clients/${data.clientId}/board`);
   revalidatePath("/board");
   revalidatePath(`/clients/${data.clientId}/activity`);
-  return { id: task.id };
+  return { id: job.id };
 }
 
-export async function moveTaskStage(input: unknown) {
+export async function moveJobStage(input: unknown) {
   const user = await requireUser();
-  const parsed = moveTaskSchema.safeParse(input);
+  const parsed = moveJobSchema.safeParse(input);
   if (!parsed.success) return { error: "Invalid move" };
-  const { taskId, stage, position } = parsed.data;
+  const { jobId, stage, position } = parsed.data;
 
-  const task = await prisma.task.findUnique({ where: { id: taskId } });
-  if (!task) return { error: "Task not found" };
-  if (!(await canAccessClient(user, task.clientId))) {
+  const job = await prisma.job.findUnique({ where: { id: jobId } });
+  if (!job) return { error: "Job not found" };
+  if (!(await canAccessClient(user, job.clientId))) {
     return { error: "You don't have access to this client." };
   }
 
-  const stageChanged = task.stage !== stage;
+  const stageChanged = job.stage !== stage;
 
-  await prisma.task.update({
-    where: { id: taskId },
+  await prisma.job.update({
+    where: { id: jobId },
     data: {
       stage,
       position,
-      completedAt: stage === "DONE" ? (task.completedAt ?? new Date()) : null,
+      completedAt: stage === "DONE" ? (job.completedAt ?? new Date()) : null,
     },
   });
 
   if (stageChanged) {
     await prisma.activity.create({
       data: {
-        clientId: task.clientId,
-        taskId: task.id,
+        clientId: job.clientId,
+        jobId: job.id,
         type: stage === "DONE" ? "COMPLETED" : "STAGE_CHANGE",
-        message: `"${task.title}" moved to ${TASK_STAGE_LABEL[stage]} by ${user.name ?? user.email}`,
+        message: `"${job.title}" moved to ${JOB_STAGE_LABEL[stage]} by ${user.name ?? user.email}`,
         userId: user.id,
       },
     });
   }
 
-  revalidatePath(`/clients/${task.clientId}/board`);
+  revalidatePath(`/clients/${job.clientId}/board`);
   revalidatePath("/board");
-  revalidatePath(`/clients/${task.clientId}/activity`);
+  revalidatePath(`/clients/${job.clientId}/activity`);
   return { ok: true };
 }
 
-export async function updateTask(taskId: string, formData: FormData) {
+export async function updateJob(jobId: string, formData: FormData) {
   const user = await requireUser();
 
-  const parsed = taskSchema.safeParse({
+  const parsed = jobSchema.safeParse({
     clientId: formData.get("clientId"),
     clientServiceId: clearSentinel(formData.get("clientServiceId")),
     title: formData.get("title"),
@@ -128,8 +128,8 @@ export async function updateTask(taskId: string, formData: FormData) {
     return { error: "You don't have access to this client." };
   }
 
-  await prisma.task.update({
-    where: { id: taskId },
+  await prisma.job.update({
+    where: { id: jobId },
     data: {
       clientServiceId: data.clientServiceId || null,
       title: data.title,
@@ -145,12 +145,12 @@ export async function updateTask(taskId: string, formData: FormData) {
   return { ok: true };
 }
 
-export async function deleteTask(taskId: string, clientId: string) {
+export async function deleteJob(jobId: string, clientId: string) {
   const user = await requireUser();
   if (!(await canAccessClient(user, clientId))) {
     return { error: "You don't have access to this client." };
   }
-  await prisma.task.delete({ where: { id: taskId } });
+  await prisma.job.delete({ where: { id: jobId } });
   revalidatePath(`/clients/${clientId}/board`);
   revalidatePath("/board");
 }
