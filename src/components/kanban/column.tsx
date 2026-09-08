@@ -5,6 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JobCard } from "./job-card";
+import { STAGE_DOT } from "@/components/jobs/status-cell";
 import type { KanbanJob } from "./types";
 import type { JobStage } from "@prisma/client";
 
@@ -29,6 +30,7 @@ export function Column({
     <div className="flex w-72 shrink-0 flex-col">
       <div className="mb-3 flex items-center justify-between px-0.5">
         <div className="flex items-center gap-2">
+          <span className={cn("h-2 w-2 rounded-full", STAGE_DOT[stage])} />
           <h3 className="text-sm font-medium text-foreground">{label}</h3>
           <span className="font-mono text-xs tabular-nums text-muted-foreground">{jobs.length}</span>
         </div>
