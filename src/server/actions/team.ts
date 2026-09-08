@@ -1,0 +1,46 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/permissions";
+import { inviteUserSchema, roleEnum } from "@/lib/validations/team";
+
+export async function inviteUser(formData: FormData) {
+  await requireAdmin();
+
+  const parsed = inviteUserSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    role: formData.get("role") || "MEMBER",
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  const data = parsed.data;
+
+  const existing = await prisma.user.findUnique({ where: { email: data.email } });
+  if (existing) return { error: "A user with that email already exists." };
+
+  await prisma.user.create({
+    data: { name: data.name, email: data.email, role: data.role },
+  });
+
+  revalidatePath("/team");
+  return { ok: true };
+}
+
+export async function setUserRole(userId: string, role: string) {
+  await requireAdmin();
+  const parsed = roleEnum.safeParse(role);
+  if (!parsed.success) return { error: "Invalid role" };
+  await prisma.user.update({ where: { id: userId }, data: { role: parsed.data } });
+  revalidatePath("/team");
+}
+
+export async function setUserDisabled(userId: string, disabled: boolean) {
+  const admin = await requireAdmin();
+  if (admin.id === userId) return { error: "You can't disable your own account." };
+  await prisma.user.update({
+    where: { id: userId },
+    data: { disabledAt: disabled ? new Date() : null },
+  });
+  revalidatePath("/team");
+}

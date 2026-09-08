@@ -1,0 +1,35 @@
+import { notFound } from "next/navigation";
+import { requireUser, getClientForUser } from "@/lib/permissions";
+import { ClientStatusBadge } from "@/components/clients/client-status-badge";
+import { ClientTabs } from "@/components/clients/client-tabs";
+
+export default async function ClientLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ clientId: string }>;
+}) {
+  const user = await requireUser();
+  const { clientId } = await params;
+  const client = await getClientForUser(user, clientId);
+  if (!client) notFound();
+
+  return (
+    <div className="flex flex-1 flex-col">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-5 md:px-6">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-lg font-semibold tracking-tight text-foreground">{client.name}</h1>
+            <ClientStatusBadge status={client.status} />
+          </div>
+          {client.companyName ? (
+            <p className="text-sm text-muted-foreground">{client.companyName}</p>
+          ) : null}
+        </div>
+      </div>
+      <ClientTabs clientId={clientId} />
+      <div className="flex-1">{children}</div>
+    </div>
+  );
+}
