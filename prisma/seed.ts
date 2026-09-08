@@ -32,6 +32,8 @@ async function main() {
     { name: "eBay Full Management + Ads", colorHex: "#8B4513" },
     { name: "eBay Listing Transfer (one-time)", colorHex: "#8A97A3" },
     { name: "Website Management", colorHex: "#7FA8D9" },
+    { name: "Ecommerce Website Build", colorHex: "#5B87C4" },
+    { name: "Portfolio Website Build", colorHex: "#A8C4E0" },
     { name: "Paid Ads", colorHex: "#C1622B" },
     { name: "SEO", colorHex: "#7FBFA0" },
     { name: "Content & Social", colorHex: "#9DBADA" },
@@ -46,7 +48,19 @@ async function main() {
     });
     serviceTypes.push(st);
   }
-  const [, ebayMessages, ebayFullOps, , ebayTransfer, website, ads, seo, content] = serviceTypes;
+  const byName = new Map(serviceTypes.map((s) => [s.name, s]));
+  const service = (name: string) => {
+    const found = byName.get(name);
+    if (!found) throw new Error(`Seed service type not found: ${name}`);
+    return found;
+  };
+  const ebayMessages = service("eBay Listings + Messages");
+  const ebayFullOps = service("eBay Full Operations");
+  const ebayTransfer = service("eBay Listing Transfer (one-time)");
+  const website = service("Website Management");
+  const ads = service("Paid Ads");
+  const seo = service("SEO");
+  const content = service("Content & Social");
 
   const clientDefs = [
     {
