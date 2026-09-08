@@ -7,6 +7,10 @@ import { sendVerificationRequest } from "@/lib/email/send-verification";
 import { verifyPassword } from "@/lib/password";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Explicitly setting this (even to Auth.js's own default) is what makes it combine
+  // correctly with Next.js's `basePath` config — left implicit, Auth.js's internal
+  // redirects/fetches ignore the app's basePath entirely and 404.
+  basePath: "/api/auth",
   adapter: PrismaAdapter(prisma),
   // Credentials sign-in requires JWT sessions — the adapter is still used for the
   // Resend/email provider's verification tokens and for looking users up by email.
