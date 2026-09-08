@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { BASE_PATH } from "@/lib/base-path";
 
 const SESSION_COOKIE_NAMES = [
   "authjs.session-token",
@@ -18,7 +19,10 @@ export default function proxy(request: NextRequest) {
   );
 
   if (!hasSessionCookie) {
-    const loginUrl = new URL("/login", request.url);
+    // Built explicitly with BASE_PATH rather than relying on Next's automatic basePath
+    // handling — request.url here is the full incoming URL, and a plain root-relative
+    // "/login" resolved against it strips any basePath prefix instead of preserving it.
+    const loginUrl = new URL(`${BASE_PATH}/login`, request.url);
     return NextResponse.redirect(loginUrl);
   }
 

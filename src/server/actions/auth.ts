@@ -2,6 +2,7 @@
 
 import { AuthError } from "next-auth";
 import { signIn } from "@/lib/auth";
+import { BASE_PATH } from "@/lib/base-path";
 
 export async function signInWithEmail(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
@@ -10,7 +11,7 @@ export async function signInWithEmail(formData: FormData) {
   }
 
   try {
-    await signIn("resend", { email, redirectTo: "/dashboard" });
+    await signIn("resend", { email, redirectTo: `${BASE_PATH}/dashboard` });
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "We couldn't sign you in. Ask an admin to confirm your account exists." };
@@ -27,7 +28,7 @@ export async function signInWithPassword(formData: FormData) {
   }
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/dashboard" });
+    await signIn("credentials", { email, password, redirectTo: `${BASE_PATH}/dashboard` });
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Incorrect email or password." };

@@ -3,6 +3,7 @@
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { BASE_PATH } from "@/lib/base-path";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,7 +53,7 @@ export function UserMenu({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
-          onClick={() => signOut({ redirectTo: "/login" })}
+          onClick={() => signOut({ redirectTo: `${BASE_PATH}/login` })}
         >
           <LogOut className="h-4 w-4" />
           Sign out
