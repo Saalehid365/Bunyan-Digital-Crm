@@ -3,6 +3,7 @@ import { requireUser, getClientForUser } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientFormDialog } from "@/components/clients/client-form-dialog";
+import { DeleteClientButton } from "@/components/clients/delete-client-button";
 import { AssignMembers } from "@/components/clients/assign-members";
 import { formatMinutes } from "@/lib/constants";
 
@@ -51,7 +52,12 @@ export default async function ClientOverviewPage({
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-medium">Client details</CardTitle>
-            {user.role === "ADMIN" ? <ClientFormDialog client={client} /> : null}
+            {user.role === "ADMIN" ? (
+              <div className="flex items-center gap-2">
+                <ClientFormDialog client={client} />
+                <DeleteClientButton clientId={clientId} clientName={client.name} />
+              </div>
+            ) : null}
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">

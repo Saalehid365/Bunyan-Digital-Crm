@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ClientStatusBadge } from "@/components/clients/client-status-badge";
 import { ServiceTypeBadge } from "@/components/services/service-type-badge";
+import { DeleteClientButton } from "@/components/clients/delete-client-button";
 import { EmptyState } from "@/components/empty-state";
 
 export default async function ClientsPage() {
@@ -71,6 +72,7 @@ export default async function ClientsPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Services</TableHead>
                 <TableHead>Contact</TableHead>
+                {isAdmin ? <TableHead className="w-10" /> : null}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -111,6 +113,16 @@ export default async function ClientsPage() {
                       {client.contactName || client.contactEmail || "—"}
                     </Link>
                   </TableCell>
+                  {isAdmin ? (
+                    <TableCell>
+                      <DeleteClientButton
+                        clientId={client.id}
+                        clientName={client.name}
+                        compact
+                        redirectAfter={false}
+                      />
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               ))}
             </TableBody>

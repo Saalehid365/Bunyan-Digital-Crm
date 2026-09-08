@@ -91,6 +91,19 @@ export async function updateClient(clientId: string, formData: FormData) {
   return { ok: true };
 }
 
+export async function deleteClient(clientId: string) {
+  await requireAdmin();
+  try {
+    await prisma.client.delete({ where: { id: clientId } });
+  } catch {
+    return { error: "Couldn't delete this client. Try again." };
+  }
+  revalidatePath("/clients");
+  revalidatePath("/board");
+  revalidatePath("/dashboard");
+  return { ok: true };
+}
+
 export async function assignMember(clientId: string, userId: string) {
   await requireAdmin();
   await prisma.clientMember.upsert({
