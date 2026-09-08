@@ -46,7 +46,7 @@ async function main() {
     });
     serviceTypes.push(st);
   }
-  const [, ebayMessages, ebayFullOps, , , website, ads, seo, content] = serviceTypes;
+  const [, ebayMessages, ebayFullOps, , ebayTransfer, website, ads, seo, content] = serviceTypes;
 
   const clientDefs = [
     {
@@ -56,8 +56,9 @@ async function main() {
       contactEmail: "priya@ariahome.co.uk",
       status: "ACTIVE" as const,
       services: [
-        { serviceType: ebayMessages, monthlyValue: 129, status: "ACTIVE" as const },
-        { serviceType: content, monthlyValue: 400, status: "ACTIVE" as const },
+        { serviceType: ebayMessages, priceValue: 129, status: "ACTIVE" as const, billingType: "MONTHLY" as const },
+        { serviceType: content, priceValue: 400, status: "ACTIVE" as const, billingType: "MONTHLY" as const },
+        { serviceType: ebayTransfer, priceValue: 50, status: "COMPLETED" as const, billingType: "ONE_OFF" as const },
       ],
       assignMember: true,
     },
@@ -68,8 +69,8 @@ async function main() {
       contactEmail: "tom@northfieldoutdoors.com",
       status: "ACTIVE" as const,
       services: [
-        { serviceType: website, monthlyValue: 600, status: "ACTIVE" as const },
-        { serviceType: seo, monthlyValue: 500, status: "ACTIVE" as const },
+        { serviceType: website, priceValue: 600, status: "ACTIVE" as const, billingType: "MONTHLY" as const },
+        { serviceType: seo, priceValue: 500, status: "ACTIVE" as const, billingType: "MONTHLY" as const },
       ],
       assignMember: true,
     },
@@ -80,8 +81,8 @@ async function main() {
       contactEmail: "amara@littlewren.co",
       status: "ACTIVE" as const,
       services: [
-        { serviceType: ebayFullOps, monthlyValue: 229, status: "ACTIVE" as const },
-        { serviceType: ads, monthlyValue: 550, status: "ACTIVE" as const },
+        { serviceType: ebayFullOps, priceValue: 229, status: "ACTIVE" as const, billingType: "MONTHLY" as const },
+        { serviceType: ads, priceValue: 550, status: "ACTIVE" as const, billingType: "MONTHLY" as const },
       ],
       assignMember: false,
     },
@@ -100,7 +101,7 @@ async function main() {
       contactName: "Nadia Hussain",
       contactEmail: "nadia@solsticeskin.com",
       status: "PAUSED" as const,
-      services: [{ serviceType: website, monthlyValue: 450, status: "PAUSED" as const }],
+      services: [{ serviceType: website, priceValue: 450, status: "PAUSED" as const, billingType: "MONTHLY" as const }],
       assignMember: false,
     },
   ];
@@ -143,8 +144,9 @@ async function main() {
         data: {
           clientId: client.id,
           serviceTypeId: s.serviceType.id,
-          monthlyValue: s.monthlyValue,
+          priceValue: s.priceValue,
           status: s.status,
+          billingType: s.billingType,
           startDate: new Date(),
         },
       });

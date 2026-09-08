@@ -13,13 +13,14 @@ import {
 import { ServiceTypeBadge } from "@/components/services/service-type-badge";
 import { SERVICE_STATUS_LABEL, GBP } from "@/lib/constants";
 import { updateClientServiceStatus, deleteClientService } from "@/server/actions/services";
-import type { ServiceStatus } from "@prisma/client";
+import type { BillingType, ServiceStatus } from "@prisma/client";
 
 type ClientService = {
   id: string;
   label: string | null;
   status: ServiceStatus;
-  monthlyValue: number | null;
+  billingType: BillingType;
+  priceValue: number | null;
   serviceType: { name: string; colorHex: string };
 };
 
@@ -45,9 +46,15 @@ export function ClientServiceList({
             ) : null}
           </div>
           <div className="flex items-center gap-3">
-            {service.monthlyValue ? (
+            {service.billingType === "ONE_OFF" ? (
+              <span className="rounded-[var(--radius-sm)] border border-border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                One-off
+              </span>
+            ) : null}
+            {service.priceValue ? (
               <span className="font-mono text-sm tabular-nums text-muted-foreground">
-                {GBP.format(service.monthlyValue)}/mo
+                {GBP.format(service.priceValue)}
+                {service.billingType === "MONTHLY" ? "/mo" : ""}
               </span>
             ) : null}
             {isAdmin ? (

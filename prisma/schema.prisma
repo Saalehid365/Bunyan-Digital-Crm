@@ -25,6 +25,11 @@ enum ServiceStatus {
   COMPLETED
 }
 
+enum BillingType {
+  MONTHLY
+  ONE_OFF
+}
+
 enum JobStage {
   BACKLOG
   IN_PROGRESS
@@ -142,7 +147,8 @@ model ClientService {
   serviceTypeId String
   label         String?
   status        ServiceStatus @default(ACTIVE)
-  monthlyValue  Decimal?      @db.Decimal(10, 2)
+  billingType   BillingType   @default(MONTHLY)
+  priceValue    Decimal?      @db.Decimal(10, 2)
   startDate     DateTime?
   notes         String?       @db.Text
   createdAt     DateTime      @default(now())

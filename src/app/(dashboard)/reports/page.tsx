@@ -10,10 +10,14 @@ export default async function ReportsPage() {
   await requireAdmin();
   const since = subDays(new Date(), 30);
 
-  const [activeServices, recentEntries] = await Promise.all([
+  const [activeServices, oneOffServices, recentEntries] = await Promise.all([
     prisma.clientService.findMany({
-      where: { status: "ACTIVE" },
+      where: { status: "ACTIVE", billingType: "MONTHLY" },
       include: { serviceType: true, client: { select: { id: true, name: true } } },
+    }),
+    prisma.clientService.findMany({
+      where: { billingType: "ONE_OFF" },
+      select: { priceValue: true },
     }),
     prisma.timeEntry.findMany({
       where: { workDate: { gte: since } },
@@ -28,7 +32,8 @@ export default async function ReportsPage() {
     }),
   ]);
 
-  const mrr = activeServices.reduce((sum, s) => sum + Number(s.monthlyValue ?? 0), 0);
+  const mrr = activeServices.reduce((sum, s) => sum + Number(s.priceValue ?? 0), 0);
+  const oneOffTotal = oneOffServices.reduce((sum, s) => sum + Number(s.priceValue ?? 0), 0);
 
   const revenueByService = new Map<string, { name: string; value: number; color: string }>();
   for (const s of activeServices) {
@@ -38,7 +43,7 @@ export default async function ReportsPage() {
       value: 0,
       color: s.serviceType.colorHex,
     };
-    existing.value += Number(s.monthlyValue ?? 0);
+    existing.value += Number(s.priceValue ?? 0);
     revenueByService.set(key, existing);
   }
   const serviceChartData = Array.from(revenueByService.values())
@@ -49,7 +54,7 @@ export default async function ReportsPage() {
   for (const s of activeServices) {
     const key = s.client.id;
     const existing = revenueByClient.get(key) ?? { label: s.client.name, value: 0 };
-    existing.value += Number(s.monthlyValue ?? 0);
+    existing.value += Number(s.priceValue ?? 0);
     revenueByClient.set(key, existing);
   }
   const clientRevenue = Array.from(revenueByClient.values())
@@ -79,6 +84,18 @@ export default async function ReportsPage() {
         <h1 className="text-lg font-semibold tracking-tight text-foreground">Reports</h1>
         <p className="text-sm text-muted-foreground">Revenue and time, at a glance.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">One-off revenue</CardTitle>
+          <CardDescription>Total across every one-off service ever added</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="font-mono text-2xl font-semibold tabular-nums text-foreground">
+            {GBP.format(oneOffTotal)}
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

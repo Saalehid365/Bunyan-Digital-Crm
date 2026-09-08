@@ -19,12 +19,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { addClientService } from "@/server/actions/services";
 import { SERVICE_STATUS_LABEL } from "@/lib/constants";
+import type { BillingType } from "@prisma/client";
 
 type ServiceType = { id: string; name: string; colorHex: string };
 
 const initialState: { error?: string; ok?: boolean } = {};
+
+const BILLING_TABS: { value: BillingType; label: string }[] = [
+  { value: "MONTHLY", label: "Monthly" },
+  { value: "ONE_OFF", label: "One-off" },
+];
 
 export function ClientServiceFormDialog({
   clientId,
@@ -34,6 +41,7 @@ export function ClientServiceFormDialog({
   serviceTypes: ServiceType[];
 }) {
   const [open, setOpen] = useState(false);
+  const [billingType, setBillingType] = useState<BillingType>("MONTHLY");
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initialState, formData: FormData): Promise<typeof initialState> => {
       return await addClientService(formData);
@@ -104,13 +112,37 @@ export function ClientServiceFormDialog({
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label>Billing</Label>
+            <input type="hidden" name="billingType" value={billingType} />
+            <div className="inline-flex rounded-[var(--radius-sm)] border border-border p-0.5">
+              {BILLING_TABS.map((tab) => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => setBillingType(tab.value)}
+                  className={cn(
+                    "rounded-[calc(var(--radius-sm)-2px)] px-3 py-1 text-xs font-medium transition-colors",
+                    billingType === tab.value
+                      ? "bg-accent text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="monthlyValue">Monthly value (£)</Label>
-              <Input id="monthlyValue" name="monthlyValue" type="number" min="0" step="1" />
+              <Label htmlFor="priceValue">
+                {billingType === "MONTHLY" ? "Monthly value (£)" : "One-off cost (£)"}
+              </Label>
+              <Input id="priceValue" name="priceValue" type="number" min="0" step="1" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="startDate">Start date</Label>
+              <Label htmlFor="startDate">{billingType === "MONTHLY" ? "Start date" : "Date"}</Label>
               <Input id="startDate" name="startDate" type="date" />
             </div>
           </div>

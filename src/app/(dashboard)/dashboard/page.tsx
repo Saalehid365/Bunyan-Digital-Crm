@@ -38,8 +38,8 @@ export default async function DashboardPage() {
         where: { stage: "DONE", completedAt: { gte: addDays(new Date(), -7) } },
       }),
       prisma.clientService.aggregate({
-        where: { status: "ACTIVE" },
-        _sum: { monthlyValue: true },
+        where: { status: "ACTIVE", billingType: "MONTHLY" },
+        _sum: { priceValue: true },
         _count: true,
       }),
       prisma.timeEntry.aggregate({
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
       }),
     ]);
 
-    const mrr = Number(activeServices._sum.monthlyValue ?? 0);
+    const mrr = Number(activeServices._sum.priceValue ?? 0);
 
     return (
       <div className="flex flex-1 flex-col">

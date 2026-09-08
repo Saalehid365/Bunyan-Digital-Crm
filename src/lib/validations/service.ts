@@ -11,13 +11,15 @@ export const serviceTypeSchema = z.object({
 export type ServiceTypeInput = z.infer<typeof serviceTypeSchema>;
 
 export const clientServiceStatusEnum = z.enum(["ACTIVE", "PAUSED", "COMPLETED"]);
+export const billingTypeEnum = z.enum(["MONTHLY", "ONE_OFF"]);
 
 export const clientServiceSchema = z.object({
   clientId: z.string().min(1),
   serviceTypeId: z.string().min(1, "Choose a service"),
   label: z.string().trim().max(120).optional().or(z.literal("")),
   status: clientServiceStatusEnum.default("ACTIVE"),
-  monthlyValue: z
+  billingType: billingTypeEnum.default("MONTHLY"),
+  priceValue: z
     .union([z.string(), z.number()])
     .optional()
     .transform((v) => {

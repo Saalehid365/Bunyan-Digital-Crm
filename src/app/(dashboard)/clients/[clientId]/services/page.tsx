@@ -52,7 +52,8 @@ export default async function ClientServicesPage({
                 id: s.id,
                 label: s.label,
                 status: s.status,
-                monthlyValue: s.monthlyValue ? Number(s.monthlyValue) : null,
+                billingType: s.billingType,
+                priceValue: s.priceValue ? Number(s.priceValue) : null,
                 serviceType: s.serviceType,
               }))}
             />
