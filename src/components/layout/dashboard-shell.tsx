@@ -30,7 +30,7 @@ export function DashboardShell({
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
+    <div className="flex h-screen w-full bg-background">
       <Sidebar role={role} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar
@@ -39,7 +39,7 @@ export function DashboardShell({
           role={role}
           onOpenPalette={() => setPaletteOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
       </div>
       <CommandPalette isAdmin={role === "ADMIN"} open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>

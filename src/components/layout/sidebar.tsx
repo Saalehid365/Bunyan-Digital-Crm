@@ -6,6 +6,8 @@ import {
   LayoutDashboard,
   Users,
   KanbanSquare,
+  Clock,
+  BarChart3,
   UsersRound,
   Settings,
 } from "lucide-react";
@@ -21,7 +23,9 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/clients", label: "Clients", icon: Users },
-  { href: "/board", label: "Board", icon: KanbanSquare },
+  { href: "/board", label: "Jobs", icon: KanbanSquare },
+  { href: "/timesheets", label: "Timesheets", icon: Clock },
+  { href: "/reports", label: "Reports", icon: BarChart3, adminOnly: true },
   { href: "/team", label: "Team", icon: UsersRound, adminOnly: true },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

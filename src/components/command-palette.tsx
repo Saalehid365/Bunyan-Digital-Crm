@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LayoutDashboard, Users, KanbanSquare, UsersRound, Settings, Plus } from "lucide-react";
+import { LayoutDashboard, Users, KanbanSquare, Clock, BarChart3, UsersRound, Settings, Plus } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -41,8 +41,16 @@ export function CommandPalette({
             <Users className="h-4 w-4" /> Clients
           </CommandItem>
           <CommandItem onSelect={() => go("/board")}>
-            <KanbanSquare className="h-4 w-4" /> Board
+            <KanbanSquare className="h-4 w-4" /> Jobs
           </CommandItem>
+          <CommandItem onSelect={() => go("/timesheets")}>
+            <Clock className="h-4 w-4" /> Timesheets
+          </CommandItem>
+          {isAdmin ? (
+            <CommandItem onSelect={() => go("/reports")}>
+              <BarChart3 className="h-4 w-4" /> Reports
+            </CommandItem>
+          ) : null}
           {isAdmin ? (
             <CommandItem onSelect={() => go("/team")}>
               <UsersRound className="h-4 w-4" /> Team
