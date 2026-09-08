@@ -17,7 +17,7 @@ export function Topbar({
   onOpenPalette: () => void;
 }) {
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4 md:px-6">
+    <header className="relative z-10 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] md:px-6">
       <div className="flex min-w-0 items-center gap-2">
         <MobileNav role={role} />
         <button

@@ -65,19 +65,13 @@ export function SidebarNav({
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "group relative flex items-center gap-2.5 rounded-[var(--radius-sm)] px-3 py-2 text-sm transition-colors",
+              "group relative flex items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 text-sm transition-colors duration-150",
               active
-                ? "bg-sidebar-accent text-sidebar-foreground font-medium"
+                ? "bg-sidebar-accent text-sidebar-foreground font-medium shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
                 : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
             )}
           >
-            <span
-              className={cn(
-                "absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-full bg-primary transition-opacity",
-                active ? "opacity-100" : "opacity-0",
-              )}
-            />
-            <Icon className="h-4 w-4" />
+            <Icon className={cn("h-4 w-4", active && "text-primary")} />
             {item.label}
           </Link>
         );

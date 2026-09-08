@@ -46,7 +46,7 @@ export function StatusCell({
         disabled={pending}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "flex h-8 w-full items-center justify-center gap-1 rounded-[var(--radius-sm)] text-xs font-medium transition-opacity hover:opacity-90 disabled:opacity-60",
+          "flex h-8 w-full items-center justify-center gap-1 rounded-[var(--radius-sm)] text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.08)] transition-all duration-150 hover:opacity-90 hover:shadow-[0_2px_6px_rgba(0,0,0,0.14)] disabled:opacity-60",
           STAGE_FILL[stage],
           className,
         )}

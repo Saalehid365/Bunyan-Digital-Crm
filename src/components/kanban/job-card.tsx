@@ -55,9 +55,11 @@ export function JobCard({
       {...listeners}
       onClick={onClick}
       className={cn(
-        "cursor-pointer rounded-[var(--radius-md)] border border-border bg-card p-3 shadow-none transition-shadow",
+        "cursor-pointer rounded-[var(--radius-md)] border border-border bg-card p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-150 ease-out",
         isDragging && !overlay ? "opacity-30" : "",
-        overlay ? "rotate-1 shadow-lg" : "hover:border-line",
+        overlay
+          ? "rotate-1 shadow-lg"
+          : "hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.16)]",
       )}
     >
       <div className="mb-2 flex items-start justify-between gap-2">
