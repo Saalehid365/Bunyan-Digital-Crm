@@ -26,7 +26,11 @@ async function main() {
   });
 
   const serviceDefs = [
-    { name: "eBay Management", colorHex: "#E08245" },
+    { name: "eBay Listings", colorHex: "#F0B27A" },
+    { name: "eBay Listings + Messages", colorHex: "#E08245" },
+    { name: "eBay Full Operations", colorHex: "#B5651D" },
+    { name: "eBay Full Management + Ads", colorHex: "#8B4513" },
+    { name: "eBay Listing Transfer (one-time)", colorHex: "#8A97A3" },
     { name: "Website Management", colorHex: "#7FA8D9" },
     { name: "Paid Ads", colorHex: "#C1622B" },
     { name: "SEO", colorHex: "#7FBFA0" },
@@ -42,7 +46,7 @@ async function main() {
     });
     serviceTypes.push(st);
   }
-  const [ebay, website, ads, seo, content] = serviceTypes;
+  const [, ebayMessages, ebayFullOps, , , website, ads, seo, content] = serviceTypes;
 
   const clientDefs = [
     {
@@ -52,7 +56,7 @@ async function main() {
       contactEmail: "priya@ariahome.co.uk",
       status: "ACTIVE" as const,
       services: [
-        { serviceType: ebay, monthlyValue: 850, status: "ACTIVE" as const },
+        { serviceType: ebayMessages, monthlyValue: 129, status: "ACTIVE" as const },
         { serviceType: content, monthlyValue: 400, status: "ACTIVE" as const },
       ],
       assignMember: true,
@@ -76,7 +80,7 @@ async function main() {
       contactEmail: "amara@littlewren.co",
       status: "ACTIVE" as const,
       services: [
-        { serviceType: ebay, monthlyValue: 700, status: "ACTIVE" as const },
+        { serviceType: ebayFullOps, monthlyValue: 229, status: "ACTIVE" as const },
         { serviceType: ads, monthlyValue: 550, status: "ACTIVE" as const },
       ],
       assignMember: false,
