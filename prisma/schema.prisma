@@ -3,8 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Prisma Migrate's advisory lock needs a direct (non-pooled) connection — Neon's
+  // pooled/PgBouncer endpoint runs in transaction-pooling mode, which can silently
+  // hand a lock/unlock pair different underlying connections and time out (P1002).
+  // DATABASE_URL stays the pooled endpoint for the app's runtime queries.
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 enum Role {
