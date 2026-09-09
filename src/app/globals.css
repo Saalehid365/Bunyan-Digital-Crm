@@ -152,14 +152,19 @@
 
 /* ---- gradients — orange/blue, built from the app's own accent + chart-2 tokens ---- */
 :root {
+  /*
+   * oklab (Cartesian: L/a/b), not oklch (polar: L/C/H) — mixing orange and blue in oklch
+   * takes the shortest hue arc, which runs through red/magenta rather than the intended
+   * blue, producing an unwanted coral-pink cast. oklab has no hue wheel to detour around.
+   */
   --gradient-accent: linear-gradient(135deg, var(--primary), var(--chart-2));
   --gradient-primary: linear-gradient(
     135deg,
     var(--primary),
-    color-mix(in oklch, var(--primary), var(--chart-2) 35%)
+    color-mix(in oklab, var(--primary), var(--chart-2) 35%)
   );
-  --gradient-success: linear-gradient(135deg, var(--success), color-mix(in oklch, var(--success), var(--chart-2) 20%));
-  --gradient-review: linear-gradient(135deg, var(--chart-2), color-mix(in oklch, var(--chart-2), var(--primary) 20%));
+  --gradient-success: linear-gradient(135deg, var(--success), color-mix(in oklab, var(--success), var(--chart-2) 20%));
+  --gradient-review: linear-gradient(135deg, var(--chart-2), color-mix(in oklab, var(--chart-2), var(--primary) 20%));
 }
 
 @layer utilities {
