@@ -54,25 +54,30 @@ export default async function DashboardPage() {
     return (
       <div className="flex flex-1 flex-col">
         <div className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
-          <div>
+          <div className="rise" style={{ animationDelay: "0ms" }}>
             <h1 className="text-lg font-semibold tracking-tight text-foreground">Dashboard</h1>
             <p className="text-sm text-muted-foreground">Agency-wide view across every client.</p>
           </div>
 
-          <MetricPanel
-            heroLabel="Active monthly recurring value"
-            heroValue={GBP.format(mrr)}
-            heroSublabel={`Across ${activeServices._count} active service${activeServices._count === 1 ? "" : "s"}`}
-            ledger={[
-              { label: "Active clients", value: String(activeClients) },
-              { label: "Open jobs", value: String(openJobs) },
-              { label: "Completed this week", value: String(doneThisWeek) },
-              { label: "Logged this week", value: formatMinutes(minutesThisWeekAgg._sum.minutes ?? 0) },
-            ]}
-          />
+          <div className="rise" style={{ animationDelay: "80ms" }}>
+            <MetricPanel
+              heroLabel="Active monthly recurring value"
+              heroValue={GBP.format(mrr)}
+              heroSublabel={`Across ${activeServices._count} active service${activeServices._count === 1 ? "" : "s"}`}
+              ledger={[
+                { label: "Active clients", value: String(activeClients) },
+                { label: "Open jobs", value: String(openJobs) },
+                { label: "Completed this week", value: String(doneThisWeek) },
+                { label: "Logged this week", value: formatMinutes(minutesThisWeekAgg._sum.minutes ?? 0) },
+              ]}
+            />
+          </div>
         </div>
 
-        <Card className="mx-4 flex flex-1 flex-col overflow-hidden md:mx-6 mb-4 md:mb-6">
+        <Card
+          className="rise mx-4 flex flex-1 flex-col overflow-hidden md:mx-6 mb-4 md:mb-6"
+          style={{ animationDelay: "160ms" }}
+        >
           <CardHeader>
             <CardTitle className="text-sm font-medium">Work board</CardTitle>
           </CardHeader>
@@ -112,26 +117,31 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-1 flex-col">
       <div className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
-        <div>
+        <div className="rise" style={{ animationDelay: "0ms" }}>
           <h1 className="text-lg font-semibold tracking-tight text-foreground">
             Welcome back{user.name ? `, ${user.name.split(" ")[0]}` : ""}
           </h1>
           <p className="text-sm text-muted-foreground">Here&apos;s what&apos;s on for your clients.</p>
         </div>
 
-        <MetricPanel
-          heroLabel="Your open jobs"
-          heroValue={String(myOpenJobs)}
-          heroSublabel={`${myCompletedThisWeek} completed this week`}
-          ledger={[
-            { label: "Assigned clients", value: String(activeClients) },
-            { label: "Due within 14 days", value: String(dueSoonCount) },
-            { label: "Logged this week", value: formatMinutes(myMinutesThisWeekAgg._sum.minutes ?? 0) },
-          ]}
-        />
+        <div className="rise" style={{ animationDelay: "80ms" }}>
+          <MetricPanel
+            heroLabel="Your open jobs"
+            heroValue={String(myOpenJobs)}
+            heroSublabel={`${myCompletedThisWeek} completed this week`}
+            ledger={[
+              { label: "Assigned clients", value: String(activeClients) },
+              { label: "Due within 14 days", value: String(dueSoonCount) },
+              { label: "Logged this week", value: formatMinutes(myMinutesThisWeekAgg._sum.minutes ?? 0) },
+            ]}
+          />
+        </div>
       </div>
 
-      <Card className="mx-4 mb-4 flex flex-1 flex-col overflow-hidden md:mx-6 md:mb-6">
+      <Card
+        className="rise mx-4 mb-4 flex flex-1 flex-col overflow-hidden md:mx-6 md:mb-6"
+        style={{ animationDelay: "160ms" }}
+      >
         <CardHeader>
           <CardTitle className="text-sm font-medium">Work board</CardTitle>
         </CardHeader>

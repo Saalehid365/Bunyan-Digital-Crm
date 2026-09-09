@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "motion/react";
 import {
   LayoutDashboard,
   Users,
@@ -66,13 +67,20 @@ export function SidebarNav({
             onClick={onNavigate}
             className={cn(
               "group relative flex items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 text-sm transition-colors duration-150",
-              active
-                ? "bg-sidebar-accent text-sidebar-foreground font-medium shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-                : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+              active ? "text-sidebar-foreground font-medium" : "text-muted-foreground hover:text-sidebar-foreground",
             )}
           >
-            <Icon className={cn("h-4 w-4", active && "text-primary")} />
-            {item.label}
+            {active ? (
+              <motion.span
+                layoutId="sidebar-active-pill"
+                className="absolute inset-0 rounded-[var(--radius-md)] border border-primary/35 bg-gradient-to-br from-primary/16 to-[var(--chart-2)]/16 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              />
+            ) : (
+              <span className="absolute inset-0 rounded-[var(--radius-md)] opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-hover:bg-sidebar-accent/60" />
+            )}
+            <Icon className={cn("relative h-4 w-4", active && "text-primary")} />
+            <span className="relative">{item.label}</span>
           </Link>
         );
       })}
@@ -82,7 +90,7 @@ export function SidebarNav({
 
 export function Sidebar({ role }: { role: "ADMIN" | "MEMBER" }) {
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
+    <aside className="rise relative z-[1] hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
       <SidebarBrand />
       <SidebarNav role={role} />
       <div className="border-t border-sidebar-border px-3 py-3">

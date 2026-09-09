@@ -141,7 +141,7 @@ export function JobsTable({
                           <TableCell onClick={() => onJobClick(job)}>
                             {job.assignedTo ? (
                               <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
-                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[9px] font-medium text-primary">
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-accent text-[9px] font-medium text-white shadow-[0_1px_2px_-1px_rgba(0,0,0,0.3)]">
                                   {initials(job.assignedTo.name)}
                                 </span>
                                 {job.assignedTo.name}

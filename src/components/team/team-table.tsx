@@ -35,7 +35,7 @@ export function TeamTable({ members, currentUserId }: { members: TeamMember[]; c
         <li key={member.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary/15 text-xs font-medium text-primary">
+              <AvatarFallback className="bg-gradient-accent text-xs font-medium text-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
                 {initials(member.name, member.email)}
               </AvatarFallback>
             </Avatar>
@@ -59,7 +59,7 @@ export function TeamTable({ members, currentUserId }: { members: TeamMember[]; c
                 })
               }
             >
-              <SelectTrigger size="sm" className="w-32">
+              <SelectTrigger size="sm" className="w-36">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

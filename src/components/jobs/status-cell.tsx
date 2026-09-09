@@ -15,9 +15,9 @@ import type { JobStage } from "@prisma/client";
 
 export const STAGE_FILL: Record<JobStage, string> = {
   BACKLOG: "bg-muted text-muted-foreground",
-  IN_PROGRESS: "bg-primary text-primary-foreground",
-  IN_REVIEW: "bg-[var(--chart-2)] text-white",
-  DONE: "bg-success text-success-foreground",
+  IN_PROGRESS: "bg-gradient-primary text-primary-foreground",
+  IN_REVIEW: "bg-gradient-review text-white",
+  DONE: "bg-gradient-success text-success-foreground",
 };
 
 export const STAGE_DOT: Record<JobStage, string> = {
