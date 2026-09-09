@@ -1,4 +1,12 @@
-import type { ClientStatus, JobStage, Priority, Recurrence, ServiceStatus } from "@prisma/client";
+import type {
+  ClientStatus,
+  InvoiceStatus,
+  JobStage,
+  Priority,
+  QuoteStatus,
+  Recurrence,
+  ServiceStatus,
+} from "@prisma/client";
 
 export const JOB_STAGES: { value: JobStage; label: string }[] = [
   { value: "BACKLOG", label: "Backlog" },
@@ -62,6 +70,45 @@ export const GBP = new Intl.NumberFormat("en-GB", {
   currency: "GBP",
   maximumFractionDigits: 0,
 });
+
+/** Same as GBP but keeps pence — dashboard summaries round to whole pounds, but an
+ * actual quote/invoice line item or total needs the exact figure. */
+export const GBP_PRECISE = new Intl.NumberFormat("en-GB", {
+  style: "currency",
+  currency: "GBP",
+});
+
+export const QUOTE_STATUSES: { value: QuoteStatus; label: string }[] = [
+  { value: "DRAFT", label: "Draft" },
+  { value: "SENT", label: "Sent" },
+  { value: "ACCEPTED", label: "Accepted" },
+  { value: "DECLINED", label: "Declined" },
+  { value: "EXPIRED", label: "Expired" },
+];
+
+export const QUOTE_STATUS_LABEL: Record<QuoteStatus, string> = {
+  DRAFT: "Draft",
+  SENT: "Sent",
+  ACCEPTED: "Accepted",
+  DECLINED: "Declined",
+  EXPIRED: "Expired",
+};
+
+export const INVOICE_STATUSES: { value: InvoiceStatus; label: string }[] = [
+  { value: "DRAFT", label: "Draft" },
+  { value: "SENT", label: "Sent" },
+  { value: "PAID", label: "Paid" },
+  { value: "OVERDUE", label: "Overdue" },
+  { value: "VOID", label: "Void" },
+];
+
+export const INVOICE_STATUS_LABEL: Record<InvoiceStatus, string> = {
+  DRAFT: "Draft",
+  SENT: "Sent",
+  PAID: "Paid",
+  OVERDUE: "Overdue",
+  VOID: "Void",
+};
 
 /** Formats a minute count as "2h 30m" / "45m" / "3h". */
 export function formatMinutes(totalMinutes: number): string {

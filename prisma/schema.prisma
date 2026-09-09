@@ -64,6 +64,24 @@ enum ActivityType {
   COMPLETED
   CLIENT_UPDATED
   TIME_LOGGED
+  QUOTE_STATUS_CHANGE
+  INVOICE_STATUS_CHANGE
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  VOID
 }
 
 model User {
@@ -78,12 +96,14 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
-  clientMembers ClientMember[]
-  assignedJobs  Job[]          @relation("JobAssignee")
-  activities    Activity[]
-  timeEntries   TimeEntry[]
+  accounts        Account[]
+  sessions        Session[]
+  clientMembers   ClientMember[]
+  assignedJobs    Job[]          @relation("JobAssignee")
+  activities      Activity[]
+  timeEntries     TimeEntry[]
+  createdQuotes   Quote[]
+  createdInvoices Invoice[]
 }
 
 model Account {
@@ -139,6 +159,8 @@ model Client {
   members    ClientMember[]
   jobs       Job[]
   activities Activity[]
+  quotes     Quote[]
+  invoices   Invoice[]
 
   @@index([status])
 }
@@ -167,9 +189,11 @@ model ClientService {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  serviceType ServiceType @relation(fields: [serviceTypeId], references: [id], onDelete: Restrict)
-  jobs        Job[]
+  client           Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  serviceType      ServiceType       @relation(fields: [serviceTypeId], references: [id], onDelete: Restrict)
+  jobs             Job[]
+  quoteLineItems   QuoteLineItem[]
+  invoiceLineItems InvoiceLineItem[]
 
   @@index([clientId])
 }
@@ -251,14 +275,97 @@ model Activity {
   id        String       @id @default(cuid())
   clientId  String
   jobId     String?
+  quoteId   String?
+  invoiceId String?
   userId    String?
   type      ActivityType
   message   String       @db.Text
   createdAt DateTime     @default(now())
 
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  job    Job?   @relation(fields: [jobId], references: [id], onDelete: SetNull)
-  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  client  Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  job     Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  quote   Quote?   @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  invoice Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([clientId, createdAt])
+}
+
+/// A priced proposal sent to a client before work is agreed — can be converted into
+/// an Invoice once accepted.
+model Quote {
+  id          String      @id @default(cuid())
+  clientId    String
+  number      Int         @unique @default(autoincrement())
+  title       String
+  status      QuoteStatus @default(DRAFT)
+  issueDate   DateTime    @default(now())
+  expiryDate  DateTime?
+  notes       String?     @db.Text
+  createdById String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  client     Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdBy  User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  lineItems  QuoteLineItem[]
+  invoice    Invoice?
+  activities Activity[]
+
+  @@index([clientId])
+}
+
+model QuoteLineItem {
+  id              String  @id @default(cuid())
+  quoteId         String
+  clientServiceId String?
+  description     String
+  quantity        Decimal @default(1) @db.Decimal(10, 2)
+  unitPrice       Decimal @db.Decimal(10, 2)
+  position        Int     @default(0)
+
+  quote         Quote          @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  clientService ClientService? @relation(fields: [clientServiceId], references: [id], onDelete: SetNull)
+
+  @@index([quoteId])
+}
+
+/// A billed amount for work delivered — optionally originates from an accepted Quote.
+model Invoice {
+  id          String        @id @default(cuid())
+  clientId    String
+  quoteId     String?       @unique
+  number      Int           @unique @default(autoincrement())
+  title       String
+  status      InvoiceStatus @default(DRAFT)
+  issueDate   DateTime      @default(now())
+  dueDate     DateTime?
+  paidAt      DateTime?
+  notes       String?       @db.Text
+  createdById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  client     Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  quote      Quote?            @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  createdBy  User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  lineItems  InvoiceLineItem[]
+  activities Activity[]
+
+  @@index([clientId])
+}
+
+model InvoiceLineItem {
+  id              String  @id @default(cuid())
+  invoiceId       String
+  clientServiceId String?
+  description     String
+  quantity        Decimal @default(1) @db.Decimal(10, 2)
+  unitPrice       Decimal @db.Decimal(10, 2)
+  position        Int     @default(0)
+
+  invoice       Invoice        @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  clientService ClientService? @relation(fields: [clientServiceId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId])
 }

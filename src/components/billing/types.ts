@@ -1,0 +1,41 @@
+import type { QuoteStatus, InvoiceStatus } from "@prisma/client";
+
+export type BillingLineItem = {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+export type QuoteRow = {
+  id: string;
+  number: number;
+  title: string;
+  status: QuoteStatus;
+  clientId: string;
+  clientName: string;
+  issueDate: Date;
+  expiryDate: Date | null;
+  notes: string | null;
+  lineItems: BillingLineItem[];
+  hasInvoice: boolean;
+};
+
+export type InvoiceRow = {
+  id: string;
+  number: number;
+  title: string;
+  status: InvoiceStatus;
+  clientId: string;
+  clientName: string;
+  issueDate: Date;
+  dueDate: Date | null;
+  paidAt: Date | null;
+  notes: string | null;
+  lineItems: BillingLineItem[];
+  quoteNumber: number | null;
+};
+
+export function lineItemsTotal(items: BillingLineItem[]): number {
+  return items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0);
+}

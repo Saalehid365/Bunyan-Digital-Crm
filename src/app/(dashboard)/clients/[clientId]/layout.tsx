@@ -28,7 +28,7 @@ export default async function ClientLayout({
           ) : null}
         </div>
       </div>
-      <ClientTabs clientId={clientId} />
+      <ClientTabs clientId={clientId} isAdmin={user.role === "ADMIN"} />
       <div className="flex-1">{children}</div>
     </div>
   );

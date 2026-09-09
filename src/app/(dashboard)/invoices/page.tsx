@@ -1,0 +1,76 @@
+import { requireAdmin } from "@/lib/permissions";
+import { prisma } from "@/lib/prisma";
+import { getAccessibleClients, getClientServicesByClient } from "@/lib/jobs-data";
+import { QuotesInvoicesView } from "@/components/billing/quotes-invoices-view";
+import type { QuoteRow, InvoiceRow } from "@/components/billing/types";
+
+export default async function InvoicesPage() {
+  await requireAdmin();
+
+  const [quotes, invoices, clients, clientServicesByClient] = await Promise.all([
+    prisma.quote.findMany({
+      include: { client: { select: { name: true } }, lineItems: true, invoice: { select: { id: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.invoice.findMany({
+      include: { client: { select: { name: true } }, lineItems: true, quote: { select: { number: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+    getAccessibleClients(undefined),
+    getClientServicesByClient(undefined),
+  ]);
+
+  const quoteRows: QuoteRow[] = quotes.map((q) => ({
+    id: q.id,
+    number: q.number,
+    title: q.title,
+    status: q.status,
+    clientId: q.clientId,
+    clientName: q.client.name,
+    issueDate: q.issueDate,
+    expiryDate: q.expiryDate,
+    notes: q.notes,
+    hasInvoice: q.invoice !== null,
+    lineItems: q.lineItems.map((li) => ({
+      id: li.id,
+      description: li.description,
+      quantity: Number(li.quantity),
+      unitPrice: Number(li.unitPrice),
+    })),
+  }));
+
+  const invoiceRows: InvoiceRow[] = invoices.map((inv) => ({
+    id: inv.id,
+    number: inv.number,
+    title: inv.title,
+    status: inv.status,
+    clientId: inv.clientId,
+    clientName: inv.client.name,
+    issueDate: inv.issueDate,
+    dueDate: inv.dueDate,
+    paidAt: inv.paidAt,
+    notes: inv.notes,
+    quoteNumber: inv.quote?.number ?? null,
+    lineItems: inv.lineItems.map((li) => ({
+      id: li.id,
+      description: li.description,
+      quantity: Number(li.quantity),
+      unitPrice: Number(li.unitPrice),
+    })),
+  }));
+
+  return (
+    <div className="flex flex-1 flex-col">
+      <div className="px-4 pt-5 md:px-6">
+        <h1 className="text-lg font-semibold tracking-tight text-foreground">Quotes & Invoices</h1>
+        <p className="text-sm text-muted-foreground">Track proposals and billing across every client.</p>
+      </div>
+      <QuotesInvoicesView
+        quotes={quoteRows}
+        invoices={invoiceRows}
+        clients={clients}
+        clientServicesByClient={clientServicesByClient}
+      />
+    </div>
+  );
+}
