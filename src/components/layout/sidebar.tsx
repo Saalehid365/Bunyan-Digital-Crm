@@ -11,6 +11,7 @@ import {
   BarChart3,
   UsersRound,
   Settings,
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/board", label: "Jobs", icon: KanbanSquare },
   { href: "/timesheets", label: "Timesheets", icon: Clock },
+  { href: "/invoices", label: "Quotes & Invoices", icon: Receipt, adminOnly: true },
   { href: "/reports", label: "Reports", icon: BarChart3, adminOnly: true },
   { href: "/team", label: "Team", icon: UsersRound, adminOnly: true },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -73,7 +75,7 @@ export function SidebarNav({
             {active ? (
               <motion.span
                 layoutId="sidebar-active-pill"
-                className="absolute inset-0 rounded-[var(--radius-md)] border border-primary/35 bg-gradient-to-br from-primary/16 to-[var(--chart-2)]/16 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                className="absolute inset-0 rounded-[var(--radius-md)] border border-primary/25 bg-primary/10 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_2px_8px_-2px_rgba(0,0,0,0.08)]"
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
               />
             ) : (
@@ -90,12 +92,7 @@ export function SidebarNav({
 
 export function Sidebar({ role }: { role: "ADMIN" | "MEMBER" }) {
   return (
-    <aside
-      className="rise relative z-[1] hidden w-60 shrink-0 flex-col border-r border-sidebar-border md:flex"
-      style={{
-        backgroundImage: "linear-gradient(180deg, var(--sidebar), color-mix(in oklab, var(--sidebar), var(--primary) 3%))",
-      }}
-    >
+    <aside className="rise hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar shadow-[1px_0_3px_rgba(0,0,0,0.03)] md:flex">
       <SidebarBrand />
       <SidebarNav role={role} />
       <div className="border-t border-sidebar-border px-3 py-3">

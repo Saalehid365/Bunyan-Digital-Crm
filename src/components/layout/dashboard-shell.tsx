@@ -31,13 +31,8 @@ export function DashboardShell({
 
   return (
     <div className="flex h-screen w-full bg-background">
-      <div className="glow-field" aria-hidden="true">
-        <div className="glow a" />
-        <div className="glow b" />
-        <div className="glow c" />
-      </div>
       <Sidebar role={role} />
-      <div className="relative z-[1] flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Topbar
           name={name}
           email={email}

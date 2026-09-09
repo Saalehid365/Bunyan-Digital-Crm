@@ -35,7 +35,7 @@ export function TeamTable({ members, currentUserId }: { members: TeamMember[]; c
         <li key={member.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-gradient-accent text-xs font-medium text-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
+              <AvatarFallback className="bg-primary text-xs font-medium text-primary-foreground shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
                 {initials(member.name, member.email)}
               </AvatarFallback>
             </Avatar>

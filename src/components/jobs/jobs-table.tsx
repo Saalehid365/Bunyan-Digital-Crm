@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 import { JOB_STAGES, PRIORITY_LABEL, RECURRENCE_LABEL, formatMinutes } from "@/lib/constants";
 import { EmptyState } from "@/components/empty-state";
-import { StatusCell, STAGE_DOT } from "@/components/jobs/status-cell";
+import { StatusCell, STAGE_DOT, STAGE_TEXT, STAGE_BORDER } from "@/components/jobs/status-cell";
 import type { KanbanJob } from "@/components/kanban/types";
 import type { JobStage, Priority } from "@prisma/client";
 
@@ -57,7 +57,7 @@ export function JobsTable({
   return (
     <div className="overflow-x-auto p-4 md:p-6">
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-8px_rgba(0,0,0,0.14)]">
-        <Table>
+        <Table className="[&_td]:border-r [&_td]:border-border/60 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-border/60 [&_th:last-child]:border-r-0">
           <TableHeader>
             <TableRow>
               <TableHead>Job</TableHead>
@@ -80,7 +80,10 @@ export function JobsTable({
             return (
               <TableBody key={group.stage} className="border-t-2 border-border first:border-t-0">
                 <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={colSpan} className="bg-muted/40 py-2">
+                  <TableCell
+                    colSpan={colSpan}
+                    className={cn("border-l-4 bg-muted/40 py-2", STAGE_BORDER[group.stage])}
+                  >
                     <button
                       onClick={() =>
                         setCollapsed((prev) => {
@@ -96,7 +99,7 @@ export function JobsTable({
                         className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform", isCollapsed && "-rotate-90")}
                       />
                       <span className={cn("h-2 w-2 rounded-full", STAGE_DOT[group.stage])} />
-                      <span className="text-sm font-medium text-foreground">{group.label}</span>
+                      <span className={cn("text-sm font-semibold", STAGE_TEXT[group.stage])}>{group.label}</span>
                       <span className="font-mono text-xs tabular-nums text-muted-foreground">
                         {group.jobs.length}
                       </span>
@@ -113,7 +116,10 @@ export function JobsTable({
 
                       return (
                         <TableRow key={job.id} className="cursor-pointer">
-                          <TableCell className="max-w-[220px]" onClick={() => onJobClick(job)}>
+                          <TableCell
+                            className={cn("max-w-[220px] border-l-4", STAGE_BORDER[group.stage])}
+                            onClick={() => onJobClick(job)}
+                          >
                             <div className="flex items-center gap-2">
                               <span
                                 className={cn("h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT[job.priority])}
@@ -135,13 +141,13 @@ export function JobsTable({
                               {job.clientName}
                             </TableCell>
                           ) : null}
-                          <TableCell className="w-36">
+                          <TableCell className="w-36 p-0">
                             <StatusCell jobId={job.id} stage={job.stage} position={job.position} />
                           </TableCell>
                           <TableCell onClick={() => onJobClick(job)}>
                             {job.assignedTo ? (
                               <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
-                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-accent text-[9px] font-medium text-white shadow-[0_1px_2px_-1px_rgba(0,0,0,0.3)]">
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground shadow-[0_1px_2px_-1px_rgba(0,0,0,0.3)]">
                                   {initials(job.assignedTo.name)}
                                 </span>
                                 {job.assignedTo.name}
@@ -191,7 +197,7 @@ export function JobsTable({
 
                 {!isCollapsed && onAddJob ? (
                   <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={colSpan} className="py-1.5">
+                    <TableCell colSpan={colSpan} className={cn("border-l-4 py-1.5", STAGE_BORDER[group.stage])}>
                       <button
                         onClick={() => onAddJob(group.stage)}
                         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
@@ -204,7 +210,10 @@ export function JobsTable({
 
                 {!isCollapsed ? (
                   <TableRow className="border-t border-border bg-muted/20 hover:bg-muted/20">
-                    <TableCell colSpan={showClient ? 4 : 3} className="py-1.5 text-xs text-muted-foreground">
+                    <TableCell
+                      colSpan={showClient ? 4 : 3}
+                      className={cn("border-l-4 py-1.5 text-xs text-muted-foreground", STAGE_BORDER[group.stage])}
+                    >
                       {group.jobs.length} job{group.jobs.length === 1 ? "" : "s"}
                     </TableCell>
                     <TableCell colSpan={showClient ? 3 : 3} className="py-1.5">

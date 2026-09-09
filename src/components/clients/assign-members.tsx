@@ -44,7 +44,7 @@ export function AssignMembers({
             <li key={member.id} className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
-                  <AvatarFallback className="bg-gradient-accent text-[10px] font-medium text-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
+                  <AvatarFallback className="bg-primary text-[10px] font-medium text-primary-foreground shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
                     {initials(member.name, member.email)}
                   </AvatarFallback>
                 </Avatar>

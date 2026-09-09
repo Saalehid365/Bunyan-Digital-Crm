@@ -13,11 +13,13 @@ import { JOB_STAGES, JOB_STAGE_LABEL } from "@/lib/constants";
 import { moveJobStage } from "@/server/actions/jobs";
 import type { JobStage } from "@prisma/client";
 
+// Flat, light tints (not full-saturation fills, not gradient) — soft enough to sit in a
+// dense grid without shouting, the color itself carried by the text.
 export const STAGE_FILL: Record<JobStage, string> = {
   BACKLOG: "bg-muted text-muted-foreground",
-  IN_PROGRESS: "bg-gradient-primary text-primary-foreground",
-  IN_REVIEW: "bg-gradient-review text-white",
-  DONE: "bg-gradient-success text-success-foreground",
+  IN_PROGRESS: "bg-primary/15 text-primary",
+  IN_REVIEW: "bg-[var(--chart-2)]/15 text-[var(--chart-2)]",
+  DONE: "bg-success/15 text-success",
 };
 
 export const STAGE_DOT: Record<JobStage, string> = {
@@ -25,6 +27,20 @@ export const STAGE_DOT: Record<JobStage, string> = {
   IN_PROGRESS: "bg-primary",
   IN_REVIEW: "bg-[var(--chart-2)]",
   DONE: "bg-success",
+};
+
+export const STAGE_TEXT: Record<JobStage, string> = {
+  BACKLOG: "text-foreground",
+  IN_PROGRESS: "text-primary",
+  IN_REVIEW: "text-[var(--chart-2)]",
+  DONE: "text-success",
+};
+
+export const STAGE_BORDER: Record<JobStage, string> = {
+  BACKLOG: "border-l-muted-foreground/40",
+  IN_PROGRESS: "border-l-primary",
+  IN_REVIEW: "border-l-[var(--chart-2)]",
+  DONE: "border-l-success",
 };
 
 export function StatusCell({
@@ -46,7 +62,7 @@ export function StatusCell({
         disabled={pending}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "flex h-8 w-full items-center justify-center gap-1 rounded-[var(--radius-sm)] text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.08)] transition-all duration-150 hover:opacity-90 hover:shadow-[0_2px_6px_rgba(0,0,0,0.14)] disabled:opacity-60",
+          "flex h-full min-h-10 w-full items-center justify-center gap-1 text-xs font-semibold transition-opacity duration-150 hover:opacity-85 disabled:opacity-60",
           STAGE_FILL[stage],
           className,
         )}

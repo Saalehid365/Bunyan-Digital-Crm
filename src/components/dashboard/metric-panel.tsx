@@ -71,7 +71,7 @@ export function MetricPanel({
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {heroLabel}
         </p>
-        <p className="mt-2 bg-gradient-accent bg-clip-text font-mono text-4xl font-semibold tabular-nums tracking-tight text-transparent sm:text-5xl">
+        <p className="mt-2 font-mono text-4xl font-semibold tabular-nums tracking-tight text-primary sm:text-5xl">
           <AnimatedValue raw={heroValue} />
         </p>
         {heroSublabel ? (

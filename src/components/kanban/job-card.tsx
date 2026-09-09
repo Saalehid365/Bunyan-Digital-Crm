@@ -134,7 +134,7 @@ export function JobCard({
         )}
         {job.assignedTo ? (
           <span
-            className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-accent text-[9px] font-medium text-white shadow-[0_1px_2px_-1px_rgba(0,0,0,0.3)]"
+            className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground shadow-[0_1px_2px_-1px_rgba(0,0,0,0.3)]"
             title={job.assignedTo.name ?? ""}
           >
             {initials(job.assignedTo.name)}

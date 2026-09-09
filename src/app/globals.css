@@ -42,6 +42,7 @@
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-line: var(--line);
+  --color-topbar: var(--topbar);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -51,46 +52,49 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* "Vellum" — light theme: cool blue-grey paper, deep blueprint-navy ink */
+/* Light theme (default): true neutral grey/near-black — no blue tint in the base
+   ink or surfaces. Indigo (primary), blue (chart-2) and green (success) stay as
+   deliberate accent colors only, never as the text/background neutrals. */
 :root {
-  --background: #eef0f1;
-  --foreground: #132c4f;
+  --background: #f7f7f7;
+  --foreground: #1a1a1a;
   --card: #ffffff;
-  --card-foreground: #132c4f;
+  --card-foreground: #1a1a1a;
   --popover: #ffffff;
-  --popover-foreground: #132c4f;
-  --primary: #c1622b;
-  --primary-foreground: #fdf8f4;
-  --secondary: #e2e7ea;
-  --secondary-foreground: #132c4f;
-  --muted: #e2e7ea;
-  --muted-foreground: #5b6b7a;
-  --accent: #e2e7ea;
-  --accent-foreground: #132c4f;
+  --popover-foreground: #1a1a1a;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #eeeeee;
+  --secondary-foreground: #1a1a1a;
+  --muted: #eeeeee;
+  --muted-foreground: #6f6f6f;
+  --accent: #eeeeee;
+  --accent-foreground: #1a1a1a;
   --destructive: #b8433a;
-  --border: #d7dee3;
-  --input: #d7dee3;
-  --ring: #c1622b;
+  --border: #e2e2e2;
+  --input: #e2e2e2;
+  --ring: #4f46e5;
   --success: #3f6e56;
   --success-foreground: #fdf8f4;
-  --line: #b9c3ca;
-  --chart-1: #c1622b;
+  --line: #d1d1d1;
+  --chart-1: #4f46e5;
   --chart-2: #2e5eaa;
   --chart-3: #3f6e56;
-  --chart-4: #5b6b7a;
-  --chart-5: #8a97a3;
+  --chart-4: #6f6f6f;
+  --chart-5: #999999;
   --radius: 0.65rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #132c4f;
-  --sidebar-primary: #c1622b;
-  --sidebar-primary-foreground: #fdf8f4;
-  --sidebar-accent: #e2e7ea;
-  --sidebar-accent-foreground: #132c4f;
-  --sidebar-border: #d7dee3;
-  --sidebar-ring: #c1622b;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #4f46e5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eeeeee;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #e2e2e2;
+  --sidebar-ring: #4f46e5;
+  --topbar: #f5f5fc;
 }
 
-/* "Blueprint" — dark theme (default): true blueprint-blue ground, warm orange accent */
+/* "Blueprint" — dark theme (default): true blueprint-blue ground, indigo accent */
 .dark {
   --background: #132c4f;
   --foreground: #f4f8fb;
@@ -98,8 +102,8 @@
   --card-foreground: #f4f8fb;
   --popover: #1b3a63;
   --popover-foreground: #f4f8fb;
-  --primary: #e08245;
-  --primary-foreground: #14213a;
+  --primary: #818cf8;
+  --primary-foreground: #1e1b4b;
   --secondary: #234a7a;
   --secondary-foreground: #f4f8fb;
   --muted: #1e3f6b;
@@ -109,23 +113,24 @@
   --destructive: #e2685c;
   --border: rgba(191, 215, 232, 0.16);
   --input: rgba(191, 215, 232, 0.22);
-  --ring: #e08245;
+  --ring: #818cf8;
   --success: #7fbfa0;
   --success-foreground: #0f2418;
   --line: rgba(191, 215, 232, 0.24);
-  --chart-1: #e08245;
+  --chart-1: #818cf8;
   --chart-2: #7fa8d9;
   --chart-3: #7fbfa0;
   --chart-4: #9dbada;
   --chart-5: #547aa8;
   --sidebar: #0f2340;
   --sidebar-foreground: #f4f8fb;
-  --sidebar-primary: #e08245;
-  --sidebar-primary-foreground: #14213a;
+  --sidebar-primary: #818cf8;
+  --sidebar-primary-foreground: #1e1b4b;
   --sidebar-accent: #1b3a63;
   --sidebar-accent-foreground: #f4f8fb;
   --sidebar-border: rgba(191, 215, 232, 0.14);
-  --sidebar-ring: #e08245;
+  --sidebar-ring: #818cf8;
+  --topbar: #17335a;
 }
 
 @layer base {
@@ -147,99 +152,6 @@
 @layer utilities {
   .tabular-nums {
     font-variant-numeric: tabular-nums;
-  }
-}
-
-/* ---- gradients — orange/blue, built from the app's own accent + chart-2 tokens ---- */
-:root {
-  /*
-   * oklab (Cartesian: L/a/b), not oklch (polar: L/C/H) — mixing orange and blue in oklch
-   * takes the shortest hue arc, which runs through red/magenta rather than the intended
-   * blue, producing an unwanted coral-pink cast. oklab has no hue wheel to detour around.
-   */
-  --gradient-accent: linear-gradient(135deg, var(--primary), var(--chart-2));
-  --gradient-primary: linear-gradient(
-    135deg,
-    var(--primary),
-    color-mix(in oklab, var(--primary), var(--chart-2) 35%)
-  );
-  --gradient-success: linear-gradient(135deg, var(--success), color-mix(in oklab, var(--success), var(--chart-2) 20%));
-  --gradient-review: linear-gradient(135deg, var(--chart-2), color-mix(in oklab, var(--chart-2), var(--primary) 20%));
-}
-
-@layer utilities {
-  .bg-gradient-accent {
-    background-image: var(--gradient-accent);
-  }
-  .bg-gradient-primary {
-    background-image: var(--gradient-primary);
-  }
-  .bg-gradient-success {
-    background-image: var(--gradient-success);
-  }
-  .bg-gradient-review {
-    background-image: var(--gradient-review);
-  }
-  .text-gradient-accent {
-    background-image: var(--gradient-accent);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-}
-
-/* ---- ambient gradient field — soft, slowly drifting blobs behind main content ---- */
-.glow-field {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-.glow {
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(70px);
-  opacity: 0.14;
-  animation: bunyan-drift 18s ease-in-out infinite;
-}
-.dark .glow {
-  opacity: 0.22;
-}
-.glow.a {
-  width: 520px;
-  height: 520px;
-  top: -180px;
-  left: 12%;
-  background: var(--primary);
-}
-.glow.b {
-  width: 460px;
-  height: 460px;
-  top: 30%;
-  right: -140px;
-  background: var(--chart-2);
-  animation-delay: -6s;
-}
-.glow.c {
-  width: 380px;
-  height: 380px;
-  bottom: -160px;
-  left: 38%;
-  background: var(--success);
-  opacity: 0.08;
-  animation-delay: -11s;
-}
-.dark .glow.c {
-  opacity: 0.12;
-}
-@keyframes bunyan-drift {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(3%, -4%) scale(1.08);
   }
 }
 
@@ -265,9 +177,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .glow {
-    animation: none;
-  }
   .rise {
     animation: none;
   }

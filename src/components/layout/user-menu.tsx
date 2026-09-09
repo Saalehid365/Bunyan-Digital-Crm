@@ -36,7 +36,7 @@ export function UserMenu({
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2 rounded-[var(--radius-sm)] p-1 pr-2 outline-none hover:bg-accent">
         <Avatar className="h-7 w-7">
-          <AvatarFallback className="bg-gradient-accent text-[11px] font-medium text-white shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
+          <AvatarFallback className="bg-primary text-[11px] font-medium text-primary-foreground shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
             {initials(name, email)}
           </AvatarFallback>
         </Avatar>
