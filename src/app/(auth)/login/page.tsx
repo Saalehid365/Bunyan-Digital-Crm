@@ -2,7 +2,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LoginForm } from "@/components/auth/login-form";
 
 const ERROR_MESSAGES: Record<string, string> = {
-  AccessDenied: "That email isn't registered. Ask an admin to add you as a team member first.",
+  // Auth.js only forwards a fixed allowlist of error codes to this page via the
+  // redirect (see @auth/core's clientErrors), so a stale/pending magic link from an
+  // account that's since been disabled lands on this same generic code as a genuinely
+  // unregistered email — this copy is written to stay accurate for either cause. A
+  // *fresh* sign-in attempt (password, or requesting a new link) gets a precise
+  // "account disabled" message instead, from src/server/actions/auth.ts.
+  AccessDenied: "This account isn't able to sign in — it may not be registered yet, or it's been disabled. Ask an admin to check your access.",
   CredentialsSignin: "Incorrect email or password.",
   Verification: "That sign-in link has expired or was already used. Request a new one.",
 };

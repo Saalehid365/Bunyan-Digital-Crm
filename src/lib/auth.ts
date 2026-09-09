@@ -5,6 +5,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationRequest } from "@/lib/email/send-verification";
 import { verifyPassword } from "@/lib/password";
+import { AccountDisabledError } from "@/lib/auth-errors";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Explicitly setting this (even to Auth.js's own default) is what makes it combine
@@ -36,7 +37,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!email || !password) return null;
 
         const user = await prisma.user.findUnique({ where: { email } });
-        if (!user || user.disabledAt || !user.passwordHash) return null;
+        if (!user || !user.passwordHash) return null;
+        if (user.disabledAt) throw new AccountDisabledError();
         if (!verifyPassword(password, user.passwordHash)) return null;
 
         return { id: user.id, email: user.email, name: user.name, role: user.role };
@@ -52,7 +54,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const existing = await prisma.user.findUnique({
         where: { email: user.email },
       });
-      return !!existing && !existing.disabledAt;
+      if (!existing) return false;
+      if (existing.disabledAt) throw new AccountDisabledError();
+      return true;
     },
     async jwt({ token, user }) {
       if (user) {

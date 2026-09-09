@@ -66,6 +66,7 @@ export async function createJob(formData: FormData) {
 
   revalidatePath(`/clients/${data.clientId}/board`);
   revalidatePath("/board");
+  revalidatePath("/dashboard");
   revalidatePath(`/clients/${data.clientId}/activity`);
   return { id: job.id };
 }
@@ -107,6 +108,7 @@ export async function moveJobStage(input: unknown) {
 
   revalidatePath(`/clients/${job.clientId}/board`);
   revalidatePath("/board");
+  revalidatePath("/dashboard");
   revalidatePath(`/clients/${job.clientId}/activity`);
   return { ok: true };
 }
@@ -146,6 +148,7 @@ export async function updateJob(jobId: string, formData: FormData) {
 
   revalidatePath(`/clients/${data.clientId}/board`);
   revalidatePath("/board");
+  revalidatePath("/dashboard");
   return { ok: true };
 }
 
@@ -157,4 +160,5 @@ export async function deleteJob(jobId: string, clientId: string) {
   await prisma.job.delete({ where: { id: jobId } });
   revalidatePath(`/clients/${clientId}/board`);
   revalidatePath("/board");
+  revalidatePath("/dashboard");
 }
