@@ -66,7 +66,7 @@ export function MetricPanel({
   ledger: { label: string; value: string }[];
 }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-8px_rgba(0,0,0,0.12)] sm:flex-row">
+    <div className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-8px_rgba(0,0,0,0.16)] sm:flex-row">
       <div className="flex-1 border-b border-border p-6 sm:border-b-0 sm:border-r">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {heroLabel}

@@ -22,7 +22,7 @@ export function Topbar({
         <MobileNav role={role} />
         <button
           onClick={onOpenPalette}
-          className="flex w-9 items-center gap-2 rounded-[var(--radius-sm)] border border-border bg-muted/40 px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-line hover:text-foreground sm:w-56 sm:px-3"
+          className="flex w-9 items-center gap-2 rounded-[var(--radius-sm)] border border-border bg-muted/40 px-2.5 py-1.5 text-sm text-muted-foreground transition-all duration-150 hover:border-primary/40 hover:bg-muted hover:text-foreground hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary),transparent_88%)] sm:w-56 sm:px-3"
         >
           <Search className="h-3.5 w-3.5 shrink-0" />
           <span className="hidden flex-1 text-left sm:inline">Search…</span>

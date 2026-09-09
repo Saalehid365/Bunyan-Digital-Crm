@@ -64,7 +64,7 @@ export default async function ClientsPage() {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-8px_rgba(0,0,0,0.1)]">
+        <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-8px_rgba(0,0,0,0.14)]">
           <Table>
             <TableHeader>
               <TableRow>

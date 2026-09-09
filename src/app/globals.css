@@ -243,6 +243,12 @@
   }
 }
 
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* ---- entrance choreography ---- */
 @keyframes bunyan-rise {
   from {
@@ -263,6 +269,9 @@
     animation: none;
   }
   .rise {
+    animation: none;
+  }
+  [data-slot="skeleton"]::before {
     animation: none;
   }
 }

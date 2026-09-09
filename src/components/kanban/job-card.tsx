@@ -16,6 +16,13 @@ const PRIORITY_DOT: Record<Priority, string> = {
   LOW: "bg-muted-foreground/50",
 };
 
+const PRIORITY_STRIPE: Record<Priority, string> = {
+  URGENT: "border-l-destructive",
+  HIGH: "border-l-primary",
+  MEDIUM: "border-l-[var(--chart-4)]",
+  LOW: "border-l-border",
+};
+
 function initials(name: string | null) {
   if (!name) return "?";
   return name.split(/\s+/).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
@@ -55,11 +62,12 @@ export function JobCard({
       {...listeners}
       onClick={onClick}
       className={cn(
-        "cursor-pointer rounded-[var(--radius-md)] border border-border bg-card p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-150 ease-out",
+        "cursor-pointer rounded-[var(--radius-md)] border border-l-[3px] border-border bg-card p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 ease-[cubic-bezier(0.16,0.8,0.3,1)]",
+        PRIORITY_STRIPE[job.priority],
         isDragging && !overlay ? "opacity-30" : "",
         overlay
           ? "rotate-1 shadow-lg"
-          : "hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.16)]",
+          : "hover:-translate-y-1 hover:shadow-[0_8px_24px_-6px_rgba(0,0,0,0.2)]",
       )}
     >
       <div className="mb-2 flex items-start justify-between gap-2">

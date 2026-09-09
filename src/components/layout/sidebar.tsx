@@ -90,7 +90,12 @@ export function SidebarNav({
 
 export function Sidebar({ role }: { role: "ADMIN" | "MEMBER" }) {
   return (
-    <aside className="rise relative z-[1] hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
+    <aside
+      className="rise relative z-[1] hidden w-60 shrink-0 flex-col border-r border-sidebar-border md:flex"
+      style={{
+        backgroundImage: "linear-gradient(180deg, var(--sidebar), color-mix(in oklab, var(--sidebar), var(--primary) 3%))",
+      }}
+    >
       <SidebarBrand />
       <SidebarNav role={role} />
       <div className="border-t border-sidebar-border px-3 py-3">
