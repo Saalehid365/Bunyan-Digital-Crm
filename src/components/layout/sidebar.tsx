@@ -14,12 +14,17 @@ import {
   Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Permission } from "@prisma/client";
 
 type NavItem = {
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
+  /** Hard admin-only, unrelated to the grantable Permission set (e.g. managing the
+   * team itself is more sensitive than any one capability). */
   adminOnly?: boolean;
+  /** Visible to ADMIN always, or a MEMBER holding this specific permission. */
+  permission?: Permission;
 };
 
 export const NAV_ITEMS: NavItem[] = [
@@ -27,8 +32,8 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/board", label: "Jobs", icon: KanbanSquare },
   { href: "/timesheets", label: "Timesheets", icon: Clock },
-  { href: "/invoices", label: "Quotes & Invoices", icon: Receipt, adminOnly: true },
-  { href: "/reports", label: "Reports", icon: BarChart3, adminOnly: true },
+  { href: "/invoices", label: "Quotes & Invoices", icon: Receipt, permission: "MANAGE_BILLING" },
+  { href: "/reports", label: "Reports", icon: BarChart3, permission: "VIEW_REPORTS" },
   { href: "/team", label: "Team", icon: UsersRound, adminOnly: true },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -50,16 +55,24 @@ export function SidebarBrand() {
 
 export function SidebarNav({
   role,
+  permissions = [],
   onNavigate,
 }: {
   role: "ADMIN" | "MEMBER";
+  permissions?: Permission[];
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const isAdmin = role === "ADMIN";
+  const visibleItems = NAV_ITEMS.filter((item) => {
+    if (item.adminOnly) return isAdmin;
+    if (item.permission) return isAdmin || permissions.includes(item.permission);
+    return true;
+  });
 
   return (
     <nav className="flex-1 space-y-0.5 px-2 py-4">
-      {NAV_ITEMS.filter((item) => !item.adminOnly || role === "ADMIN").map((item) => {
+      {visibleItems.map((item) => {
         const active = pathname === item.href || pathname.startsWith(item.href + "/");
         const Icon = item.icon;
         return (
@@ -90,11 +103,11 @@ export function SidebarNav({
   );
 }
 
-export function Sidebar({ role }: { role: "ADMIN" | "MEMBER" }) {
+export function Sidebar({ role, permissions }: { role: "ADMIN" | "MEMBER"; permissions: Permission[] }) {
   return (
     <aside className="rise hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar shadow-[1px_0_3px_rgba(0,0,0,0.03)] md:flex">
       <SidebarBrand />
-      <SidebarNav role={role} />
+      <SidebarNav role={role} permissions={permissions} />
       <div className="border-t border-sidebar-border px-3 py-3">
         <p className="px-2 text-[11px] leading-relaxed text-muted-foreground">
           Bunyan Digital Ltd

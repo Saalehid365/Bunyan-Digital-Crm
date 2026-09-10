@@ -1,23 +1,27 @@
-import { requireAdmin } from "@/lib/permissions";
+import { requirePermission, getVisibleClientIds } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getAccessibleClients, getClientServicesByClient } from "@/lib/jobs-data";
 import { QuotesInvoicesView } from "@/components/billing/quotes-invoices-view";
 import type { QuoteRow, InvoiceRow } from "@/components/billing/types";
 
 export default async function InvoicesPage() {
-  await requireAdmin();
+  const user = await requirePermission("MANAGE_BILLING");
+  const clientIds = user.role === "ADMIN" ? undefined : await getVisibleClientIds(user.id);
+  const clientFilter = clientIds ? { clientId: { in: clientIds } } : {};
 
   const [quotes, invoices, clients, clientServicesByClient] = await Promise.all([
     prisma.quote.findMany({
+      where: clientFilter,
       include: { client: { select: { name: true } }, lineItems: true, invoice: { select: { id: true } } },
       orderBy: { createdAt: "desc" },
     }),
     prisma.invoice.findMany({
+      where: clientFilter,
       include: { client: { select: { name: true } }, lineItems: true, quote: { select: { number: true } } },
       orderBy: { createdAt: "desc" },
     }),
-    getAccessibleClients(undefined),
-    getClientServicesByClient(undefined),
+    getAccessibleClients(clientIds),
+    getClientServicesByClient(clientIds),
   ]);
 
   const quoteRows: QuoteRow[] = quotes.map((q) => ({

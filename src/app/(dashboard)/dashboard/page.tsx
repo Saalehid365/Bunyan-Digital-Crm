@@ -3,7 +3,9 @@ import { requireUser, getVisibleClientIds } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { GBP, formatMinutes } from "@/lib/constants";
 import { getKanbanJobs, getClientServicesByClient, getAccessibleClients } from "@/lib/jobs-data";
+import { getStaleLeads } from "@/lib/stale-leads";
 import { MetricPanel } from "@/components/dashboard/metric-panel";
+import { StaleLeadsCard } from "@/components/dashboard/stale-leads-card";
 import { GlobalBoard } from "@/components/kanban/global-board";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -33,7 +35,7 @@ export default async function DashboardPage() {
   ).length;
 
   if (isAdmin) {
-    const [openJobs, doneThisWeek, activeServices, minutesThisWeekAgg] = await Promise.all([
+    const [openJobs, doneThisWeek, activeServices, minutesThisWeekAgg, staleLeads] = await Promise.all([
       prisma.job.count({ where: { stage: { not: "DONE" } } }),
       prisma.job.count({
         where: { stage: "DONE", completedAt: { gte: addDays(new Date(), -7) } },
@@ -47,6 +49,7 @@ export default async function DashboardPage() {
         where: { workDate: { gte: addDays(new Date(), -7) } },
         _sum: { minutes: true },
       }),
+      getStaleLeads(),
     ]);
 
     const mrr = Number(activeServices._sum.priceValue ?? 0);
@@ -72,11 +75,15 @@ export default async function DashboardPage() {
               ]}
             />
           </div>
+
+          {staleLeads.length > 0 ? (
+            <StaleLeadsCard leads={staleLeads} style={{ animationDelay: "140ms" }} />
+          ) : null}
         </div>
 
         <Card
           className="rise mx-4 flex flex-1 flex-col overflow-hidden md:mx-6 mb-4 md:mb-6"
-          style={{ animationDelay: "160ms" }}
+          style={{ animationDelay: "200ms" }}
         >
           <CardHeader>
             <CardTitle className="text-sm font-medium">Work board</CardTitle>

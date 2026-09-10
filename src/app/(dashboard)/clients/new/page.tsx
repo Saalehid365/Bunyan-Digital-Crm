@@ -1,9 +1,9 @@
-import { requireAdmin } from "@/lib/permissions";
+import { requirePermission } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientForm } from "@/components/clients/client-form";
 
 export default async function NewClientPage() {
-  await requireAdmin();
+  await requirePermission("MANAGE_CLIENTS");
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-4 md:p-6">

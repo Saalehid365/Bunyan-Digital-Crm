@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
-import { requireUser, getClientForUser } from "@/lib/permissions";
+import { requireUser, getClientForUser, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientFormDialog } from "@/components/clients/client-form-dialog";
 import { DeleteClientButton } from "@/components/clients/delete-client-button";
 import { AssignMembers } from "@/components/clients/assign-members";
+import { OnboardingChecklist } from "@/components/clients/onboarding-checklist";
 import { formatMinutes } from "@/lib/constants";
 
 export default async function ClientOverviewPage({
@@ -16,8 +17,9 @@ export default async function ClientOverviewPage({
   const { clientId } = await params;
   const client = await getClientForUser(user, clientId);
   if (!client) notFound();
+  const canManageClients = await hasPermission(user, "MANAGE_CLIENTS");
 
-  const [members, allUsers, jobCounts, timeAgg] = await Promise.all([
+  const [members, allUsers, jobCounts, timeAgg, onboardingTasks] = await Promise.all([
     prisma.clientMember.findMany({
       where: { clientId },
       include: { user: { select: { id: true, name: true, email: true } } },
@@ -38,6 +40,11 @@ export default async function ClientOverviewPage({
       where: { task: { job: { clientId } } },
       _sum: { minutes: true },
     }),
+    prisma.clientOnboardingTask.findMany({
+      where: { clientId },
+      orderBy: { position: "asc" },
+      select: { id: true, title: true, done: true },
+    }),
   ]);
 
   const openJobs = jobCounts
@@ -52,7 +59,7 @@ export default async function ClientOverviewPage({
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-medium">Client details</CardTitle>
-            {user.role === "ADMIN" ? (
+            {canManageClients ? (
               <div className="flex items-center gap-2">
                 <ClientFormDialog client={client} />
                 <DeleteClientButton clientId={clientId} clientName={client.name} />
@@ -88,6 +95,19 @@ export default async function ClientOverviewPage({
         </Card>
 
         <div className="space-y-6">
+          {onboardingTasks.length > 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  Onboarding ({onboardingTasks.filter((t) => t.done).length}/{onboardingTasks.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <OnboardingChecklist clientId={clientId} tasks={onboardingTasks} />
+              </CardContent>
+            </Card>
+          ) : null}
+
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium">Work summary</CardTitle>

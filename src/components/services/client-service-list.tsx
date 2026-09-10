@@ -27,11 +27,11 @@ type ClientService = {
 export function ClientServiceList({
   clientId,
   services,
-  isAdmin,
+  canManageServices,
 }: {
   clientId: string;
   services: ClientService[];
-  isAdmin: boolean;
+  canManageServices: boolean;
 }) {
   const [pending, startTransition] = useTransition();
 
@@ -57,14 +57,14 @@ export function ClientServiceList({
                 {service.billingType === "MONTHLY" ? "/mo" : ""}
               </span>
             ) : null}
-            {isAdmin ? (
+            {canManageServices ? (
               <>
                 <Select
                   value={service.status}
                   disabled={pending}
                   onValueChange={(value) =>
                     startTransition(() =>
-                      updateClientServiceStatus(service.id, clientId, value as ServiceStatus),
+                      updateClientServiceStatus(service.id, clientId, value as ServiceStatus).then(() => {}),
                     )
                   }
                 >
@@ -84,7 +84,7 @@ export function ClientServiceList({
                   size="icon"
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
                   disabled={pending}
-                  onClick={() => startTransition(() => deleteClientService(service.id, clientId))}
+                  onClick={() => startTransition(() => deleteClientService(service.id, clientId).then(() => {}))}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>

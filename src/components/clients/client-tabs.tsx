@@ -4,14 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export function ClientTabs({ clientId, isAdmin }: { clientId: string; isAdmin: boolean }) {
+export function ClientTabs({ clientId, canManageBilling }: { clientId: string; canManageBilling: boolean }) {
   const pathname = usePathname();
   const base = `/clients/${clientId}`;
   const tabs = [
     { href: base, label: "Overview", exact: true },
     { href: `${base}/services`, label: "Services" },
     { href: `${base}/board`, label: "Board" },
-    ...(isAdmin ? [{ href: `${base}/billing`, label: "Billing", exact: false }] : []),
+    ...(canManageBilling ? [{ href: `${base}/billing`, label: "Billing", exact: false }] : []),
     { href: `${base}/activity`, label: "Activity" },
   ];
 

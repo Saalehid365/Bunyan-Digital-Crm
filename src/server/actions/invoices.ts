@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, canAccessClient } from "@/lib/permissions";
+import { requirePermission, canAccessClient } from "@/lib/permissions";
 import { invoiceSchema, invoiceStatusEnum } from "@/lib/validations/invoice";
 import { INVOICE_STATUS_LABEL } from "@/lib/constants";
 
@@ -14,7 +14,7 @@ function revalidateInvoice(clientId: string) {
 }
 
 export async function createInvoice(formData: FormData) {
-  const user = await requireAdmin();
+  const user = await requirePermission("MANAGE_BILLING");
 
   const parsed = invoiceSchema.safeParse({
     clientId: formData.get("clientId"),
@@ -64,7 +64,7 @@ export async function createInvoice(formData: FormData) {
 }
 
 export async function updateInvoiceStatus(invoiceId: string, status: unknown) {
-  const user = await requireAdmin();
+  const user = await requirePermission("MANAGE_BILLING");
   const parsedStatus = invoiceStatusEnum.safeParse(status);
   if (!parsedStatus.success) return { error: "Invalid status" };
 
@@ -99,7 +99,7 @@ export async function updateInvoiceStatus(invoiceId: string, status: unknown) {
 }
 
 export async function deleteInvoice(invoiceId: string, clientId: string) {
-  const user = await requireAdmin();
+  const user = await requirePermission("MANAGE_BILLING");
   if (!(await canAccessClient(user, clientId))) {
     return { error: "You don't have access to this client." };
   }

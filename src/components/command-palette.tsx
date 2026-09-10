@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LayoutDashboard, Users, KanbanSquare, Clock, BarChart3, UsersRound, Settings, Plus } from "lucide-react";
+import { LayoutDashboard, Users, KanbanSquare, Clock, BarChart3, UsersRound, Settings, Plus, Receipt } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -11,17 +11,24 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import type { Permission } from "@prisma/client";
 
 export function CommandPalette({
-  isAdmin,
+  role,
+  permissions,
   open,
   onOpenChange,
 }: {
-  isAdmin: boolean;
+  role: "ADMIN" | "MEMBER";
+  permissions: Permission[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const router = useRouter();
+  const isAdmin = role === "ADMIN";
+  const canViewReports = isAdmin || permissions.includes("VIEW_REPORTS");
+  const canManageClients = isAdmin || permissions.includes("MANAGE_CLIENTS");
+  const canManageBilling = isAdmin || permissions.includes("MANAGE_BILLING");
 
   function go(href: string) {
     onOpenChange(false);
@@ -46,9 +53,14 @@ export function CommandPalette({
           <CommandItem onSelect={() => go("/timesheets")}>
             <Clock className="h-4 w-4" /> Timesheets
           </CommandItem>
-          {isAdmin ? (
+          {canViewReports ? (
             <CommandItem onSelect={() => go("/reports")}>
               <BarChart3 className="h-4 w-4" /> Reports
+            </CommandItem>
+          ) : null}
+          {canManageBilling ? (
+            <CommandItem onSelect={() => go("/invoices")}>
+              <Receipt className="h-4 w-4" /> Quotes & Invoices
             </CommandItem>
           ) : null}
           {isAdmin ? (
@@ -60,7 +72,7 @@ export function CommandPalette({
             <Settings className="h-4 w-4" /> Settings
           </CommandItem>
         </CommandGroup>
-        {isAdmin ? (
+        {canManageClients ? (
           <>
             <CommandSeparator />
             <CommandGroup heading="Create">

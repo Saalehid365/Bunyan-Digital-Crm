@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/permissions";
-import { inviteUserSchema, roleEnum } from "@/lib/validations/team";
+import { inviteUserSchema, roleEnum, permissionsInputSchema } from "@/lib/validations/team";
 
 export async function inviteUser(formData: FormData) {
   await requireAdmin();
@@ -32,6 +32,14 @@ export async function setUserRole(userId: string, role: string) {
   const parsed = roleEnum.safeParse(role);
   if (!parsed.success) return { error: "Invalid role" };
   await prisma.user.update({ where: { id: userId }, data: { role: parsed.data } });
+  revalidatePath("/team");
+}
+
+export async function setUserPermissions(userId: string, permissions: string[]) {
+  await requireAdmin();
+  const parsed = permissionsInputSchema.safeParse(permissions);
+  if (!parsed.success) return { error: "Invalid permissions" };
+  await prisma.user.update({ where: { id: userId }, data: { permissions: parsed.data } });
   revalidatePath("/team");
 }
 

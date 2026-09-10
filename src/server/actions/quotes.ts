@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, canAccessClient } from "@/lib/permissions";
+import { requirePermission, canAccessClient } from "@/lib/permissions";
 import { quoteSchema, quoteStatusEnum } from "@/lib/validations/quote";
 import { QUOTE_STATUS_LABEL } from "@/lib/constants";
 
@@ -14,7 +14,7 @@ function revalidateQuote(clientId: string) {
 }
 
 export async function createQuote(formData: FormData) {
-  const user = await requireAdmin();
+  const user = await requirePermission("MANAGE_BILLING");
 
   const parsed = quoteSchema.safeParse({
     clientId: formData.get("clientId"),
@@ -64,7 +64,7 @@ export async function createQuote(formData: FormData) {
 }
 
 export async function updateQuoteStatus(quoteId: string, status: unknown) {
-  const user = await requireAdmin();
+  const user = await requirePermission("MANAGE_BILLING");
   const parsedStatus = quoteStatusEnum.safeParse(status);
   if (!parsedStatus.success) return { error: "Invalid status" };
 
@@ -94,7 +94,7 @@ export async function updateQuoteStatus(quoteId: string, status: unknown) {
 
 /** Copies a quote's line items into a new, linked Invoice. The quote itself is left as-is. */
 export async function convertQuoteToInvoice(quoteId: string) {
-  const user = await requireAdmin();
+  const user = await requirePermission("MANAGE_BILLING");
 
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
@@ -137,7 +137,7 @@ export async function convertQuoteToInvoice(quoteId: string) {
 }
 
 export async function deleteQuote(quoteId: string, clientId: string) {
-  const user = await requireAdmin();
+  const user = await requirePermission("MANAGE_BILLING");
   if (!(await canAccessClient(user, clientId))) {
     return { error: "You don't have access to this client." };
   }

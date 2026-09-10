@@ -4,22 +4,25 @@ import { Search } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import type { Permission } from "@prisma/client";
 
 export function Topbar({
   name,
   email,
   role,
+  permissions,
   onOpenPalette,
 }: {
   name: string | null | undefined;
   email: string;
   role: "ADMIN" | "MEMBER";
+  permissions: Permission[];
   onOpenPalette: () => void;
 }) {
   return (
     <header className="rise relative z-10 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-topbar px-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] md:px-6">
       <div className="flex min-w-0 items-center gap-2">
-        <MobileNav role={role} />
+        <MobileNav role={role} permissions={permissions} />
         <button
           onClick={onOpenPalette}
           className="flex w-9 items-center gap-2 rounded-[var(--radius-sm)] border border-border bg-muted/40 px-2.5 py-1.5 text-sm text-muted-foreground transition-all duration-150 hover:border-primary/40 hover:bg-muted hover:text-foreground hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary),transparent_88%)] sm:w-56 sm:px-3"

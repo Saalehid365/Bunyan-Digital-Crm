@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Wrench } from "lucide-react";
-import { requireUser, getClientForUser } from "@/lib/permissions";
+import { requireUser, getClientForUser, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientServiceList } from "@/components/services/client-service-list";
@@ -16,6 +16,7 @@ export default async function ClientServicesPage({
   const { clientId } = await params;
   const client = await getClientForUser(user, clientId);
   if (!client) notFound();
+  const canManageServices = await hasPermission(user, "MANAGE_SERVICES");
 
   const [services, serviceTypes] = await Promise.all([
     prisma.clientService.findMany({
@@ -23,19 +24,17 @@ export default async function ClientServicesPage({
       include: { serviceType: true },
       orderBy: { createdAt: "asc" },
     }),
-    user.role === "ADMIN"
+    canManageServices
       ? prisma.serviceType.findMany({ where: { isArchived: false }, orderBy: { order: "asc" } })
       : Promise.resolve([]),
   ]);
-
-  const isAdmin = user.role === "ADMIN";
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-medium">Services</CardTitle>
-          {isAdmin ? <ClientServiceFormDialog clientId={clientId} serviceTypes={serviceTypes} /> : null}
+          {canManageServices ? <ClientServiceFormDialog clientId={clientId} serviceTypes={serviceTypes} /> : null}
         </CardHeader>
         <CardContent>
           {services.length === 0 ? (
@@ -47,7 +46,7 @@ export default async function ClientServicesPage({
           ) : (
             <ClientServiceList
               clientId={clientId}
-              isAdmin={isAdmin}
+              canManageServices={canManageServices}
               services={services.map((s) => ({
                 id: s.id,
                 label: s.label,

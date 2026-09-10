@@ -17,6 +17,15 @@ enum Role {
   MEMBER
 }
 
+/// Fine-grained capabilities a MEMBER can be individually granted. ADMIN always has
+/// every capability regardless of this list (see hasPermission in lib/permissions.ts).
+enum Permission {
+  MANAGE_CLIENTS
+  VIEW_REPORTS
+  MANAGE_SERVICES
+  MANAGE_BILLING
+}
+
 enum ClientStatus {
   LEAD
   ACTIVE
@@ -85,16 +94,17 @@ enum InvoiceStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String       @unique
   emailVerified DateTime?
   image         String?
-  role          Role      @default(MEMBER)
+  role          Role         @default(MEMBER)
+  permissions   Permission[] @default([])
   passwordHash  String?
   disabledAt    DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   accounts        Account[]
   sessions        Session[]
@@ -155,14 +165,29 @@ model Client {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  services   ClientService[]
-  members    ClientMember[]
-  jobs       Job[]
-  activities Activity[]
-  quotes     Quote[]
-  invoices   Invoice[]
+  services        ClientService[]
+  members         ClientMember[]
+  jobs            Job[]
+  activities      Activity[]
+  quotes          Quote[]
+  invoices        Invoice[]
+  onboardingTasks ClientOnboardingTask[]
 
   @@index([status])
+}
+
+model ClientOnboardingTask {
+  id          String    @id @default(cuid())
+  clientId    String
+  title       String
+  done        Boolean   @default(false)
+  position    Float     @default(0)
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
 }
 
 model ServiceType {

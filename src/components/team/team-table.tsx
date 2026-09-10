@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { setUserRole, setUserDisabled } from "@/server/actions/team";
+import { MemberPermissionsControl } from "@/components/team/member-permissions-control";
 import { toast } from "sonner";
+import type { Permission } from "@prisma/client";
 
 type TeamMember = {
   id: string;
@@ -19,6 +21,7 @@ type TeamMember = {
   email: string;
   role: "ADMIN" | "MEMBER";
   disabledAt: Date | null;
+  permissions: Permission[];
 };
 
 function initials(name: string | null, email: string) {
@@ -67,6 +70,13 @@ export function TeamTable({ members, currentUserId }: { members: TeamMember[]; c
                 <SelectItem value="ADMIN">Admin</SelectItem>
               </SelectContent>
             </Select>
+            {member.role === "MEMBER" ? (
+              <MemberPermissionsControl
+                userId={member.id}
+                permissions={member.permissions}
+                disabled={pending}
+              />
+            ) : null}
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">
                 {member.disabledAt ? "Disabled" : "Active"}

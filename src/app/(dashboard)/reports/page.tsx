@@ -1,5 +1,5 @@
 import { subDays } from "date-fns";
-import { requireAdmin } from "@/lib/permissions";
+import { requirePermission, getVisibleClientIds } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { GBP, formatMinutes } from "@/lib/constants";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,20 +7,22 @@ import { RevenueByServiceChart } from "@/components/dashboard/revenue-by-service
 import { BarList } from "@/components/dashboard/bar-list";
 
 export default async function ReportsPage() {
-  await requireAdmin();
+  const user = await requirePermission("VIEW_REPORTS");
+  const clientIds = user.role === "ADMIN" ? undefined : await getVisibleClientIds(user.id);
+  const clientFilter = clientIds ? { id: { in: clientIds } } : {};
   const since = subDays(new Date(), 30);
 
   const [activeServices, oneOffServices, recentEntries] = await Promise.all([
     prisma.clientService.findMany({
-      where: { status: "ACTIVE", billingType: "MONTHLY" },
+      where: { status: "ACTIVE", billingType: "MONTHLY", client: clientFilter },
       include: { serviceType: true, client: { select: { id: true, name: true } } },
     }),
     prisma.clientService.findMany({
-      where: { billingType: "ONE_OFF" },
+      where: { billingType: "ONE_OFF", client: clientFilter },
       select: { priceValue: true },
     }),
     prisma.timeEntry.findMany({
-      where: { workDate: { gte: since } },
+      where: { workDate: { gte: since }, task: { job: { client: clientFilter } } },
       include: {
         user: { select: { id: true, name: true } },
         task: {

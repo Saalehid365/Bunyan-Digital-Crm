@@ -1,29 +1,40 @@
 import Link from "next/link";
-import { Plus, Users } from "lucide-react";
-import { requireUser, getVisibleClientIds } from "@/lib/permissions";
+import { AlertTriangle, Plus, Users } from "lucide-react";
+import { requireUser, getVisibleClientIds, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { getStaleLeads } from "@/lib/stale-leads";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ClientStatusBadge } from "@/components/clients/client-status-badge";
 import { ServiceTypeBadge } from "@/components/services/service-type-badge";
 import { DeleteClientButton } from "@/components/clients/delete-client-button";
 import { EmptyState } from "@/components/empty-state";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default async function ClientsPage() {
   const user = await requireUser();
   const isAdmin = user.role === "ADMIN";
+  const canManageClients = await hasPermission(user, "MANAGE_CLIENTS");
   const clientIds = isAdmin ? undefined : await getVisibleClientIds(user.id);
 
-  const clients = await prisma.client.findMany({
-    where: clientIds ? { id: { in: clientIds } } : {},
-    orderBy: { createdAt: "desc" },
-    include: {
-      services: {
-        where: { status: "ACTIVE" },
-        include: { serviceType: true },
+  const [clients, staleLeads] = await Promise.all([
+    prisma.client.findMany({
+      where: clientIds ? { id: { in: clientIds } } : {},
+      orderBy: { createdAt: "desc" },
+      include: {
+        services: {
+          where: { status: "ACTIVE" },
+          include: { serviceType: true },
+        },
       },
-    },
-  });
+    }),
+    isAdmin ? getStaleLeads() : Promise.resolve([]),
+  ]);
+  const staleLeadMap = new Map(staleLeads.map((l) => [l.id, l]));
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
@@ -35,7 +46,7 @@ export default async function ClientsPage() {
             {isAdmin ? "" : " assigned to you"}
           </p>
         </div>
-        {isAdmin ? (
+        {canManageClients ? (
           <Button asChild size="sm">
             <Link href="/clients/new">
               <Plus className="h-4 w-4" /> New client
@@ -54,7 +65,7 @@ export default async function ClientsPage() {
               : "Ask an admin to assign you to a client."
           }
           action={
-            isAdmin ? (
+            canManageClients ? (
               <Button asChild size="sm">
                 <Link href="/clients/new">
                   <Plus className="h-4 w-4" /> New client
@@ -72,7 +83,7 @@ export default async function ClientsPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Services</TableHead>
                 <TableHead>Contact</TableHead>
-                {isAdmin ? <TableHead className="w-10" /> : null}
+                {canManageClients ? <TableHead className="w-10" /> : null}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -80,7 +91,19 @@ export default async function ClientsPage() {
                 <TableRow key={client.id} className="cursor-pointer">
                   <TableCell className="p-0">
                     <Link href={`/clients/${client.id}`} className="block px-4 py-3">
-                      <p className="font-medium text-foreground">{client.name}</p>
+                      <p className="flex items-center gap-1.5 font-medium text-foreground">
+                        {client.name}
+                        {staleLeadMap.has(client.id) ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-primary" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {staleLeadMap.get(client.id)!.daysSinceLastTouch} days since last contact
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : null}
+                      </p>
                       {client.companyName ? (
                         <p className="text-xs text-muted-foreground">{client.companyName}</p>
                       ) : null}
@@ -113,7 +136,7 @@ export default async function ClientsPage() {
                       {client.contactName || client.contactEmail || "—"}
                     </Link>
                   </TableCell>
-                  {isAdmin ? (
+                  {canManageClients ? (
                     <TableCell>
                       <DeleteClientButton
                         clientId={client.id}

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireAdmin, getClientForUser } from "@/lib/permissions";
+import { requirePermission, getClientForUser } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getClientServicesByClient } from "@/lib/jobs-data";
 import { QuotesInvoicesView } from "@/components/billing/quotes-invoices-view";
@@ -10,7 +10,7 @@ export default async function ClientBillingPage({
 }: {
   params: Promise<{ clientId: string }>;
 }) {
-  const user = await requireAdmin();
+  const user = await requirePermission("MANAGE_BILLING");
   const { clientId } = await params;
   const client = await getClientForUser(user, clientId);
   if (!client) notFound();

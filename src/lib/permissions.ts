@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { Permission } from "@prisma/client";
 
 export async function getCurrentUser() {
   const session = await auth();
@@ -18,6 +19,38 @@ export async function requireUser() {
 export async function requireAdmin() {
   const user = await requireUser();
   if (user.role !== "ADMIN") redirect("/dashboard");
+  return user;
+}
+
+/** The raw granted-permissions list for a MEMBER — for UI that needs to check several
+ * permissions at once (e.g. filtering the sidebar) rather than gating one page. */
+export async function getUserPermissions(userId: string): Promise<Permission[]> {
+  const dbUser = await prisma.user.findUnique({ where: { id: userId }, select: { permissions: true } });
+  return dbUser?.permissions ?? [];
+}
+
+/**
+ * ADMIN always passes, regardless of the stored list. Does a fresh DB read rather than
+ * trusting the JWT session, so a permission the admin just revoked takes effect on the
+ * member's very next request instead of waiting for their token to refresh.
+ */
+export async function hasPermission(
+  user: { id: string; role: "ADMIN" | "MEMBER" },
+  permission: Permission,
+): Promise<boolean> {
+  if (user.role === "ADMIN") return true;
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { permissions: true },
+  });
+  return dbUser?.permissions.includes(permission) ?? false;
+}
+
+/** Redirects to /dashboard if the user lacks this permission (and isn't admin). Use at
+ * the top of pages gated by a specific capability rather than the full admin role. */
+export async function requirePermission(permission: Permission) {
+  const user = await requireUser();
+  if (!(await hasPermission(user, permission))) redirect("/dashboard");
   return user;
 }
 

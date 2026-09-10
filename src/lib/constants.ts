@@ -2,11 +2,26 @@ import type {
   ClientStatus,
   InvoiceStatus,
   JobStage,
+  Permission,
   Priority,
   QuoteStatus,
   Recurrence,
   ServiceStatus,
 } from "@prisma/client";
+
+export const PERMISSIONS: { value: Permission; label: string; description: string }[] = [
+  { value: "MANAGE_CLIENTS", label: "Manage clients", description: "Create, edit, and delete their assigned clients" },
+  { value: "VIEW_REPORTS", label: "View reports", description: "See revenue and time reports for their assigned clients" },
+  { value: "MANAGE_SERVICES", label: "Manage services", description: "Edit the service catalog and price client services" },
+  { value: "MANAGE_BILLING", label: "Manage billing", description: "Create and track quotes/invoices for their assigned clients" },
+];
+
+export const PERMISSION_LABEL: Record<Permission, string> = {
+  MANAGE_CLIENTS: "Manage clients",
+  VIEW_REPORTS: "View reports",
+  MANAGE_SERVICES: "Manage services",
+  MANAGE_BILLING: "Manage billing",
+};
 
 export const JOB_STAGES: { value: JobStage; label: string }[] = [
   { value: "BACKLOG", label: "Backlog" },
@@ -109,6 +124,19 @@ export const INVOICE_STATUS_LABEL: Record<InvoiceStatus, string> = {
   OVERDUE: "Overdue",
   VOID: "Void",
 };
+
+/** Seeded onto a client's onboarding checklist the first time they become Active. */
+export const DEFAULT_ONBOARDING_CHECKLIST: string[] = [
+  "Send welcome email & confirm next steps",
+  "Collect signed service agreement",
+  "Add services & pricing on the client's Services tab",
+  "Collect account access (eBay seller / website & hosting / ad accounts / socials — as applicable)",
+  "Collect brand assets (logo, product images, brand guidelines)",
+  "Schedule kickoff call",
+  "Assign a team member to the account",
+  "Create first job(s) for initial setup work",
+  "Confirm billing details & send first invoice",
+];
 
 /** Formats a minute count as "2h 30m" / "45m" / "3h". */
 export function formatMinutes(totalMinutes: number): string {

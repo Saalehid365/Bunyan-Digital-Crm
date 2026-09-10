@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/permissions";
+import { requirePermission, canAccessClient } from "@/lib/permissions";
 import { serviceTypeSchema, clientServiceSchema } from "@/lib/validations/service";
 
 export async function createServiceType(formData: FormData) {
-  await requireAdmin();
+  await requirePermission("MANAGE_SERVICES");
   const parsed = serviceTypeSchema.safeParse({
     name: formData.get("name"),
     colorHex: formData.get("colorHex") || "#E08245",
@@ -22,7 +22,7 @@ export async function createServiceType(formData: FormData) {
 }
 
 export async function archiveServiceType(serviceTypeId: string) {
-  await requireAdmin();
+  await requirePermission("MANAGE_SERVICES");
   await prisma.serviceType.update({
     where: { id: serviceTypeId },
     data: { isArchived: true },
@@ -31,7 +31,7 @@ export async function archiveServiceType(serviceTypeId: string) {
 }
 
 export async function addClientService(formData: FormData) {
-  await requireAdmin();
+  const user = await requirePermission("MANAGE_SERVICES");
   const parsed = clientServiceSchema.safeParse({
     clientId: formData.get("clientId"),
     serviceTypeId: formData.get("serviceTypeId"),
@@ -44,6 +44,10 @@ export async function addClientService(formData: FormData) {
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
   const data = parsed.data;
+
+  if (!(await canAccessClient(user, data.clientId))) {
+    return { error: "You don't have access to this client." };
+  }
 
   await prisma.clientService.create({
     data: {
@@ -69,7 +73,10 @@ export async function updateClientServiceStatus(
   clientId: string,
   status: "ACTIVE" | "PAUSED" | "COMPLETED",
 ) {
-  await requireAdmin();
+  const user = await requirePermission("MANAGE_SERVICES");
+  if (!(await canAccessClient(user, clientId))) {
+    return { error: "You don't have access to this client." };
+  }
   await prisma.clientService.update({
     where: { id: clientServiceId },
     data: { status },
@@ -79,7 +86,10 @@ export async function updateClientServiceStatus(
 }
 
 export async function deleteClientService(clientServiceId: string, clientId: string) {
-  await requireAdmin();
+  const user = await requirePermission("MANAGE_SERVICES");
+  if (!(await canAccessClient(user, clientId))) {
+    return { error: "You don't have access to this client." };
+  }
   await prisma.clientService.delete({ where: { id: clientServiceId } });
   revalidatePath(`/clients/${clientId}/services`);
   revalidatePath("/dashboard");

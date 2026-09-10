@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireUser, getClientForUser } from "@/lib/permissions";
+import { requireUser, getClientForUser, hasPermission } from "@/lib/permissions";
 import { ClientStatusBadge } from "@/components/clients/client-status-badge";
 import { ClientTabs } from "@/components/clients/client-tabs";
 
@@ -14,6 +14,7 @@ export default async function ClientLayout({
   const { clientId } = await params;
   const client = await getClientForUser(user, clientId);
   if (!client) notFound();
+  const canManageBilling = await hasPermission(user, "MANAGE_BILLING");
 
   return (
     <div className="flex flex-1 flex-col">
@@ -28,7 +29,7 @@ export default async function ClientLayout({
           ) : null}
         </div>
       </div>
-      <ClientTabs clientId={clientId} isAdmin={user.role === "ADMIN"} />
+      <ClientTabs clientId={clientId} canManageBilling={canManageBilling} />
       <div className="flex-1">{children}</div>
     </div>
   );

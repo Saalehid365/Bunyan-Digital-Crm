@@ -5,8 +5,9 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SidebarBrand, SidebarNav } from "@/components/layout/sidebar";
+import type { Permission } from "@prisma/client";
 
-export function MobileNav({ role }: { role: "ADMIN" | "MEMBER" }) {
+export function MobileNav({ role, permissions }: { role: "ADMIN" | "MEMBER"; permissions: Permission[] }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -25,7 +26,7 @@ export function MobileNav({ role }: { role: "ADMIN" | "MEMBER" }) {
           <SheetTitle>Navigation</SheetTitle>
         </SheetHeader>
         <SidebarBrand />
-        <SidebarNav role={role} onNavigate={() => setOpen(false)} />
+        <SidebarNav role={role} permissions={permissions} onNavigate={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );

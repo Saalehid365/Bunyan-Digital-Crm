@@ -2,15 +2,33 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, requireUser, canAccessClient } from "@/lib/permissions";
+import { requireAdmin, requireUser, requirePermission, canAccessClient } from "@/lib/permissions";
 import { clientSchema } from "@/lib/validations/client";
+import { DEFAULT_ONBOARDING_CHECKLIST } from "@/lib/constants";
 
 function emptyToUndefined(v: string | undefined) {
   return v && v.trim() !== "" ? v.trim() : undefined;
 }
 
+/**
+ * Seeds the default onboarding checklist the first time a client becomes Active.
+ * No-ops if the client already has onboarding tasks, so re-toggling status never duplicates it.
+ */
+async function startOnboardingIfNeeded(clientId: string) {
+  const existing = await prisma.clientOnboardingTask.findFirst({ where: { clientId } });
+  if (existing) return;
+
+  await prisma.clientOnboardingTask.createMany({
+    data: DEFAULT_ONBOARDING_CHECKLIST.map((title, i) => ({
+      clientId,
+      title,
+      position: (i + 1) * 1024,
+    })),
+  });
+}
+
 export async function createClient(formData: FormData) {
-  const admin = await requireAdmin();
+  const user = await requirePermission("MANAGE_CLIENTS");
 
   const parsed = clientSchema.safeParse({
     name: formData.get("name"),
@@ -38,19 +56,33 @@ export async function createClient(formData: FormData) {
       activities: {
         create: {
           type: "CREATED",
-          message: `Client created by ${admin.name ?? admin.email}`,
-          userId: admin.id,
+          message: `Client created by ${user.name ?? user.email}`,
+          userId: user.id,
         },
       },
+      // A member (not a full admin) granted this permission has no standing assignment
+      // to a client that didn't exist yet — assign them to what they just made so they
+      // retain access to it, consistent with every other permission being scoped to a
+      // member's own assigned clients.
+      ...(user.role === "MEMBER" ? { members: { create: { userId: user.id } } } : {}),
     },
   });
+
+  if (data.status === "ACTIVE") {
+    await startOnboardingIfNeeded(client.id);
+  }
 
   revalidatePath("/clients");
   return { id: client.id };
 }
 
 export async function updateClient(clientId: string, formData: FormData) {
-  const admin = await requireAdmin();
+  const user = await requirePermission("MANAGE_CLIENTS");
+  if (!(await canAccessClient(user, clientId))) {
+    return { error: "You don't have access to this client." };
+  }
+
+  const before = await prisma.client.findUnique({ where: { id: clientId }, select: { status: true } });
 
   const parsed = clientSchema.safeParse({
     name: formData.get("name"),
@@ -79,12 +111,24 @@ export async function updateClient(clientId: string, formData: FormData) {
       activities: {
         create: {
           type: "CLIENT_UPDATED",
-          message: `Client details updated by ${admin.name ?? admin.email}`,
-          userId: admin.id,
+          message: `Client details updated by ${user.name ?? user.email}`,
+          userId: user.id,
         },
       },
     },
   });
+
+  if (data.status === "ACTIVE" && before?.status !== "ACTIVE") {
+    await startOnboardingIfNeeded(clientId);
+    await prisma.activity.create({
+      data: {
+        clientId,
+        type: "CLIENT_UPDATED",
+        message: "Onboarding checklist started (Lead → Active)",
+        userId: user.id,
+      },
+    });
+  }
 
   revalidatePath(`/clients/${clientId}`);
   revalidatePath("/clients");
@@ -92,7 +136,10 @@ export async function updateClient(clientId: string, formData: FormData) {
 }
 
 export async function deleteClient(clientId: string) {
-  await requireAdmin();
+  const user = await requirePermission("MANAGE_CLIENTS");
+  if (!(await canAccessClient(user, clientId))) {
+    return { error: "You don't have access to this client." };
+  }
   try {
     await prisma.client.delete({ where: { id: clientId } });
   } catch {

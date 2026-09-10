@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/permissions";
+import { requireUser, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ServiceTypeManager } from "@/components/services/service-type-manager";
@@ -6,9 +6,10 @@ import { PasswordForm } from "@/components/settings/password-form";
 
 export default async function SettingsPage() {
   const user = await requireUser();
+  const canManageServices = await hasPermission(user, "MANAGE_SERVICES");
 
   const [serviceTypes, dbUser] = await Promise.all([
-    user.role === "ADMIN"
+    canManageServices
       ? prisma.serviceType.findMany({
           where: { isArchived: false },
           orderBy: { order: "asc" },
@@ -57,7 +58,7 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
 
-      {user.role === "ADMIN" ? (
+      {canManageServices ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium">Service catalog</CardTitle>
