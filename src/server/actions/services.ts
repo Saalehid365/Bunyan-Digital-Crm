@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requirePermission, canAccessClient } from "@/lib/permissions";
 import { serviceTypeSchema, clientServiceSchema } from "@/lib/validations/service";
+import { activateClient } from "@/lib/client-activation";
 
 export async function createServiceType(formData: FormData) {
   await requirePermission("MANAGE_SERVICES");
@@ -49,7 +50,7 @@ export async function addClientService(formData: FormData) {
     return { error: "You don't have access to this client." };
   }
 
-  await prisma.clientService.create({
+  const clientService = await prisma.clientService.create({
     data: {
       clientId: data.clientId,
       serviceTypeId: data.serviceTypeId,
@@ -60,10 +61,20 @@ export async function addClientService(formData: FormData) {
       startDate: data.startDate ? new Date(data.startDate) : undefined,
       notes: data.notes || undefined,
     },
+    include: { serviceType: true },
   });
+
+  if (data.status === "ACTIVE") {
+    await activateClient(
+      data.clientId,
+      user.id,
+      `Client marked Active — ${clientService.serviceType.name} service started`,
+    );
+  }
 
   revalidatePath(`/clients/${data.clientId}/services`);
   revalidatePath(`/clients/${data.clientId}`);
+  revalidatePath("/clients");
   revalidatePath("/dashboard");
   return { ok: true };
 }
@@ -77,11 +88,19 @@ export async function updateClientServiceStatus(
   if (!(await canAccessClient(user, clientId))) {
     return { error: "You don't have access to this client." };
   }
-  await prisma.clientService.update({
+  const updated = await prisma.clientService.update({
     where: { id: clientServiceId },
     data: { status },
+    include: { serviceType: true },
   });
+
+  if (status === "ACTIVE") {
+    await activateClient(clientId, user.id, `Client marked Active — ${updated.serviceType.name} service marked active`);
+  }
+
   revalidatePath(`/clients/${clientId}/services`);
+  revalidatePath(`/clients/${clientId}`);
+  revalidatePath("/clients");
   revalidatePath("/dashboard");
 }
 

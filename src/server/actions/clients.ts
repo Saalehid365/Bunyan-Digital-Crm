@@ -4,27 +4,10 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, requireUser, requirePermission, canAccessClient } from "@/lib/permissions";
 import { clientSchema } from "@/lib/validations/client";
-import { DEFAULT_ONBOARDING_CHECKLIST } from "@/lib/constants";
+import { startOnboardingIfNeeded } from "@/lib/client-activation";
 
 function emptyToUndefined(v: string | undefined) {
   return v && v.trim() !== "" ? v.trim() : undefined;
-}
-
-/**
- * Seeds the default onboarding checklist the first time a client becomes Active.
- * No-ops if the client already has onboarding tasks, so re-toggling status never duplicates it.
- */
-async function startOnboardingIfNeeded(clientId: string) {
-  const existing = await prisma.clientOnboardingTask.findFirst({ where: { clientId } });
-  if (existing) return;
-
-  await prisma.clientOnboardingTask.createMany({
-    data: DEFAULT_ONBOARDING_CHECKLIST.map((title, i) => ({
-      clientId,
-      title,
-      position: (i + 1) * 1024,
-    })),
-  });
 }
 
 export async function createClient(formData: FormData) {
