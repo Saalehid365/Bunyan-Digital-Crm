@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,7 +54,10 @@ export function DeleteClientButton({
       <Button
         variant="outline"
         size={compact ? "icon" : "sm"}
-        className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        className={cn(
+          "border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive",
+          compact ? "opacity-0 transition-opacity group-hover:opacity-100" : undefined,
+        )}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();

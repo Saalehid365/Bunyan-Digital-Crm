@@ -11,7 +11,7 @@ import { MultiSelectFilter } from "@/components/jobs/multi-select-filter";
 import { Board } from "@/components/kanban/board";
 import { JobsTable } from "@/components/jobs/jobs-table";
 import { JobFormDialog } from "@/components/kanban/job-form-dialog";
-import { JobDetailSheet } from "@/components/kanban/job-detail-sheet";
+import { JobDetailDialog } from "@/components/kanban/job-detail-dialog";
 import type { KanbanJob } from "@/components/kanban/types";
 import type { JobStage, Priority, Recurrence } from "@prisma/client";
 
@@ -245,7 +245,7 @@ export function JobsView({
         onDone={() => setCreateState((s) => ({ ...s, open: false }))}
       />
 
-      <JobDetailSheet
+      <JobDetailDialog
         job={detailJob}
         open={Boolean(detailJob)}
         onOpenChange={(open) => !open && setDetailJobId(null)}

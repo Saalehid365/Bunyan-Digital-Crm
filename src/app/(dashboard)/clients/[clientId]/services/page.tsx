@@ -33,7 +33,10 @@ export default async function ClientServicesPage({
     <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-sm font-medium">Services</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <Wrench className="h-4 w-4 text-muted-foreground" />
+            Services
+          </CardTitle>
           {canManageServices ? <ClientServiceFormDialog clientId={clientId} serviceTypes={serviceTypes} /> : null}
         </CardHeader>
         <CardContent>

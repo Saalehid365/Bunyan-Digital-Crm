@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { format, startOfDay, startOfMonth, startOfWeek } from "date-fns";
-import { Clock } from "lucide-react";
+import { Clock, UsersRound, ListChecks } from "lucide-react";
 import { requireUser, getVisibleClientIds } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { formatMinutes } from "@/lib/constants";
@@ -102,7 +102,10 @@ export default async function TimesheetsPage({
       <div className="grid gap-6 sm:grid-cols-3">
         <Card className="sm:col-span-1">
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Total logged</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              Total logged
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="font-mono text-3xl font-semibold tabular-nums text-foreground">
@@ -113,7 +116,10 @@ export default async function TimesheetsPage({
 
         <Card className="sm:col-span-2">
           <CardHeader>
-            <CardTitle className="text-sm font-medium">By team member</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <UsersRound className="h-4 w-4 text-muted-foreground" />
+              By team member
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {userBreakdown.length === 0 ? (
@@ -136,7 +142,10 @@ export default async function TimesheetsPage({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Entries</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <ListChecks className="h-4 w-4 text-muted-foreground" />
+            Entries
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {entries.length === 0 ? (

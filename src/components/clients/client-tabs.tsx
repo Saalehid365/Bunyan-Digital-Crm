@@ -10,6 +10,7 @@ export function ClientTabs({ clientId, canManageBilling }: { clientId: string; c
   const tabs = [
     { href: base, label: "Overview", exact: true },
     { href: `${base}/services`, label: "Services" },
+    { href: `${base}/access`, label: "Access" },
     { href: `${base}/board`, label: "Board" },
     ...(canManageBilling ? [{ href: `${base}/billing`, label: "Billing", exact: false }] : []),
     { href: `${base}/activity`, label: "Activity" },

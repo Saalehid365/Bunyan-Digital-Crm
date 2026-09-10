@@ -1,4 +1,5 @@
 import { addDays } from "date-fns";
+import { KanbanSquare } from "lucide-react";
 import { requireUser, getVisibleClientIds } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { GBP, formatMinutes } from "@/lib/constants";
@@ -86,7 +87,10 @@ export default async function DashboardPage() {
           style={{ animationDelay: "200ms" }}
         >
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Work board</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <KanbanSquare className="h-4 w-4 text-muted-foreground" />
+            Work board
+          </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-1 flex-col p-0">
             <GlobalBoard
@@ -150,7 +154,10 @@ export default async function DashboardPage() {
         style={{ animationDelay: "160ms" }}
       >
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Work board</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <KanbanSquare className="h-4 w-4 text-muted-foreground" />
+            Work board
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-1 flex-col p-0">
           <GlobalBoard

@@ -5,25 +5,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { isPast, isToday, format } from "date-fns";
 import { AlertTriangle, Clock, ListChecks, Repeat } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PRIORITY_LABEL, RECURRENCE_LABEL, formatMinutes } from "@/lib/constants";
+import { PRIORITY_LABEL, RECURRENCE_LABEL, PRIORITY_DOT_CLASS, PRIORITY_STRIPE_CLASS, formatMinutes } from "@/lib/constants";
 import type { KanbanJob } from "./types";
-import type { Priority } from "@prisma/client";
 
-const PRIORITY_DOT: Record<Priority, string> = {
-  URGENT: "bg-destructive",
-  HIGH: "bg-primary",
-  MEDIUM: "bg-chart-4",
-  LOW: "bg-muted-foreground/50",
-};
-
-const PRIORITY_STRIPE: Record<Priority, string> = {
-  URGENT: "border-l-destructive",
-  HIGH: "border-l-primary",
-  MEDIUM: "border-l-[var(--chart-4)]",
-  LOW: "border-l-border",
-};
-
-function initials(name: string | null) {
+export function initials(name: string | null) {
   if (!name) return "?";
   return name.split(/\s+/).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 }
@@ -63,7 +48,7 @@ export function JobCard({
       onClick={onClick}
       className={cn(
         "cursor-pointer rounded-[var(--radius-md)] border border-l-[3px] border-border bg-card p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 ease-[cubic-bezier(0.16,0.8,0.3,1)]",
-        PRIORITY_STRIPE[job.priority],
+        PRIORITY_STRIPE_CLASS[job.priority],
         isDragging && !overlay ? "opacity-30" : "",
         overlay
           ? "rotate-1 shadow-lg"
@@ -73,7 +58,7 @@ export function JobCard({
       <div className="mb-2 flex items-start justify-between gap-2">
         <p className="text-sm font-medium leading-snug text-foreground">{job.title}</p>
         <span
-          className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT[job.priority])}
+          className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT_CLASS[job.priority])}
           title={PRIORITY_LABEL[job.priority]}
         />
       </div>

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { IdCard, BarChart3, UsersRound, ListChecks } from "lucide-react";
 import { requireUser, getClientForUser, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,7 +59,10 @@ export default async function ClientOverviewPage({
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-medium">Client details</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <IdCard className="h-4 w-4 text-muted-foreground" />
+              Client details
+            </CardTitle>
             {canManageClients ? (
               <div className="flex items-center gap-2">
                 <ClientFormDialog client={client} />
@@ -98,7 +102,8 @@ export default async function ClientOverviewPage({
           {onboardingTasks.length > 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                  <ListChecks className="h-4 w-4 text-muted-foreground" />
                   Onboarding ({onboardingTasks.filter((t) => t.done).length}/{onboardingTasks.length})
                 </CardTitle>
               </CardHeader>
@@ -110,7 +115,10 @@ export default async function ClientOverviewPage({
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Work summary</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                Work summary
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <dl className="grid grid-cols-2 gap-4">
@@ -139,7 +147,10 @@ export default async function ClientOverviewPage({
           {user.role === "ADMIN" ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium">Assigned team</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <UsersRound className="h-4 w-4 text-muted-foreground" />
+                Assigned team
+              </CardTitle>
               </CardHeader>
               <CardContent>
                 <AssignMembers

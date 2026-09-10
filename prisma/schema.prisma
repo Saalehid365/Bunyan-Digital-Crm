@@ -172,6 +172,7 @@ model Client {
   quotes          Quote[]
   invoices        Invoice[]
   onboardingTasks ClientOnboardingTask[]
+  accessEntries   ClientAccess[]
 
   @@index([status])
 }
@@ -184,6 +185,25 @@ model ClientOnboardingTask {
   position    Float     @default(0)
   createdAt   DateTime  @default(now())
   completedAt DateTime?
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+/// Login details for a client's own third-party accounts (marketplace, hosting, ads, etc.)
+/// that we've been given access to. `secretCipher` is AES-256-GCM ciphertext, never plaintext —
+/// see src/lib/crypto.ts.
+model ClientAccess {
+  id           String   @id @default(cuid())
+  clientId     String
+  label        String
+  username     String?
+  secretCipher String   @db.Text
+  url          String?
+  notes        String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 

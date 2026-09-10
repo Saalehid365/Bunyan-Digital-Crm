@@ -6,6 +6,7 @@ import { getStaleLeads } from "@/lib/stale-leads";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ClientStatusBadge } from "@/components/clients/client-status-badge";
+import { ClientAvatar } from "@/components/clients/client-avatar";
 import { ServiceTypeBadge } from "@/components/services/service-type-badge";
 import { DeleteClientButton } from "@/components/clients/delete-client-button";
 import { EmptyState } from "@/components/empty-state";
@@ -88,25 +89,28 @@ export default async function ClientsPage() {
             </TableHeader>
             <TableBody>
               {clients.map((client) => (
-                <TableRow key={client.id} className="cursor-pointer">
+                <TableRow key={client.id} className="group cursor-pointer">
                   <TableCell className="p-0">
-                    <Link href={`/clients/${client.id}`} className="block px-4 py-3">
-                      <p className="flex items-center gap-1.5 font-medium text-foreground">
-                        {client.name}
-                        {staleLeadMap.has(client.id) ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-primary" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {staleLeadMap.get(client.id)!.daysSinceLastTouch} days since last contact
-                            </TooltipContent>
-                          </Tooltip>
+                    <Link href={`/clients/${client.id}`} className="flex items-center gap-3 px-4 py-3">
+                      <ClientAvatar name={client.name} />
+                      <div className="min-w-0">
+                        <p className="flex items-center gap-1.5 font-medium text-foreground">
+                          {client.name}
+                          {staleLeadMap.has(client.id) ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-primary" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {staleLeadMap.get(client.id)!.daysSinceLastTouch} days since last contact
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : null}
+                        </p>
+                        {client.companyName ? (
+                          <p className="text-xs text-muted-foreground">{client.companyName}</p>
                         ) : null}
-                      </p>
-                      {client.companyName ? (
-                        <p className="text-xs text-muted-foreground">{client.companyName}</p>
-                      ) : null}
+                      </div>
                     </Link>
                   </TableCell>
                   <TableCell>

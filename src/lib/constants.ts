@@ -51,6 +51,20 @@ export const PRIORITY_ORDER: Record<Priority, number> = {
   LOW: 3,
 };
 
+export const PRIORITY_DOT_CLASS: Record<Priority, string> = {
+  URGENT: "bg-destructive",
+  HIGH: "bg-primary",
+  MEDIUM: "bg-chart-4",
+  LOW: "bg-muted-foreground/50",
+};
+
+export const PRIORITY_STRIPE_CLASS: Record<Priority, string> = {
+  URGENT: "border-l-destructive",
+  HIGH: "border-l-primary",
+  MEDIUM: "border-l-[var(--chart-4)]",
+  LOW: "border-l-border",
+};
+
 export const RECURRENCE_TABS: { value: Recurrence | "ALL"; label: string }[] = [
   { value: "ALL", label: "All" },
   { value: "DAILY", label: "Daily" },

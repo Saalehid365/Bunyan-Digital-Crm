@@ -1,3 +1,4 @@
+import { UserCircle, KeyRound, Wrench } from "lucide-react";
 import { requireUser, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -26,7 +27,10 @@ export default async function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Your profile</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <UserCircle className="h-4 w-4 text-muted-foreground" />
+            Your profile
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-2 gap-4 text-sm">
@@ -48,7 +52,10 @@ export default async function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Password sign-in</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <KeyRound className="h-4 w-4 text-muted-foreground" />
+            Password sign-in
+          </CardTitle>
           <CardDescription>
             Set a password to sign in directly, instead of waiting for an emailed link each time.
           </CardDescription>
@@ -61,7 +68,10 @@ export default async function SettingsPage() {
       {canManageServices ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Service catalog</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <Wrench className="h-4 w-4 text-muted-foreground" />
+              Service catalog
+            </CardTitle>
             <CardDescription>
               The services you offer, e.g. eBay management, website management. Attach these to clients from their Services tab.
             </CardDescription>

@@ -1,4 +1,5 @@
 import { subDays } from "date-fns";
+import { Banknote, PieChart, Users, Clock, UsersRound } from "lucide-react";
 import { requirePermission, getVisibleClientIds } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { GBP, formatMinutes } from "@/lib/constants";
@@ -89,7 +90,10 @@ export default async function ReportsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">One-off revenue</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <Banknote className="h-4 w-4 text-muted-foreground" />
+            One-off revenue
+          </CardTitle>
           <CardDescription>Total across every one-off service ever added</CardDescription>
         </CardHeader>
         <CardContent>
@@ -102,7 +106,10 @@ export default async function ReportsPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Revenue by service</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <PieChart className="h-4 w-4 text-muted-foreground" />
+              Revenue by service
+            </CardTitle>
             <CardDescription>Active monthly value: {GBP.format(mrr)}</CardDescription>
           </CardHeader>
           <CardContent>
@@ -116,7 +123,10 @@ export default async function ReportsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Revenue by client</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              Revenue by client
+            </CardTitle>
             <CardDescription>Top clients by active monthly value</CardDescription>
           </CardHeader>
           <CardContent>
@@ -126,7 +136,10 @@ export default async function ReportsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Hours by client</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              Hours by client
+            </CardTitle>
             <CardDescription>Last 30 days</CardDescription>
           </CardHeader>
           <CardContent>
@@ -136,7 +149,10 @@ export default async function ReportsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Hours by team member</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <UsersRound className="h-4 w-4 text-muted-foreground" />
+              Hours by team member
+            </CardTitle>
             <CardDescription>Last 30 days</CardDescription>
           </CardHeader>
           <CardContent>
