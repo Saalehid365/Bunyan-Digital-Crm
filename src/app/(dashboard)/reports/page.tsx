@@ -84,7 +84,7 @@ export default async function ReportsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight text-foreground">Reports</h1>
+        <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">Reports</h1>
         <p className="text-sm text-muted-foreground">Revenue and time, at a glance.</p>
       </div>
 

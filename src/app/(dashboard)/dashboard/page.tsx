@@ -59,7 +59,7 @@ export default async function DashboardPage() {
       <div className="flex flex-1 flex-col">
         <div className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
           <div className="rise" style={{ animationDelay: "0ms" }}>
-            <h1 className="text-lg font-semibold tracking-tight text-foreground">Dashboard</h1>
+            <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
             <p className="text-sm text-muted-foreground">Agency-wide view across every client.</p>
           </div>
 
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
     <div className="flex flex-1 flex-col">
       <div className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
         <div className="rise" style={{ animationDelay: "0ms" }}>
-          <h1 className="text-lg font-semibold tracking-tight text-foreground">
+          <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
             Welcome back{user.name ? `, ${user.name.split(" ")[0]}` : ""}
           </h1>
           <p className="text-sm text-muted-foreground">Here&apos;s what&apos;s on for your clients.</p>

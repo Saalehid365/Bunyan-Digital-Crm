@@ -66,7 +66,7 @@ export default async function InvoicesPage() {
   return (
     <div className="flex flex-1 flex-col">
       <div className="px-4 pt-5 md:px-6">
-        <h1 className="text-lg font-semibold tracking-tight text-foreground">Quotes & Invoices</h1>
+        <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">Quotes & Invoices</h1>
         <p className="text-sm text-muted-foreground">Track proposals and billing across every client.</p>
       </div>
       <QuotesInvoicesView

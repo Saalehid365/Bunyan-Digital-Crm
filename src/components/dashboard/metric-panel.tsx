@@ -66,21 +66,24 @@ export function MetricPanel({
   ledger: { label: string; value: string }[];
 }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-8px_rgba(0,0,0,0.16)] sm:flex-row">
-      <div className="flex-1 border-b border-border p-6 sm:border-b-0 sm:border-r">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="grid gap-4 sm:grid-cols-5">
+      <div className="rounded-[var(--radius-lg)] bg-primary p-6 text-primary-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04),0_16px_36px_-12px_rgba(16,28,38,0.4)] sm:col-span-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-primary-foreground/55">
           {heroLabel}
         </p>
-        <p className="mt-2 font-mono text-4xl font-semibold tabular-nums tracking-tight text-primary sm:text-5xl">
+        <p className="mt-2 font-serif text-4xl font-semibold tracking-tight sm:text-5xl">
           <AnimatedValue raw={heroValue} />
         </p>
         {heroSublabel ? (
-          <p className="mt-2 text-sm text-muted-foreground">{heroSublabel}</p>
+          <p className="mt-2 text-sm text-primary-foreground/70">{heroSublabel}</p>
         ) : null}
       </div>
-      <dl className="grid flex-1 grid-cols-2 divide-x divide-y divide-border sm:grid-cols-2 sm:divide-y-0">
+      <dl className="grid grid-cols-2 gap-3 sm:col-span-2">
         {ledger.map((item) => (
-          <div key={item.label} className="flex flex-col justify-center px-6 py-4">
+          <div
+            key={item.label}
+            className="flex flex-col justify-center rounded-[var(--radius-lg)] border border-border bg-card px-4 py-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_10px_24px_-16px_rgba(16,28,38,0.16)]"
+          >
             <dt className="text-xs text-muted-foreground">{item.label}</dt>
             <dd className="mt-1 font-mono text-xl font-semibold tabular-nums text-foreground">
               <AnimatedValue raw={item.value} />

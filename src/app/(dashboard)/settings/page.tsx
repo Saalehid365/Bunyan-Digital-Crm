@@ -22,7 +22,7 @@ export default async function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight text-foreground">Settings</h1>
+        <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
       </div>
 
       <Card>

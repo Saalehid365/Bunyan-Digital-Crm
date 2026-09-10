@@ -78,7 +78,7 @@ export default async function TimesheetsPage({
     <div className="mx-auto max-w-5xl space-y-6 p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-foreground">Timesheets</h1>
+          <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">Timesheets</h1>
           <p className="text-sm text-muted-foreground">Time logged across every job.</p>
         </div>
         <div className="flex items-center gap-1">

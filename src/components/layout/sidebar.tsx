@@ -41,12 +41,12 @@ export const NAV_ITEMS: NavItem[] = [
 export function SidebarBrand() {
   return (
     <div className="flex h-14 items-center gap-2.5 border-b border-sidebar-border px-5">
-      <div className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] border border-primary/40 bg-primary/10 text-primary">
+      <div className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] bg-sidebar-primary text-sidebar-primary-foreground">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
           <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
+      <span className="font-serif text-base font-semibold tracking-tight text-white">
         Bunyan Digital
       </span>
     </div>
@@ -82,19 +82,19 @@ export function SidebarNav({
             onClick={onNavigate}
             className={cn(
               "group relative flex items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 text-sm transition-colors duration-150",
-              active ? "text-sidebar-foreground font-medium" : "text-muted-foreground hover:text-sidebar-foreground",
+              active ? "text-white font-medium" : "text-sidebar-foreground/70 hover:text-white",
             )}
           >
             {active ? (
               <motion.span
                 layoutId="sidebar-active-pill"
-                className="absolute inset-0 rounded-[var(--radius-md)] border border-primary/25 bg-primary/10 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_2px_8px_-2px_rgba(0,0,0,0.08)]"
+                className="absolute inset-0 rounded-[var(--radius-md)] bg-white/[0.06] shadow-[inset_3px_0_0_var(--sidebar-primary)]"
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
               />
             ) : (
               <span className="absolute inset-0 rounded-[var(--radius-md)] opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-hover:bg-sidebar-accent/60" />
             )}
-            <Icon className={cn("relative h-4 w-4", active && "text-primary")} />
+            <Icon className={cn("relative h-4 w-4", active && "text-sidebar-primary")} />
             <span className="relative">{item.label}</span>
           </Link>
         );
@@ -109,7 +109,7 @@ export function Sidebar({ role, permissions }: { role: "ADMIN" | "MEMBER"; permi
       <SidebarBrand />
       <SidebarNav role={role} permissions={permissions} />
       <div className="border-t border-sidebar-border px-3 py-3">
-        <p className="px-2 text-[11px] leading-relaxed text-muted-foreground">
+        <p className="px-2 text-[11px] leading-relaxed text-sidebar-foreground/50">
           Bunyan Digital Ltd
         </p>
       </div>

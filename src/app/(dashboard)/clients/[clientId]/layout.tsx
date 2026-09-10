@@ -24,7 +24,7 @@ export default async function ClientLayout({
           <ClientAvatar name={client.name} className="h-10 w-10 text-sm" />
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-lg font-semibold tracking-tight text-foreground">{client.name}</h1>
+              <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">{client.name}</h1>
               <ClientStatusBadge status={client.status} />
             </div>
             {client.companyName ? (
