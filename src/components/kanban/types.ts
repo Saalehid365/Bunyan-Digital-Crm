@@ -33,5 +33,6 @@ export type KanbanJob = {
   serviceTypeName: string | null;
   serviceTypeColor: string | null;
   assignedTo: { id: string; name: string | null } | null;
+  assignmentAckedAt: string | null;
   tasks: JobTask[];
 };

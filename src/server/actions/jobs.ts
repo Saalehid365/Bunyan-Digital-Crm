@@ -12,6 +12,19 @@ function clearSentinel(value: FormDataEntryValue | null) {
   return value || undefined;
 }
 
+/**
+ * Assigning a job to someone doesn't by itself grant them visibility into that
+ * job's client — a MEMBER only sees clients they're a ClientMember of. Without
+ * this, an assignee can be handed a job and never see it on their own board.
+ */
+async function ensureClientMember(clientId: string, userId: string) {
+  await prisma.clientMember.upsert({
+    where: { clientId_userId: { clientId, userId } },
+    create: { clientId, userId },
+    update: {},
+  });
+}
+
 export async function createJob(formData: FormData) {
   const user = await requireUser();
 
@@ -63,6 +76,10 @@ export async function createJob(formData: FormData) {
       },
     },
   });
+
+  if (data.assignedToId) {
+    await ensureClientMember(data.clientId, data.assignedToId);
+  }
 
   revalidatePath(`/clients/${data.clientId}/board`);
   revalidatePath("/board");
@@ -133,6 +150,10 @@ export async function updateJob(jobId: string, formData: FormData) {
     return { error: "You don't have access to this client." };
   }
 
+  const existing = await prisma.job.findUnique({ where: { id: jobId }, select: { assignedToId: true, title: true } });
+  const newAssignedToId = data.assignedToId || null;
+  const reassigned = newAssignedToId !== (existing?.assignedToId ?? null);
+
   await prisma.job.update({
     where: { id: jobId },
     data: {
@@ -141,12 +162,54 @@ export async function updateJob(jobId: string, formData: FormData) {
       description: data.description || null,
       priority: data.priority,
       recurrence: data.recurrence,
-      assignedToId: data.assignedToId || null,
+      assignedToId: newAssignedToId,
+      // A reassignment (including to someone new, or cleared) needs a fresh acknowledgement —
+      // don't let re-saving the form with the same assignee silently reset an already-acked job.
+      ...(reassigned ? { assignmentAckedAt: null } : {}),
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
     },
   });
 
+  if (data.assignedToId) {
+    await ensureClientMember(data.clientId, data.assignedToId);
+  }
+
+  if (reassigned && newAssignedToId) {
+    await prisma.activity.create({
+      data: {
+        clientId: data.clientId,
+        jobId,
+        type: "CLIENT_UPDATED",
+        message: `${user.name ?? user.email} assigned "${existing?.title ?? data.title}" — pending acknowledgement`,
+        userId: user.id,
+      },
+    });
+  }
+
   revalidatePath(`/clients/${data.clientId}/board`);
+  revalidatePath("/board");
+  revalidatePath("/dashboard");
+  return { ok: true };
+}
+
+export async function acknowledgeJobAssignment(jobId: string) {
+  const user = await requireUser();
+  const job = await prisma.job.findUnique({ where: { id: jobId } });
+  if (!job) return { error: "Job not found" };
+  if (job.assignedToId !== user.id) return { error: "This job isn't assigned to you." };
+
+  await prisma.job.update({ where: { id: jobId }, data: { assignmentAckedAt: new Date() } });
+  await prisma.activity.create({
+    data: {
+      clientId: job.clientId,
+      jobId,
+      type: "CLIENT_UPDATED",
+      message: `${user.name ?? user.email} acknowledged the assignment for "${job.title}"`,
+      userId: user.id,
+    },
+  });
+
+  revalidatePath(`/clients/${job.clientId}/board`);
   revalidatePath("/board");
   revalidatePath("/dashboard");
   return { ok: true };

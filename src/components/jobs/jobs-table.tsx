@@ -147,10 +147,23 @@ export function JobsTable({
                           <TableCell onClick={() => onJobClick(job)}>
                             {job.assignedTo ? (
                               <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
-                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground shadow-[0_1px_2px_-1px_rgba(0,0,0,0.3)]">
-                                  {initials(job.assignedTo.name)}
+                                <span className="relative flex shrink-0">
+                                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground shadow-[0_1px_2px_-1px_rgba(0,0,0,0.3)]">
+                                    {initials(job.assignedTo.name)}
+                                  </span>
+                                  {!job.assignmentAckedAt ? (
+                                    <span
+                                      className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-chart-4 ring-2 ring-card"
+                                      title="Pending acknowledgement"
+                                    />
+                                  ) : null}
                                 </span>
                                 {job.assignedTo.name}
+                                {!job.assignmentAckedAt ? (
+                                  <span className="rounded-full bg-chart-4/15 px-1.5 py-0.5 text-[10px] font-medium text-[var(--chart-4)]">
+                                    Pending
+                                  </span>
+                                ) : null}
                               </span>
                             ) : (
                               <span className="text-sm text-muted-foreground">—</span>

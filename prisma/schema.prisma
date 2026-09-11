@@ -268,6 +268,7 @@ model Job {
   priority        Priority   @default(MEDIUM)
   recurrence      Recurrence @default(NONE)
   assignedToId    String?
+  assignmentAckedAt DateTime?
   dueDate         DateTime?
   completedAt     DateTime?
   createdAt       DateTime   @default(now())

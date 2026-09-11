@@ -115,24 +115,34 @@ export function JobEditForm({
           </PropertyRow>
 
           <PropertyRow icon={User} label="Assignee">
-            <Select name="assignedToId" defaultValue={job.assignedTo?.id ?? "unassigned"}>
-              <SelectTrigger className={sidebarTrigger} aria-label="Assignee">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                {assignableUsers.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-medium text-primary-foreground">
-                        {initials(u.name)}
+            <div className="flex items-center gap-1.5">
+              <Select name="assignedToId" defaultValue={job.assignedTo?.id ?? "unassigned"}>
+                <SelectTrigger className={sidebarTrigger} aria-label="Assignee">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {assignableUsers.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-medium text-primary-foreground">
+                          {initials(u.name)}
+                        </span>
+                        {u.name || u.email}
                       </span>
-                      {u.name || u.email}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {job.assignedTo && !job.assignmentAckedAt ? (
+                <span
+                  className="shrink-0 rounded-full bg-chart-4/15 px-1.5 py-0.5 text-[10px] font-medium text-[var(--chart-4)]"
+                  title="Not yet acknowledged by the assignee"
+                >
+                  Pending
+                </span>
+              ) : null}
+            </div>
           </PropertyRow>
 
           <PropertyRow icon={CalendarDays} label="Due">

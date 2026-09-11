@@ -38,6 +38,7 @@ export async function getKanbanJobs(clientIds: string[] | undefined): Promise<Ka
     serviceTypeName: job.clientService?.serviceType.name ?? null,
     serviceTypeColor: job.clientService?.serviceType.colorHex ?? null,
     assignedTo: job.assignedTo,
+    assignmentAckedAt: job.assignmentAckedAt ? job.assignmentAckedAt.toISOString() : null,
     tasks: job.tasks.map((task) => ({
       id: task.id,
       title: task.title,

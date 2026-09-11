@@ -126,11 +126,19 @@ export function JobCard({
           <span />
         )}
         {job.assignedTo ? (
-          <span
-            className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground shadow-[0_1px_2px_-1px_rgba(0,0,0,0.3)]"
-            title={job.assignedTo.name ?? ""}
-          >
-            {initials(job.assignedTo.name)}
+          <span className="relative flex shrink-0">
+            <span
+              className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground shadow-[0_1px_2px_-1px_rgba(0,0,0,0.3)]"
+              title={job.assignedTo.name ?? ""}
+            >
+              {initials(job.assignedTo.name)}
+            </span>
+            {!job.assignmentAckedAt ? (
+              <span
+                className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-chart-4 ring-2 ring-card"
+                title="Pending acknowledgement"
+              />
+            ) : null}
           </span>
         ) : null}
       </div>

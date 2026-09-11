@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { JOB_STAGE_LABEL, PRIORITY_DOT_CLASS } from "@/lib/constants";
 import { JobEditForm } from "./job-edit-form";
+import { AcknowledgeAssignmentBanner } from "./acknowledge-assignment-banner";
 import { TaskChecklist } from "@/components/tasks/task-checklist";
 import type { KanbanJob } from "./types";
 
@@ -74,6 +75,10 @@ export function JobDetailDialog({
             </button>
           </div>
         </div>
+
+        {job.assignedTo?.id === currentUserId && !job.assignmentAckedAt ? (
+          <AcknowledgeAssignmentBanner jobId={job.id} />
+        ) : null}
 
         <div className="overflow-y-auto">
           <JobEditForm
