@@ -3,8 +3,13 @@ import { z } from "zod";
 export const taskSchema = z.object({
   jobId: z.string().min(1),
   title: z.string().trim().min(1, "Task title is required").max(200),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
 });
 export type TaskInput = z.infer<typeof taskSchema>;
+
+export const taskDescriptionSchema = z.object({
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+});
 
 export const timeEntrySchema = z.object({
   taskId: z.string().min(1),

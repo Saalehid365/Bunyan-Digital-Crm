@@ -12,6 +12,7 @@ export type JobTimeEntry = {
 export type JobTask = {
   id: string;
   title: string;
+  description: string | null;
   done: boolean;
   totalMinutes: number;
   timeEntries: JobTimeEntry[];

@@ -41,6 +41,7 @@ export async function getKanbanJobs(clientIds: string[] | undefined): Promise<Ka
     tasks: job.tasks.map((task) => ({
       id: task.id,
       title: task.title,
+      description: task.description,
       done: task.done,
       totalMinutes: task.timeEntries.reduce((sum, e) => sum + e.minutes, 0),
       timeEntries: task.timeEntries.map((e) => ({

@@ -25,6 +25,7 @@ export async function addTask(formData: FormData) {
   const parsed = taskSchema.safeParse({
     jobId: formData.get("jobId"),
     title: formData.get("title"),
+    description: formData.get("description"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
 
@@ -41,6 +42,7 @@ export async function addTask(formData: FormData) {
     data: {
       jobId: parsed.data.jobId,
       title: parsed.data.title,
+      description: parsed.data.description?.trim() || undefined,
       position: (last?.position ?? 0) + 1024,
     },
   });
@@ -91,6 +93,22 @@ export async function renameTask(taskId: string, title: string) {
   }
 
   await prisma.task.update({ where: { id: taskId }, data: { title: trimmed } });
+  revalidateJobViews(task.job.clientId);
+  return { ok: true };
+}
+
+export async function updateTaskDescription(taskId: string, description: string) {
+  const user = await requireUser();
+  const task = await prisma.task.findUnique({ where: { id: taskId }, include: { job: true } });
+  if (!task) return { error: "Task not found" };
+  if (!(await canAccessClient(user, task.job.clientId))) {
+    return { error: "You don't have access to this client." };
+  }
+
+  await prisma.task.update({
+    where: { id: taskId },
+    data: { description: description.trim() || null },
+  });
   revalidateJobViews(task.job.clientId);
   return { ok: true };
 }

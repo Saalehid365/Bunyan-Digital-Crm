@@ -289,6 +289,7 @@ model Task {
   id          String    @id @default(cuid())
   jobId       String
   title       String
+  description String?   @db.Text
   done        Boolean   @default(false)
   position    Float     @default(0)
   createdAt   DateTime  @default(now())
