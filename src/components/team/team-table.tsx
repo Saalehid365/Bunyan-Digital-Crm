@@ -12,6 +12,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { setUserRole, setUserDisabled } from "@/server/actions/team";
 import { MemberPermissionsControl } from "@/components/team/member-permissions-control";
+import { SetPasswordDialog } from "@/components/team/set-password-dialog";
+import { DeleteMemberButton } from "@/components/team/delete-member-button";
 import { toast } from "sonner";
 import type { Permission } from "@prisma/client";
 
@@ -22,6 +24,7 @@ type TeamMember = {
   role: "ADMIN" | "MEMBER";
   disabledAt: Date | null;
   permissions: Permission[];
+  hasPassword: boolean;
 };
 
 function initials(name: string | null, email: string) {
@@ -77,6 +80,12 @@ export function TeamTable({ members, currentUserId }: { members: TeamMember[]; c
                 disabled={pending}
               />
             ) : null}
+            <SetPasswordDialog
+              userId={member.id}
+              name={member.name}
+              email={member.email}
+              hasPassword={member.hasPassword}
+            />
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">
                 {member.disabledAt ? "Disabled" : "Active"}
@@ -92,6 +101,9 @@ export function TeamTable({ members, currentUserId }: { members: TeamMember[]; c
                 }
               />
             </div>
+            {member.id !== currentUserId ? (
+              <DeleteMemberButton userId={member.id} name={member.name} email={member.email} />
+            ) : null}
           </div>
         </li>
       ))}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Flag, User, CalendarDays, Repeat, Tag, Trash2 } from "lucide-react";
+import { Flag, User, CalendarDays, Repeat, Tag, Trash2, Flame } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -97,10 +97,16 @@ export function JobEditForm({
                 {Object.entries(PRIORITY_LABEL).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     <span className="inline-flex items-center gap-1.5">
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT_CLASS[value as keyof typeof PRIORITY_DOT_CLASS]}`}
-                      />
-                      {label}
+                      {value === "URGENT" ? (
+                        <Flame className="h-3 w-3 text-destructive" />
+                      ) : (
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT_CLASS[value as keyof typeof PRIORITY_DOT_CLASS]}`}
+                        />
+                      )}
+                      <span className={value === "URGENT" ? "font-medium text-destructive" : undefined}>
+                        {label}
+                      </span>
                     </span>
                   </SelectItem>
                 ))}

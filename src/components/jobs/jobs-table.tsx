@@ -2,26 +2,19 @@
 
 import { useState } from "react";
 import { format, isPast, isToday } from "date-fns";
-import { AlertTriangle, ChevronDown, ListChecks, Plus, Repeat } from "lucide-react";
+import { AlertTriangle, ChevronDown, ListChecks, Plus, Repeat, Flame } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { JOB_STAGES, PRIORITY_LABEL, RECURRENCE_LABEL, formatMinutes } from "@/lib/constants";
+import { JOB_STAGES, PRIORITY_LABEL, PRIORITY_DOT_CLASS, RECURRENCE_LABEL, formatMinutes } from "@/lib/constants";
 import { EmptyState } from "@/components/empty-state";
 import { StatusCell, STAGE_DOT, STAGE_TEXT, STAGE_BORDER } from "@/components/jobs/status-cell";
 import type { KanbanJob } from "@/components/kanban/types";
-import type { JobStage, Priority } from "@prisma/client";
+import type { JobStage } from "@prisma/client";
 
 function initials(name: string | null) {
   if (!name) return "?";
   return name.split(/\s+/).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 }
-
-const PRIORITY_DOT: Record<Priority, string> = {
-  URGENT: "bg-destructive",
-  HIGH: "bg-primary",
-  MEDIUM: "bg-chart-4",
-  LOW: "bg-muted-foreground/50",
-};
 
 const COLS = 7; // colspan for group header/summary/empty rows when a client column is shown
 const COLS_NO_CLIENT = 6;
@@ -121,10 +114,17 @@ export function JobsTable({
                             onClick={() => onJobClick(job)}
                           >
                             <div className="flex items-center gap-2">
-                              <span
-                                className={cn("h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT[job.priority])}
-                                title={PRIORITY_LABEL[job.priority]}
-                              />
+                              {job.priority === "URGENT" ? (
+                                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive/15 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
+                                  <Flame className="h-2.5 w-2.5" />
+                                  Urgent
+                                </span>
+                              ) : (
+                                <span
+                                  className={cn("h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT_CLASS[job.priority])}
+                                  title={PRIORITY_LABEL[job.priority]}
+                                />
+                              )}
                               <span className="truncate font-medium text-foreground">{job.title}</span>
                               {job.recurrence !== "NONE" ? (
                                 <span

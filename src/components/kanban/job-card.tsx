@@ -3,7 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { isPast, isToday, format } from "date-fns";
-import { AlertTriangle, Clock, ListChecks, Repeat } from "lucide-react";
+import { AlertTriangle, Clock, ListChecks, Repeat, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PRIORITY_LABEL, RECURRENCE_LABEL, PRIORITY_DOT_CLASS, PRIORITY_STRIPE_CLASS, formatMinutes } from "@/lib/constants";
 import type { KanbanJob } from "./types";
@@ -47,7 +47,8 @@ export function JobCard({
       {...listeners}
       onClick={onClick}
       className={cn(
-        "cursor-pointer rounded-[var(--radius-md)] border border-l-[3px] border-border bg-card p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 ease-[cubic-bezier(0.16,0.8,0.3,1)]",
+        "cursor-pointer rounded-[var(--radius-md)] border border-border p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 ease-[cubic-bezier(0.16,0.8,0.3,1)]",
+        job.priority === "URGENT" ? "border-l-4 bg-destructive/[0.05]" : "border-l-[3px] bg-card",
         PRIORITY_STRIPE_CLASS[job.priority],
         isDragging && !overlay ? "opacity-30" : "",
         overlay
@@ -57,10 +58,17 @@ export function JobCard({
     >
       <div className="mb-2 flex items-start justify-between gap-2">
         <p className="text-sm font-medium leading-snug text-foreground">{job.title}</p>
-        <span
-          className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT_CLASS[job.priority])}
-          title={PRIORITY_LABEL[job.priority]}
-        />
+        {job.priority === "URGENT" ? (
+          <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[10px] font-semibold text-destructive">
+            <Flame className="h-2.5 w-2.5" />
+            Urgent
+          </span>
+        ) : (
+          <span
+            className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT_CLASS[job.priority])}
+            title={PRIORITY_LABEL[job.priority]}
+          />
+        )}
       </div>
 
       {showClient || job.serviceTypeName ? (

@@ -7,10 +7,22 @@ import { InviteMemberDialog } from "@/components/team/invite-member-dialog";
 export default async function TeamPage() {
   const admin = await requireAdmin();
 
-  const members = await prisma.user.findMany({
+  const rows = await prisma.user.findMany({
     orderBy: { createdAt: "asc" },
-    select: { id: true, name: true, email: true, role: true, disabledAt: true, permissions: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      disabledAt: true,
+      permissions: true,
+      passwordHash: true,
+    },
   });
+  const members = rows.map(({ passwordHash, ...rest }) => ({
+    ...rest,
+    hasPassword: passwordHash !== null,
+  }));
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 md:p-6">

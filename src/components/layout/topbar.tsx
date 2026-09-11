@@ -2,21 +2,25 @@
 
 import { Search } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { DueSoonBell } from "@/components/layout/due-soon-bell";
 import { UserMenu } from "@/components/layout/user-menu";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import type { Permission } from "@prisma/client";
+import type { DueSoonJob } from "@/lib/due-soon-jobs";
 
 export function Topbar({
   name,
   email,
   role,
   permissions,
+  dueSoonJobs,
   onOpenPalette,
 }: {
   name: string | null | undefined;
   email: string;
   role: "ADMIN" | "MEMBER";
   permissions: Permission[];
+  dueSoonJobs: DueSoonJob[];
   onOpenPalette: () => void;
 }) {
   return (
@@ -36,6 +40,7 @@ export function Topbar({
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5">
+        <DueSoonBell jobs={dueSoonJobs} />
         <ThemeToggle />
         <UserMenu name={name} email={email} role={role} />
       </div>
