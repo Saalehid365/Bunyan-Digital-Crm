@@ -25,6 +25,10 @@ export async function getDueSoonJobs(clientIds: string[] | undefined): Promise<D
     where: {
       stage: { not: "DONE" },
       dueDate: { lte: cutoff },
+      // Once the assignee has acknowledged the job, it drops off this alert — the
+      // deadline itself is still visible everywhere else (table, board), this bell
+      // is specifically for things that still need someone's attention.
+      OR: [{ assignedToId: null }, { assignmentAckedAt: null }],
       ...(clientIds ? { clientId: { in: clientIds } } : {}),
     },
     select: {

@@ -27,7 +27,7 @@ export function DueSoonBell({ jobs }: { jobs: DueSoonJob[] }) {
           variant="ghost"
           size="icon"
           className="relative h-8 w-8 text-muted-foreground hover:text-foreground"
-          aria-label="Jobs due soon"
+          aria-label="Alerts"
         >
           <Bell className="h-4 w-4" />
           {hasJobs ? (
@@ -44,7 +44,7 @@ export function DueSoonBell({ jobs }: { jobs: DueSoonJob[] }) {
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
         <div className="border-b border-border px-3.5 py-2.5">
-          <p className="text-sm font-medium text-foreground">Due soon</p>
+          <p className="text-sm font-medium text-foreground">Alerts</p>
           <p className="text-xs text-muted-foreground">
             {hasJobs ? "Open jobs that are overdue or due in the next few days." : "You're all caught up."}
           </p>
