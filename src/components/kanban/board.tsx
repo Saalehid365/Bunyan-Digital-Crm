@@ -12,7 +12,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { toast } from "sonner";
-import { JOB_STAGES } from "@/lib/constants";
+import { BOARD_STAGES } from "@/lib/constants";
 import { moveJobStage } from "@/server/actions/jobs";
 import { Column } from "./column";
 import { JobCard } from "./job-card";
@@ -44,7 +44,7 @@ export function Board({
 
   const columns = useMemo(() => {
     const map = new Map<JobStage, KanbanJob[]>();
-    for (const s of JOB_STAGES) map.set(s.value, []);
+    for (const s of BOARD_STAGES) map.set(s.value, []);
     for (const j of jobs) map.get(j.stage)?.push(j);
     for (const list of map.values()) list.sort((a, b) => a.position - b.position);
     return map;
@@ -110,7 +110,7 @@ export function Board({
       onDragEnd={handleDragEnd}
     >
       <div className="flex flex-1 gap-5 overflow-x-auto p-4 md:p-6">
-        {JOB_STAGES.map((s) => (
+        {BOARD_STAGES.map((s) => (
           <Column
             key={s.value}
             stage={s.value}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Search, X } from "lucide-react";
+import { CheckCircle2, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ export function JobsView({
     setJobs(initialJobs);
   }
 
-  const [view, setView] = useState<"board" | "table">("table");
+  const [view, setView] = useState<"board" | "table" | "completed">("table");
   const [search, setSearch] = useState("");
   const [clientFilter, setClientFilter] = useState<string[]>([]);
   const [stageFilter, setStageFilter] = useState<string[]>([]);
@@ -122,6 +122,22 @@ export function JobsView({
     });
   }, [jobs, search, clientFilter, stageFilter, assigneeFilter, priorityFilter, recurrenceTab]);
 
+  const completedJobs = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return jobs.filter((j) => {
+      if (j.stage !== "DONE") return false;
+      if (q && !j.title.toLowerCase().includes(q) && !j.clientName.toLowerCase().includes(q)) return false;
+      if (clientFilter.length > 0 && !clientFilter.includes(j.clientId)) return false;
+      if (priorityFilter.length > 0 && !priorityFilter.includes(j.priority)) return false;
+      if (assigneeFilter.length > 0) {
+        const assigneeKey = j.assignedTo?.id ?? "unassigned";
+        if (!assigneeFilter.includes(assigneeKey)) return false;
+      }
+      if (recurrenceTab !== "ALL" && j.recurrence !== recurrenceTab) return false;
+      return true;
+    });
+  }, [jobs, search, clientFilter, assigneeFilter, priorityFilter, recurrenceTab]);
+
   function openCreate(stage: JobStage) {
     setCreateState({ open: true, stage });
   }
@@ -136,16 +152,21 @@ export function JobsView({
   return (
     <div className="flex flex-1 flex-col">
       <div className="flex items-center gap-5 border-b border-border px-4 md:px-6">
-        {(["table", "board"] as const).map((key) => (
+        {(["table", "board", "completed"] as const).map((key) => (
           <button
             key={key}
             onClick={() => setView(key)}
             className={cn(
-              "relative py-3 text-sm capitalize transition-colors",
+              "relative flex items-center gap-1.5 py-3 text-sm transition-colors",
               view === key ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {key === "table" ? "Main table" : "Board"}
+            {key === "table" ? "Main table" : key === "board" ? "Board" : "Completed"}
+            {key === "completed" && completedJobs.length > 0 ? (
+              <span className="rounded-full bg-muted px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground">
+                {completedJobs.length}
+              </span>
+            ) : null}
             {view === key ? <span className="absolute inset-x-0 -bottom-px h-[2px] bg-primary" /> : null}
           </button>
         ))}
@@ -230,6 +251,17 @@ export function JobsView({
           canCreate={Boolean(clientId)}
           onAddJob={openCreate}
           onJobClick={(job) => setDetailJobId(job.id)}
+        />
+      ) : view === "completed" ? (
+        <JobsTable
+          jobs={completedJobs}
+          showClient={showClient}
+          onJobClick={(job) => setDetailJobId(job.id)}
+          emptyState={{
+            icon: CheckCircle2,
+            title: "Nothing completed yet",
+            description: "Jobs marked Done will show up here, keeping the board focused on active work.",
+          }}
         />
       ) : (
         <JobsTable

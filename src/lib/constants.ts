@@ -42,6 +42,10 @@ export const JOB_STAGES: { value: JobStage; label: string }[] = [
   { value: "DONE", label: "Done" },
 ];
 
+/** Kanban board columns — Done is deliberately excluded so completed work doesn't
+ * clutter the active board; it lives in the separate Completed tab instead. */
+export const BOARD_STAGES = JOB_STAGES.filter((s) => s.value !== "DONE");
+
 export const JOB_STAGE_LABEL: Record<JobStage, string> = {
   BACKLOG: "Backlog",
   IN_PROGRESS: "In progress",

@@ -24,19 +24,22 @@ export function JobsTable({
   showClient,
   onJobClick,
   onAddJob,
+  emptyState,
 }: {
   jobs: KanbanJob[];
   showClient: boolean;
   onJobClick: (job: KanbanJob) => void;
   onAddJob?: (stage: JobStage) => void;
+  emptyState?: { icon: typeof ListChecks; title: string; description: string };
 }) {
   const [collapsed, setCollapsed] = useState<Set<JobStage>>(new Set());
   const colSpan = showClient ? COLS : COLS_NO_CLIENT;
 
   if (jobs.length === 0) {
+    const empty = emptyState ?? { icon: ListChecks, title: "No jobs yet", description: "Jobs you add will show up here." };
     return (
       <div className="p-4 md:p-6">
-        <EmptyState icon={ListChecks} title="No jobs yet" description="Jobs you add will show up here." />
+        <EmptyState icon={empty.icon} title={empty.title} description={empty.description} />
       </div>
     );
   }
