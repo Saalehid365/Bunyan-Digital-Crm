@@ -1,4 +1,7 @@
-import type { JobStage, Priority, Recurrence } from "@prisma/client";
+import type { InvoiceStatus, JobStage, Priority, QuoteStatus, Recurrence } from "@prisma/client";
+
+export type LinkedQuote = { id: string; number: number; status: QuoteStatus };
+export type LinkedInvoice = { id: string; number: number; status: InvoiceStatus; paidAt: string | null };
 
 export type JobTimeEntry = {
   id: string;
@@ -34,5 +37,7 @@ export type KanbanJob = {
   serviceTypeColor: string | null;
   assignedTo: { id: string; name: string | null } | null;
   assignmentAckedAt: string | null;
+  linkedQuote: LinkedQuote | null;
+  linkedInvoice: LinkedInvoice | null;
   tasks: JobTask[];
 };

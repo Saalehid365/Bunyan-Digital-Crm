@@ -261,6 +261,8 @@ model Job {
   id              String     @id @default(cuid())
   clientId        String
   clientServiceId String?
+  quoteId         String?
+  invoiceId       String?
   title           String
   description     String?    @db.Text
   stage           JobStage   @default(BACKLOG)
@@ -276,6 +278,8 @@ model Job {
 
   client        Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientService ClientService? @relation(fields: [clientServiceId], references: [id], onDelete: SetNull)
+  quote         Quote?         @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  invoice       Invoice?       @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
   assignedTo    User?          @relation("JobAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
   tasks         Task[]
   activities    Activity[]
@@ -283,6 +287,8 @@ model Job {
   @@index([clientId, stage])
   @@index([assignedToId])
   @@index([dueDate])
+  @@index([quoteId])
+  @@index([invoiceId])
 }
 
 /// A checklist sub-item within a Job — the granular unit of work that time is logged against.
@@ -358,6 +364,7 @@ model Quote {
   lineItems  QuoteLineItem[]
   invoice    Invoice?
   activities Activity[]
+  jobs       Job[]
 
   @@index([clientId])
 }
@@ -398,6 +405,7 @@ model Invoice {
   createdBy  User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
   lineItems  InvoiceLineItem[]
   activities Activity[]
+  jobs       Job[]
 
   @@index([clientId])
 }

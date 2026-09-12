@@ -62,7 +62,7 @@ export async function createJob(formData: FormData) {
       description: data.description || undefined,
       priority: data.priority,
       recurrence: data.recurrence,
-      assignedToId: data.assignedToId || undefined,
+      assignedToId: data.assignedToId,
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
       stage,
       position: (last?.position ?? 0) + 1024,
@@ -77,9 +77,7 @@ export async function createJob(formData: FormData) {
     },
   });
 
-  if (data.assignedToId) {
-    await ensureClientMember(data.clientId, data.assignedToId);
-  }
+  await ensureClientMember(data.clientId, data.assignedToId);
 
   revalidatePath(`/clients/${data.clientId}/board`);
   revalidatePath("/board");
@@ -136,6 +134,8 @@ export async function updateJob(jobId: string, formData: FormData) {
   const parsed = jobSchema.safeParse({
     clientId: formData.get("clientId"),
     clientServiceId: clearSentinel(formData.get("clientServiceId")),
+    quoteId: clearSentinel(formData.get("quoteId")),
+    invoiceId: clearSentinel(formData.get("invoiceId")),
     title: formData.get("title"),
     description: formData.get("description"),
     priority: formData.get("priority") || "MEDIUM",
@@ -151,30 +151,29 @@ export async function updateJob(jobId: string, formData: FormData) {
   }
 
   const existing = await prisma.job.findUnique({ where: { id: jobId }, select: { assignedToId: true, title: true } });
-  const newAssignedToId = data.assignedToId || null;
-  const reassigned = newAssignedToId !== (existing?.assignedToId ?? null);
+  const reassigned = data.assignedToId !== existing?.assignedToId;
 
   await prisma.job.update({
     where: { id: jobId },
     data: {
       clientServiceId: data.clientServiceId || null,
+      quoteId: data.quoteId || null,
+      invoiceId: data.invoiceId || null,
       title: data.title,
       description: data.description || null,
       priority: data.priority,
       recurrence: data.recurrence,
-      assignedToId: newAssignedToId,
-      // A reassignment (including to someone new, or cleared) needs a fresh acknowledgement —
-      // don't let re-saving the form with the same assignee silently reset an already-acked job.
+      assignedToId: data.assignedToId,
+      // A reassignment to someone new needs a fresh acknowledgement — don't let
+      // re-saving the form with the same assignee silently reset an already-acked job.
       ...(reassigned ? { assignmentAckedAt: null } : {}),
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
     },
   });
 
-  if (data.assignedToId) {
-    await ensureClientMember(data.clientId, data.assignedToId);
-  }
+  await ensureClientMember(data.clientId, data.assignedToId);
 
-  if (reassigned && newAssignedToId) {
+  if (reassigned) {
     await prisma.activity.create({
       data: {
         clientId: data.clientId,

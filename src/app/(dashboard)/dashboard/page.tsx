@@ -3,7 +3,7 @@ import { KanbanSquare } from "lucide-react";
 import { requireUser, getVisibleClientIds } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { GBP, formatMinutes } from "@/lib/constants";
-import { getKanbanJobs, getClientServicesByClient, getAccessibleClients } from "@/lib/jobs-data";
+import { getKanbanJobs, getClientServicesByClient, getQuotesAndInvoicesByClient, getAccessibleClients } from "@/lib/jobs-data";
 import { getStaleLeads } from "@/lib/stale-leads";
 import { MetricPanel } from "@/components/dashboard/metric-panel";
 import { StaleLeadsCard } from "@/components/dashboard/stale-leads-card";
@@ -16,16 +16,19 @@ export default async function DashboardPage() {
   const clientIds = isAdmin ? undefined : await getVisibleClientIds(user.id);
   const clientFilter = clientIds ? { id: { in: clientIds } } : {};
 
-  const [activeClients, jobs, clients, clientServicesByClient, activeUsers] = await Promise.all([
-    prisma.client.count({ where: { ...clientFilter, status: "ACTIVE" } }),
-    getKanbanJobs(clientIds),
-    getAccessibleClients(clientIds),
-    getClientServicesByClient(clientIds),
-    prisma.user.findMany({
-      where: { disabledAt: null },
-      select: { id: true, name: true, email: true },
-    }),
-  ]);
+  const [activeClients, jobs, clients, clientServicesByClient, quotesAndInvoicesByClient, activeUsers] =
+    await Promise.all([
+      prisma.client.count({ where: { ...clientFilter, status: "ACTIVE" } }),
+      getKanbanJobs(clientIds),
+      getAccessibleClients(clientIds),
+      getClientServicesByClient(clientIds),
+      getQuotesAndInvoicesByClient(clientIds),
+      prisma.user.findMany({
+        where: { disabledAt: null },
+        select: { id: true, name: true, email: true },
+      }),
+    ]);
+  const { quotesByClient, invoicesByClient } = quotesAndInvoicesByClient;
 
   const dueSoonCount = jobs.filter(
     (j) =>
@@ -100,6 +103,8 @@ export default async function DashboardPage() {
               isAdmin={isAdmin}
               assignableUsers={activeUsers}
               clientServicesByClient={clientServicesByClient}
+              quotesByClient={quotesByClient}
+              invoicesByClient={invoicesByClient}
             />
           </CardContent>
         </Card>
@@ -167,6 +172,8 @@ export default async function DashboardPage() {
             isAdmin={isAdmin}
             assignableUsers={activeUsers}
             clientServicesByClient={clientServicesByClient}
+            quotesByClient={quotesByClient}
+            invoicesByClient={invoicesByClient}
           />
         </CardContent>
       </Card>

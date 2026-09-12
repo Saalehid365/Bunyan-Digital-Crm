@@ -14,9 +14,12 @@ import { JobEditForm } from "./job-edit-form";
 import { AcknowledgeAssignmentBanner } from "./acknowledge-assignment-banner";
 import { TaskChecklist } from "@/components/tasks/task-checklist";
 import type { KanbanJob } from "./types";
+import type { QuoteStatus, InvoiceStatus } from "@prisma/client";
 
 type AssignableUser = { id: string; name: string | null; email: string };
 type ClientServiceOption = { id: string; name: string };
+type QuoteOption = { id: string; number: number; status: QuoteStatus };
+type InvoiceOption = { id: string; number: number; status: InvoiceStatus };
 
 export function JobDetailDialog({
   job,
@@ -24,6 +27,8 @@ export function JobDetailDialog({
   onOpenChange,
   assignableUsers,
   clientServices,
+  quotes,
+  invoices,
   currentUserId,
   isAdmin,
 }: {
@@ -32,6 +37,8 @@ export function JobDetailDialog({
   onOpenChange: (open: boolean) => void;
   assignableUsers: AssignableUser[];
   clientServices: ClientServiceOption[];
+  quotes: QuoteOption[];
+  invoices: InvoiceOption[];
   currentUserId: string;
   isAdmin: boolean;
 }) {
@@ -85,6 +92,8 @@ export function JobDetailDialog({
             job={job}
             assignableUsers={assignableUsers}
             clientServices={clientServices}
+            quotes={quotes}
+            invoices={invoices}
             onDeleted={() => onOpenChange(false)}
           />
 

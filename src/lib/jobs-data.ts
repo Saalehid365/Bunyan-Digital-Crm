@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { KanbanJob } from "@/components/kanban/types";
+import type { QuoteStatus, InvoiceStatus } from "@prisma/client";
 
 /** Fetches jobs (with their task checklists + time entries) scoped to the given client ids,
  * or every client if clientIds is undefined (admin view). Shared by the dashboard and Jobs page
@@ -11,6 +12,8 @@ export async function getKanbanJobs(clientIds: string[] | undefined): Promise<Ka
       client: { select: { id: true, name: true } },
       assignedTo: { select: { id: true, name: true } },
       clientService: { include: { serviceType: true } },
+      quote: { select: { id: true, number: true, status: true } },
+      invoice: { select: { id: true, number: true, status: true, paidAt: true } },
       tasks: {
         orderBy: { position: "asc" },
         include: {
@@ -39,6 +42,15 @@ export async function getKanbanJobs(clientIds: string[] | undefined): Promise<Ka
     serviceTypeColor: job.clientService?.serviceType.colorHex ?? null,
     assignedTo: job.assignedTo,
     assignmentAckedAt: job.assignmentAckedAt ? job.assignmentAckedAt.toISOString() : null,
+    linkedQuote: job.quote ? { id: job.quote.id, number: job.quote.number, status: job.quote.status } : null,
+    linkedInvoice: job.invoice
+      ? {
+          id: job.invoice.id,
+          number: job.invoice.number,
+          status: job.invoice.status,
+          paidAt: job.invoice.paidAt ? job.invoice.paidAt.toISOString() : null,
+        }
+      : null,
     tasks: job.tasks.map((task) => ({
       id: task.id,
       title: task.title,
@@ -86,4 +98,25 @@ export async function getClientServicesByClient(
       c.services.map((s) => ({ id: s.id, name: s.serviceType.name })),
     ]),
   );
+}
+
+/** Every quote and invoice per client, for the "link a quote/invoice to this
+ * job" pickers on one-off jobs — scoped the same way getClientServicesByClient is. */
+export async function getQuotesAndInvoicesByClient(clientIds: string[] | undefined): Promise<{
+  quotesByClient: Record<string, { id: string; number: number; status: QuoteStatus }[]>;
+  invoicesByClient: Record<string, { id: string; number: number; status: InvoiceStatus }[]>;
+}> {
+  const clients = await prisma.client.findMany({
+    where: clientIds ? { id: { in: clientIds } } : {},
+    select: {
+      id: true,
+      quotes: { select: { id: true, number: true, status: true }, orderBy: { number: "desc" } },
+      invoices: { select: { id: true, number: true, status: true }, orderBy: { number: "desc" } },
+    },
+  });
+
+  return {
+    quotesByClient: Object.fromEntries(clients.map((c) => [c.id, c.quotes])),
+    invoicesByClient: Object.fromEntries(clients.map((c) => [c.id, c.invoices])),
+  };
 }

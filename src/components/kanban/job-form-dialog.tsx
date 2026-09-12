@@ -153,12 +153,11 @@ export function JobFormDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor="assignedToId">Assignee</Label>
-              <Select name="assignedToId" defaultValue="unassigned">
+              <Select name="assignedToId" required>
                 <SelectTrigger id="assignedToId" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Choose someone" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {assignableUsers.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
                       {u.name || u.email}

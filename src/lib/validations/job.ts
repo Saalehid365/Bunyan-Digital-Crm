@@ -7,11 +7,16 @@ export const recurrenceEnum = z.enum(["NONE", "DAILY", "WEEKLY", "FORTNIGHTLY", 
 export const jobSchema = z.object({
   clientId: z.string().min(1),
   clientServiceId: z.string().optional().or(z.literal("")),
+  quoteId: z.string().optional().or(z.literal("")),
+  invoiceId: z.string().optional().or(z.literal("")),
   title: z.string().trim().min(1, "Title is required").max(160),
   description: z.string().trim().max(4000).optional().or(z.literal("")),
   priority: priorityEnum.default("MEDIUM"),
   recurrence: recurrenceEnum.default("NONE"),
-  assignedToId: z.string().optional().or(z.literal("")),
+  assignedToId: z
+    .string({ error: "Assign this job to someone" })
+    .trim()
+    .min(1, "Assign this job to someone"),
   dueDate: z.string().trim().optional().or(z.literal("")),
 });
 export type JobInput = z.infer<typeof jobSchema>;

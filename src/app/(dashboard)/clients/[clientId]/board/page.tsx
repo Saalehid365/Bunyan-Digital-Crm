@@ -14,7 +14,7 @@ export default async function ClientBoardPage({
   const client = await getClientForUser(user, clientId);
   if (!client) notFound();
 
-  const [jobs, members, clientServices] = await Promise.all([
+  const [jobs, members, clientServices, quotes, invoices] = await Promise.all([
     getKanbanJobs([clientId]),
     prisma.clientMember.findMany({
       where: { clientId },
@@ -24,6 +24,8 @@ export default async function ClientBoardPage({
       where: { clientId },
       include: { serviceType: true },
     }),
+    prisma.quote.findMany({ where: { clientId }, select: { id: true, number: true, status: true }, orderBy: { number: "desc" } }),
+    prisma.invoice.findMany({ where: { clientId }, select: { id: true, number: true, status: true }, orderBy: { number: "desc" } }),
   ]);
 
   const admins = await prisma.user.findMany({
@@ -48,6 +50,8 @@ export default async function ClientBoardPage({
           name: s.label ? `${s.serviceType.name} (${s.label})` : s.serviceType.name,
         })),
       }}
+      quotesByClient={{ [clientId]: quotes }}
+      invoicesByClient={{ [clientId]: invoices }}
     />
   );
 }

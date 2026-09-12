@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Flag, User, CalendarDays, Repeat, Tag, Trash2, Flame } from "lucide-react";
+import { Flag, User, CalendarDays, Repeat, Tag, Trash2, Flame, Receipt, FileText } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,13 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PRIORITY_LABEL, RECURRENCE_LABEL, PRIORITY_DOT_CLASS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import { PRIORITY_LABEL, RECURRENCE_LABEL, PRIORITY_DOT_CLASS, QUOTE_STATUS_LABEL, INVOICE_STATUS_LABEL } from "@/lib/constants";
+import { INVOICE_STATUS_FILL } from "@/components/billing/status-cells";
 import { updateJob, deleteJob } from "@/server/actions/jobs";
 import { initials } from "./job-card";
 import type { KanbanJob } from "./types";
+import type { QuoteStatus, InvoiceStatus } from "@prisma/client";
 
 type AssignableUser = { id: string; name: string | null; email: string };
 type ClientServiceOption = { id: string; name: string };
+type QuoteOption = { id: string; number: number; status: QuoteStatus };
+type InvoiceOption = { id: string; number: number; status: InvoiceStatus };
 
 const initialState: { error?: string; ok?: boolean } = {};
 
@@ -45,11 +50,15 @@ export function JobEditForm({
   job,
   assignableUsers,
   clientServices,
+  quotes,
+  invoices,
   onDeleted,
 }: {
   job: KanbanJob;
   assignableUsers: AssignableUser[];
   clientServices: ClientServiceOption[];
+  quotes: QuoteOption[];
+  invoices: InvoiceOption[];
   onDeleted: () => void;
 }) {
   const [state, formAction, pending] = useActionState(
@@ -116,12 +125,11 @@ export function JobEditForm({
 
           <PropertyRow icon={User} label="Assignee">
             <div className="flex items-center gap-1.5">
-              <Select name="assignedToId" defaultValue={job.assignedTo?.id ?? "unassigned"}>
+              <Select name="assignedToId" defaultValue={job.assignedTo?.id} required>
                 <SelectTrigger className={sidebarTrigger} aria-label="Assignee">
-                  <SelectValue />
+                  <SelectValue placeholder="Choose someone" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {assignableUsers.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
                       <span className="inline-flex items-center gap-1.5">
@@ -186,6 +194,54 @@ export function JobEditForm({
                 </SelectContent>
               </Select>
             </PropertyRow>
+          ) : null}
+
+          {job.recurrence === "NONE" ? (
+            <>
+              <PropertyRow icon={FileText} label="Quote">
+                <Select name="quoteId" defaultValue={job.linkedQuote?.id ?? "none"}>
+                  <SelectTrigger className={sidebarTrigger} aria-label="Quote">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {quotes.map((q) => (
+                      <SelectItem key={q.id} value={q.id}>
+                        {`Q-${String(q.number).padStart(4, "0")}`} · {QUOTE_STATUS_LABEL[q.status]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </PropertyRow>
+
+              <PropertyRow icon={Receipt} label="Invoice">
+                <div className="flex items-center gap-1.5">
+                  <Select name="invoiceId" defaultValue={job.linkedInvoice?.id ?? "none"}>
+                    <SelectTrigger className={sidebarTrigger} aria-label="Invoice">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {invoices.map((i) => (
+                        <SelectItem key={i.id} value={i.id}>
+                          {`INV-${String(i.number).padStart(4, "0")}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {job.linkedInvoice ? (
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+                        INVOICE_STATUS_FILL[job.linkedInvoice.status],
+                      )}
+                    >
+                      {INVOICE_STATUS_LABEL[job.linkedInvoice.status]}
+                    </span>
+                  ) : null}
+                </div>
+              </PropertyRow>
+            </>
           ) : null}
         </div>
       </div>

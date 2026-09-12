@@ -13,10 +13,12 @@ import { JobsTable } from "@/components/jobs/jobs-table";
 import { JobFormDialog } from "@/components/kanban/job-form-dialog";
 import { JobDetailDialog } from "@/components/kanban/job-detail-dialog";
 import type { KanbanJob } from "@/components/kanban/types";
-import type { JobStage, Priority, Recurrence } from "@prisma/client";
+import type { JobStage, Priority, Recurrence, QuoteStatus, InvoiceStatus } from "@prisma/client";
 
 type AssignableUser = { id: string; name: string | null; email: string };
 type ClientServiceOption = { id: string; name: string };
+type QuoteOption = { id: string; number: number; status: QuoteStatus };
+type InvoiceOption = { id: string; number: number; status: InvoiceStatus };
 
 const PRIORITY_DOT: Record<Priority, string> = {
   URGENT: "bg-destructive",
@@ -34,6 +36,8 @@ export function JobsView({
   isAdmin,
   assignableUsers,
   clientServicesByClient,
+  quotesByClient,
+  invoicesByClient,
   extraControls,
 }: {
   initialJobs: KanbanJob[];
@@ -46,6 +50,8 @@ export function JobsView({
   isAdmin: boolean;
   assignableUsers: AssignableUser[];
   clientServicesByClient: Record<string, ClientServiceOption[]>;
+  quotesByClient: Record<string, QuoteOption[]>;
+  invoicesByClient: Record<string, InvoiceOption[]>;
   extraControls?: React.ReactNode;
 }) {
   const [jobs, setJobs] = useState(initialJobs);
@@ -251,6 +257,8 @@ export function JobsView({
         onOpenChange={(open) => !open && setDetailJobId(null)}
         assignableUsers={assignableUsers}
         clientServices={detailJob ? clientServicesByClient[detailJob.clientId] ?? [] : []}
+        quotes={detailJob ? quotesByClient[detailJob.clientId] ?? [] : []}
+        invoices={detailJob ? invoicesByClient[detailJob.clientId] ?? [] : []}
         currentUserId={currentUserId}
         isAdmin={isAdmin}
       />
