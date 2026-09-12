@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import {
   LayoutDashboard,
+  Sun,
   Users,
   KanbanSquare,
   Clock,
@@ -29,6 +30,7 @@ type NavItem = {
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/my-day", label: "My Day", icon: Sun },
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/board", label: "Jobs", icon: KanbanSquare },
   { href: "/timesheets", label: "Timesheets", icon: Clock },

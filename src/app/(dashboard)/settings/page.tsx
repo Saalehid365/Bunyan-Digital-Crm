@@ -1,9 +1,10 @@
-import { UserCircle, KeyRound, Wrench } from "lucide-react";
+import { UserCircle, KeyRound, Wrench, CalendarClock } from "lucide-react";
 import { requireUser, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ServiceTypeManager } from "@/components/services/service-type-manager";
 import { PasswordForm } from "@/components/settings/password-form";
+import { CalendlyForm } from "@/components/settings/calendly-form";
 
 export default async function SettingsPage() {
   const user = await requireUser();
@@ -16,7 +17,10 @@ export default async function SettingsPage() {
           orderBy: { order: "asc" },
         })
       : Promise.resolve([]),
-    prisma.user.findUnique({ where: { id: user.id }, select: { passwordHash: true } }),
+    prisma.user.findUnique({
+      where: { id: user.id },
+      select: { passwordHash: true, calendlyTokenCipher: true, calendlyName: true, calendlyConnectedAt: true },
+    }),
   ]);
 
   return (
@@ -62,6 +66,25 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <PasswordForm hasPassword={Boolean(dbUser?.passwordHash)} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <CalendarClock className="h-4 w-4 text-muted-foreground" />
+            Calendly
+          </CardTitle>
+          <CardDescription>
+            Connect your Calendly account to see your upcoming meetings on your My Day page.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CalendlyForm
+            connected={Boolean(dbUser?.calendlyTokenCipher)}
+            name={dbUser?.calendlyName ?? null}
+            connectedAt={dbUser?.calendlyConnectedAt ? dbUser.calendlyConnectedAt.toISOString() : null}
+          />
         </CardContent>
       </Card>
 

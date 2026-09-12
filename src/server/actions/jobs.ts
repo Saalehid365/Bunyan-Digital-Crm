@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireUser, canAccessClient } from "@/lib/permissions";
+import { requireUser, canAccessClient, ensureClientMember } from "@/lib/permissions";
 import { jobSchema, moveJobSchema, jobStageEnum } from "@/lib/validations/job";
 import { JOB_STAGE_LABEL } from "@/lib/constants";
 
@@ -10,19 +10,6 @@ import { JOB_STAGE_LABEL } from "@/lib/constants";
 function clearSentinel(value: FormDataEntryValue | null) {
   if (value === "unassigned" || value === "none") return undefined;
   return value || undefined;
-}
-
-/**
- * Assigning a job to someone doesn't by itself grant them visibility into that
- * job's client — a MEMBER only sees clients they're a ClientMember of. Without
- * this, an assignee can be handed a job and never see it on their own board.
- */
-async function ensureClientMember(clientId: string, userId: string) {
-  await prisma.clientMember.upsert({
-    where: { clientId_userId: { clientId, userId } },
-    create: { clientId, userId },
-    update: {},
-  });
 }
 
 export async function createJob(formData: FormData) {

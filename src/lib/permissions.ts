@@ -87,3 +87,17 @@ export async function getClientForUser(
   if (!(await canAccessClient(user, clientId))) return null;
   return prisma.client.findUnique({ where: { id: clientId } });
 }
+
+/**
+ * Assigning something to someone (a job, a follow-up) doesn't by itself grant them
+ * visibility into that record's client — a MEMBER only sees clients they're a
+ * ClientMember of. Without this, an assignee could be handed work for a client they
+ * can't otherwise open.
+ */
+export async function ensureClientMember(clientId: string, userId: string) {
+  await prisma.clientMember.upsert({
+    where: { clientId_userId: { clientId, userId } },
+    create: { clientId, userId },
+    update: {},
+  });
+}

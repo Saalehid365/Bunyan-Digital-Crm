@@ -106,14 +106,25 @@ model User {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  accounts        Account[]
-  sessions        Session[]
-  clientMembers   ClientMember[]
-  assignedJobs    Job[]          @relation("JobAssignee")
-  activities      Activity[]
-  timeEntries     TimeEntry[]
-  createdQuotes   Quote[]
-  createdInvoices Invoice[]
+  // Calendly integration (My Day) — token is AES-256-GCM encrypted via src/lib/crypto.ts,
+  // never stored in plaintext. calendlyUserUri is captured at connect-time and needed to
+  // scope the scheduled_events lookup to just this person.
+  calendlyTokenCipher String?   @db.Text
+  calendlyUserUri     String?
+  calendlyName        String?
+  calendlyConnectedAt DateTime?
+
+  accounts          Account[]
+  sessions          Session[]
+  clientMembers     ClientMember[]
+  assignedJobs      Job[]          @relation("JobAssignee")
+  activities        Activity[]
+  timeEntries       TimeEntry[]
+  createdQuotes     Quote[]
+  createdInvoices   Invoice[]
+  personalTasks     PersonalTask[]
+  followUpsAssigned FollowUp[]     @relation("FollowUpAssignee")
+  followUpsCreated  FollowUp[]     @relation("FollowUpCreator")
 }
 
 model Account {
@@ -173,6 +184,7 @@ model Client {
   invoices        Invoice[]
   onboardingTasks ClientOnboardingTask[]
   accessEntries   ClientAccess[]
+  followUps       FollowUp[]
 
   @@index([status])
 }
@@ -423,4 +435,46 @@ model InvoiceLineItem {
   clientService ClientService? @relation(fields: [clientServiceId], references: [id], onDelete: SetNull)
 
   @@index([invoiceId])
+}
+
+/// A private personal to-do item on a user's My Day hub — unrelated to client Jobs.
+model PersonalTask {
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  notes       String?   @db.Text
+  done        Boolean   @default(false)
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// A reminder to follow up with a client, or a standalone reminder with no client attached.
+/// assignedToId is who owns it — mirrors Job.assignedToId (nullable at the DB level so a
+/// deleted user's follow-ups survive via SetNull, required at the form/zod level).
+model FollowUp {
+  id           String    @id @default(cuid())
+  clientId     String?
+  assignedToId String?
+  createdById  String?
+  title        String
+  notes        String?   @db.Text
+  dueDate      DateTime
+  done         Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  completedAt  DateTime?
+
+  client     Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  assignedTo User?   @relation("FollowUpAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?   @relation("FollowUpCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([assignedToId])
+  @@index([clientId])
+  @@index([dueDate])
 }

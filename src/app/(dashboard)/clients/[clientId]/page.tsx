@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { IdCard, BarChart3, UsersRound, ListChecks } from "lucide-react";
+import { IdCard, BarChart3, UsersRound, ListChecks, Clock3 } from "lucide-react";
 import { requireUser, getClientForUser, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { ClientFormDialog } from "@/components/clients/client-form-dialog";
 import { DeleteClientButton } from "@/components/clients/delete-client-button";
 import { AssignMembers } from "@/components/clients/assign-members";
 import { OnboardingChecklist } from "@/components/clients/onboarding-checklist";
+import { FollowUpList } from "@/components/my-day/follow-up-list";
 import { formatMinutes } from "@/lib/constants";
 
 export default async function ClientOverviewPage({
@@ -20,7 +21,7 @@ export default async function ClientOverviewPage({
   if (!client) notFound();
   const canManageClients = await hasPermission(user, "MANAGE_CLIENTS");
 
-  const [members, allUsers, jobCounts, timeAgg, onboardingTasks] = await Promise.all([
+  const [members, allUsers, admins, jobCounts, timeAgg, onboardingTasks, followUps] = await Promise.all([
     prisma.clientMember.findMany({
       where: { clientId },
       include: { user: { select: { id: true, name: true, email: true } } },
@@ -32,6 +33,10 @@ export default async function ClientOverviewPage({
           orderBy: { name: "asc" },
         })
       : Promise.resolve([]),
+    prisma.user.findMany({
+      where: { role: "ADMIN", disabledAt: null },
+      select: { id: true, name: true, email: true },
+    }),
     prisma.job.groupBy({
       by: ["stage"],
       where: { clientId },
@@ -46,6 +51,11 @@ export default async function ClientOverviewPage({
       orderBy: { position: "asc" },
       select: { id: true, title: true, done: true },
     }),
+    prisma.followUp.findMany({
+      where: { clientId },
+      include: { assignedTo: { select: { id: true, name: true } } },
+      orderBy: [{ done: "asc" }, { dueDate: "asc" }],
+    }),
   ]);
 
   const openJobs = jobCounts
@@ -53,6 +63,9 @@ export default async function ClientOverviewPage({
     .reduce((sum, j) => sum + j._count, 0);
   const doneJobs = jobCounts.find((j) => j.stage === "DONE")?._count ?? 0;
   const totalMinutes = timeAgg._sum.minutes ?? 0;
+  const assignableUsers = Array.from(
+    new Map([...members.map((m) => m.user), ...admins].map((u) => [u.id, u])).values(),
+  );
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 md:p-6">
@@ -99,6 +112,33 @@ export default async function ClientOverviewPage({
         </Card>
 
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <Clock3 className="h-4 w-4 text-muted-foreground" />
+                Follow-ups
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FollowUpList
+                followUps={followUps.map((f) => ({
+                  id: f.id,
+                  title: f.title,
+                  notes: f.notes,
+                  dueDate: f.dueDate.toISOString(),
+                  done: f.done,
+                  clientId,
+                  clientName: client.name,
+                  assignedToName: f.assignedTo?.name ?? null,
+                }))}
+                assignableUsers={assignableUsers}
+                fixedClientId={clientId}
+                currentUserId={user.id}
+                showClient={false}
+              />
+            </CardContent>
+          </Card>
+
           {onboardingTasks.length > 0 ? (
             <Card>
               <CardHeader>
