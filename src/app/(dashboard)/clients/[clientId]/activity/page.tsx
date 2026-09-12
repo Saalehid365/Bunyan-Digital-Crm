@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireUser, getClientForUser } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Timeline } from "@/components/activity/timeline";
+import { ActivityLog } from "@/components/activity/activity-log";
 import { NoteComposer } from "@/components/activity/note-composer";
 
 export default async function ClientActivityPage({
@@ -18,7 +18,7 @@ export default async function ClientActivityPage({
   const activities = await prisma.activity.findMany({
     where: { clientId },
     orderBy: { createdAt: "desc" },
-    include: { user: { select: { name: true } } },
+    include: { user: { select: { id: true, name: true } } },
   });
 
   return (
@@ -37,12 +37,13 @@ export default async function ClientActivityPage({
           <CardTitle className="text-sm font-medium">Work log</CardTitle>
         </CardHeader>
         <CardContent>
-          <Timeline
+          <ActivityLog
             entries={activities.map((a) => ({
               id: a.id,
               type: a.type,
               message: a.message,
               createdAt: a.createdAt,
+              userId: a.user?.id ?? null,
               userName: a.user?.name ?? null,
             }))}
           />

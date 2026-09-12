@@ -1,4 +1,5 @@
 import type {
+  ActivityType,
   ClientStatus,
   InvoiceStatus,
   JobStage,
@@ -8,6 +9,17 @@ import type {
   Recurrence,
   ServiceStatus,
 } from "@prisma/client";
+
+export const ACTIVITY_TYPE_LABEL: Record<ActivityType, string> = {
+  NOTE: "Note",
+  STAGE_CHANGE: "Stage change",
+  CREATED: "Created",
+  COMPLETED: "Completed",
+  CLIENT_UPDATED: "Client updated",
+  TIME_LOGGED: "Time logged",
+  QUOTE_STATUS_CHANGE: "Quote status",
+  INVOICE_STATUS_CHANGE: "Invoice status",
+};
 
 export const PERMISSIONS: { value: Permission; label: string; description: string }[] = [
   { value: "MANAGE_CLIENTS", label: "Manage clients", description: "Create, edit, and delete their assigned clients" },

@@ -8,6 +8,7 @@ export type TimelineEntry = {
   type: ActivityType;
   message: string;
   createdAt: Date;
+  userId: string | null;
   userName: string | null;
   clientName?: string;
 };
