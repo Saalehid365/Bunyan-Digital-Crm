@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientFormDialog } from "@/components/clients/client-form-dialog";
 import { DeleteClientButton } from "@/components/clients/delete-client-button";
+import { EmailClientDialog } from "@/components/clients/email-client-dialog";
 import { AssignMembers } from "@/components/clients/assign-members";
 import { OnboardingChecklist } from "@/components/clients/onboarding-checklist";
 import { FollowUpList } from "@/components/my-day/follow-up-list";
@@ -76,12 +77,15 @@ export default async function ClientOverviewPage({
               <IdCard className="h-4 w-4 text-muted-foreground" />
               Client details
             </CardTitle>
-            {canManageClients ? (
-              <div className="flex items-center gap-2">
-                <ClientFormDialog client={client} />
-                <DeleteClientButton clientId={clientId} clientName={client.name} />
-              </div>
-            ) : null}
+            <div className="flex items-center gap-2">
+              <EmailClientDialog clientId={clientId} clientName={client.name} defaultTo={client.contactEmail} />
+              {canManageClients ? (
+                <>
+                  <ClientFormDialog client={client} />
+                  <DeleteClientButton clientId={clientId} clientName={client.name} />
+                </>
+              ) : null}
+            </div>
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">

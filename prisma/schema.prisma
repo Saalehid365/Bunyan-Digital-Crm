@@ -75,6 +75,7 @@ enum ActivityType {
   TIME_LOGGED
   QUOTE_STATUS_CHANGE
   INVOICE_STATUS_CHANGE
+  EMAIL_SENT
 }
 
 enum QuoteStatus {

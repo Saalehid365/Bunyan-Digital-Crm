@@ -19,6 +19,7 @@ export const ACTIVITY_TYPE_LABEL: Record<ActivityType, string> = {
   TIME_LOGGED: "Time logged",
   QUOTE_STATUS_CHANGE: "Quote status",
   INVOICE_STATUS_CHANGE: "Invoice status",
+  EMAIL_SENT: "Email sent",
 };
 
 export const PERMISSIONS: { value: Permission; label: string; description: string }[] = [

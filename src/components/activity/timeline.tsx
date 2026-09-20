@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { CheckCircle2, Clock, FileText, MessageSquare, MoveRight, PlusCircle, Pencil, Receipt } from "lucide-react";
+import { CheckCircle2, Clock, FileText, Mail, MessageSquare, MoveRight, PlusCircle, Pencil, Receipt } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import type { ActivityType } from "@prisma/client";
 
@@ -22,6 +22,7 @@ const ICONS: Record<ActivityType, React.ComponentType<{ className?: string }>> =
   TIME_LOGGED: Clock,
   QUOTE_STATUS_CHANGE: FileText,
   INVOICE_STATUS_CHANGE: Receipt,
+  EMAIL_SENT: Mail,
 };
 
 export function Timeline({ entries }: { entries: TimelineEntry[] }) {
@@ -48,7 +49,7 @@ export function Timeline({ entries }: { entries: TimelineEntry[] }) {
               <Icon className="h-3.5 w-3.5" />
             </span>
             <div className="min-w-0 flex-1 pt-1">
-              <p className="text-sm text-foreground">
+              <p className="whitespace-pre-wrap text-sm text-foreground">
                 {entry.message}
                 {entry.clientName ? (
                   <span className="text-muted-foreground"> · {entry.clientName}</span>
