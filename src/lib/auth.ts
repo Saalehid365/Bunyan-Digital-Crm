@@ -12,6 +12,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   // correctly with Next.js's `basePath` config — left implicit, Auth.js's internal
   // redirects/fetches ignore the app's basePath entirely and 404.
   basePath: "/api/auth",
+  // Required once this app sits behind Netlify's site-to-site proxy (www.bunyandigital.co/crm
+  // forwarding to this app's own bunyandigitalcrm.netlify.app origin): the request Auth.js
+  // actually receives carries an x-forwarded-host that doesn't match this origin's own host,
+  // which Auth.js rejects by default outside of known platforms like Vercel.
+  trustHost: true,
   adapter: PrismaAdapter(prisma),
   // Credentials sign-in requires JWT sessions — the adapter is still used for the
   // Resend/email provider's verification tokens and for looking users up by email.
