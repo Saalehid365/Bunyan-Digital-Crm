@@ -13,7 +13,17 @@ async function calendlyFetch(path: string, token: string): Promise<CalendlyResul
     });
     if (!res.ok) {
       if (res.status === 401) return { ok: false, error: "That Calendly token is invalid or has been revoked." };
-      return { ok: false, error: `Calendly returned an error (${res.status}).` };
+      const body = await res.json().catch(() => null);
+      const detail = body?.message || body?.title;
+      if (res.status === 403) {
+        return {
+          ok: false,
+          error: detail
+            ? `Calendly refused this request: ${detail}`
+            : "Calendly refused this request (403) — this usually means the API isn't available on your Calendly plan.",
+        };
+      }
+      return { ok: false, error: detail ? `Calendly returned an error: ${detail}` : `Calendly returned an error (${res.status}).` };
     }
     return { ok: true, data: await res.json() };
   } catch (err) {
