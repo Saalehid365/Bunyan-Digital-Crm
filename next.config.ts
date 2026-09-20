@@ -4,6 +4,10 @@ import type { NextConfig } from "next";
 // www.bunyandigital.co/crm. Left unset locally so dev stays at the plain root.
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || undefined;
 
+// TEMP DEBUG — remove once the Netlify basePath issue is confirmed fixed.
+console.log(`[DEBUG] NEXT_PUBLIC_BASE_PATH = ${JSON.stringify(process.env.NEXT_PUBLIC_BASE_PATH)}`);
+console.log(`[DEBUG] resolved basePath = ${JSON.stringify(basePath)}`);
+
 const nextConfig: NextConfig = {
   basePath,
   experimental: {
