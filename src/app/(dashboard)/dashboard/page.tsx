@@ -1,13 +1,15 @@
 import { addDays } from "date-fns";
-import { KanbanSquare } from "lucide-react";
-import { requireUser, getVisibleClientIds } from "@/lib/permissions";
+import { KanbanSquare, CalendarClock } from "lucide-react";
+import { requireUser, getVisibleClientIds, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { GBP, formatMinutes } from "@/lib/constants";
 import { getKanbanJobs, getClientServicesByClient, getQuotesAndInvoicesByClient, getAccessibleClients } from "@/lib/jobs-data";
 import { getStaleLeads } from "@/lib/stale-leads";
+import { getInvoiceCalendarEntries } from "@/lib/invoice-calendar";
 import { MetricPanel } from "@/components/dashboard/metric-panel";
 import { StaleLeadsCard } from "@/components/dashboard/stale-leads-card";
 import { GlobalBoard } from "@/components/kanban/global-board";
+import { PaymentsCalendar } from "@/components/billing/payments-calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function DashboardPage() {
@@ -15,8 +17,9 @@ export default async function DashboardPage() {
   const isAdmin = user.role === "ADMIN";
   const clientIds = isAdmin ? undefined : await getVisibleClientIds(user.id);
   const clientFilter = clientIds ? { id: { in: clientIds } } : {};
+  const canManageBilling = await hasPermission(user, "MANAGE_BILLING");
 
-  const [activeClients, jobs, clients, clientServicesByClient, quotesAndInvoicesByClient, activeUsers] =
+  const [activeClients, jobs, clients, clientServicesByClient, quotesAndInvoicesByClient, activeUsers, invoiceCalendarEntries] =
     await Promise.all([
       prisma.client.count({ where: { ...clientFilter, status: "ACTIVE" } }),
       getKanbanJobs(clientIds),
@@ -27,6 +30,7 @@ export default async function DashboardPage() {
         where: { disabledAt: null },
         select: { id: true, name: true, email: true },
       }),
+      canManageBilling ? getInvoiceCalendarEntries(clientIds) : Promise.resolve([]),
     ]);
   const { quotesByClient, invoicesByClient } = quotesAndInvoicesByClient;
 
@@ -83,11 +87,25 @@ export default async function DashboardPage() {
           {staleLeads.length > 0 ? (
             <StaleLeadsCard leads={staleLeads} style={{ animationDelay: "140ms" }} />
           ) : null}
+
+          {canManageBilling ? (
+            <Card className="rise" style={{ animationDelay: "160ms" }}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                  Payments due
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PaymentsCalendar invoices={invoiceCalendarEntries} compact />
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
 
         <Card
           className="rise mx-4 flex flex-1 flex-col overflow-hidden md:mx-6 mb-4 md:mb-6"
-          style={{ animationDelay: "200ms" }}
+          style={{ animationDelay: "220ms" }}
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm font-medium">
@@ -152,11 +170,25 @@ export default async function DashboardPage() {
             ]}
           />
         </div>
+
+        {canManageBilling ? (
+          <Card className="rise" style={{ animationDelay: "140ms" }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                Payments due
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PaymentsCalendar invoices={invoiceCalendarEntries} compact />
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
 
       <Card
         className="rise mx-4 mb-4 flex flex-1 flex-col overflow-hidden md:mx-6 md:mb-6"
-        style={{ animationDelay: "160ms" }}
+        style={{ animationDelay: "200ms" }}
       >
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm font-medium">

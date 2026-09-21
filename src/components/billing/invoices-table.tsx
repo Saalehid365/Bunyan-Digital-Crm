@@ -1,12 +1,16 @@
 "use client";
 
+import { useTransition } from "react";
 import { format, isPast } from "date-fns";
-import { Receipt } from "lucide-react";
+import { Receipt, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
 import { GBP_PRECISE } from "@/lib/constants";
 import { InvoiceStatusCell } from "@/components/billing/status-cells";
+import { updateInvoiceStatus } from "@/server/actions/invoices";
 import { lineItemsTotal, type InvoiceRow } from "@/components/billing/types";
 
 export function InvoicesTable({
@@ -16,6 +20,8 @@ export function InvoicesTable({
   invoices: InvoiceRow[];
   onRowClick: (invoice: InvoiceRow) => void;
 }) {
+  const [pending, startTransition] = useTransition();
+
   if (invoices.length === 0) {
     return (
       <div className="p-4 md:p-6">
@@ -36,6 +42,7 @@ export function InvoicesTable({
               <TableHead>Total</TableHead>
               <TableHead>Issued</TableHead>
               <TableHead>Due</TableHead>
+              <TableHead />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -66,6 +73,26 @@ export function InvoicesTable({
                     )}
                   >
                     {inv.dueDate ? format(inv.dueDate, "d MMM yyyy") : "—"}
+                  </TableCell>
+                  <TableCell className="w-10 p-0 text-center">
+                    {inv.status !== "PAID" ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-success"
+                        disabled={pending}
+                        title="Mark as paid"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startTransition(async () => {
+                            const result = await updateInvoiceStatus(inv.id, "PAID");
+                            if (result?.error) toast.error(result.error);
+                          });
+                        }}
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                      </Button>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               );

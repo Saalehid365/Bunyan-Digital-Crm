@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { addClientService } from "@/server/actions/services";
 import { SERVICE_STATUS_LABEL } from "@/lib/constants";
@@ -33,15 +34,24 @@ const BILLING_TABS: { value: BillingType; label: string }[] = [
   { value: "ONE_OFF", label: "One-off" },
 ];
 
+function defaultInvoiceDueDate() {
+  const d = new Date();
+  d.setDate(d.getDate() + 14);
+  return d.toISOString().slice(0, 10);
+}
+
 export function ClientServiceFormDialog({
   clientId,
   serviceTypes,
+  canManageBilling = false,
 }: {
   clientId: string;
   serviceTypes: ServiceType[];
+  canManageBilling?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [billingType, setBillingType] = useState<BillingType>("MONTHLY");
+  const [createInitialInvoice, setCreateInitialInvoice] = useState(false);
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initialState, formData: FormData): Promise<typeof initialState> => {
       return await addClientService(formData);
@@ -120,7 +130,10 @@ export function ClientServiceFormDialog({
                 <button
                   key={tab.value}
                   type="button"
-                  onClick={() => setBillingType(tab.value)}
+                  onClick={() => {
+                    setBillingType(tab.value);
+                    if (tab.value !== "MONTHLY") setCreateInitialInvoice(false);
+                  }}
                   className={cn(
                     "rounded-[calc(var(--radius-sm)-2px)] px-3 py-1 text-xs font-medium transition-colors",
                     billingType === tab.value
@@ -146,6 +159,36 @@ export function ClientServiceFormDialog({
               <Input id="startDate" name="startDate" type="date" />
             </div>
           </div>
+
+          {billingType === "MONTHLY" && canManageBilling ? (
+            <div className="space-y-2 rounded-[var(--radius-md)] border border-border p-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="createInitialInvoice"
+                  name="createInitialInvoice"
+                  checked={createInitialInvoice}
+                  onCheckedChange={(checked) => setCreateInitialInvoice(checked === true)}
+                />
+                <Label htmlFor="createInitialInvoice" className="text-sm font-normal">
+                  Create first invoice now
+                </Label>
+              </div>
+              {createInitialInvoice ? (
+                <div className="space-y-2 pl-6">
+                  <Label htmlFor="invoiceDueDate">Invoice due date</Label>
+                  <Input
+                    id="invoiceDueDate"
+                    name="invoiceDueDate"
+                    type="date"
+                    defaultValue={defaultInvoiceDueDate()}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Future months are billed automatically from here on.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>

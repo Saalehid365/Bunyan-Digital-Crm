@@ -29,5 +29,7 @@ export const clientServiceSchema = z.object({
     }),
   startDate: z.string().trim().optional().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().or(z.literal("")),
+  createInitialInvoice: z.union([z.literal("on"), z.literal("true")]).optional(),
+  invoiceDueDate: z.string().trim().optional().or(z.literal("")),
 });
 export type ClientServiceInput = z.infer<typeof clientServiceSchema>;

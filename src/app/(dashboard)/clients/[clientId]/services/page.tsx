@@ -17,6 +17,7 @@ export default async function ClientServicesPage({
   const client = await getClientForUser(user, clientId);
   if (!client) notFound();
   const canManageServices = await hasPermission(user, "MANAGE_SERVICES");
+  const canManageBilling = await hasPermission(user, "MANAGE_BILLING");
 
   const [services, serviceTypes] = await Promise.all([
     prisma.clientService.findMany({
@@ -37,7 +38,13 @@ export default async function ClientServicesPage({
             <Wrench className="h-4 w-4 text-muted-foreground" />
             Services
           </CardTitle>
-          {canManageServices ? <ClientServiceFormDialog clientId={clientId} serviceTypes={serviceTypes} /> : null}
+          {canManageServices ? (
+            <ClientServiceFormDialog
+              clientId={clientId}
+              serviceTypes={serviceTypes}
+              canManageBilling={canManageBilling}
+            />
+          ) : null}
         </CardHeader>
         <CardContent>
           {services.length === 0 ? (
@@ -56,6 +63,7 @@ export default async function ClientServicesPage({
                 status: s.status,
                 billingType: s.billingType,
                 priceValue: s.priceValue ? Number(s.priceValue) : null,
+                autoInvoice: s.autoInvoice,
                 serviceType: s.serviceType,
               }))}
             />

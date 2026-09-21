@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Repeat, RepeatOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,9 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { ServiceTypeBadge } from "@/components/services/service-type-badge";
 import { SERVICE_STATUS_LABEL, GBP } from "@/lib/constants";
-import { updateClientServiceStatus, deleteClientService } from "@/server/actions/services";
+import {
+  updateClientServiceStatus,
+  updateClientServiceAutoInvoice,
+  deleteClientService,
+} from "@/server/actions/services";
 import type { BillingType, ServiceStatus } from "@prisma/client";
 
 type ClientService = {
@@ -21,6 +26,7 @@ type ClientService = {
   status: ServiceStatus;
   billingType: BillingType;
   priceValue: number | null;
+  autoInvoice: boolean;
   serviceType: { name: string; colorHex: string };
 };
 
@@ -59,6 +65,29 @@ export function ClientServiceList({
             ) : null}
             {canManageServices ? (
               <>
+                {service.billingType === "MONTHLY" ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "h-8 w-8",
+                      service.autoInvoice ? "text-primary" : "text-muted-foreground",
+                    )}
+                    disabled={pending}
+                    title={
+                      service.autoInvoice
+                        ? "Auto-invoiced monthly — click to turn off"
+                        : "Auto-invoicing off — click to turn on"
+                    }
+                    onClick={() =>
+                      startTransition(() =>
+                        updateClientServiceAutoInvoice(service.id, clientId, !service.autoInvoice).then(() => {}),
+                      )
+                    }
+                  >
+                    {service.autoInvoice ? <Repeat className="h-3.5 w-3.5" /> : <RepeatOff className="h-3.5 w-3.5" />}
+                  </Button>
+                ) : null}
                 <Select
                   value={service.status}
                   disabled={pending}
