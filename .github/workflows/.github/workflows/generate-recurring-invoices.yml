@@ -1,0 +1,23 @@
+name: Generate recurring invoices
+
+on:
+  schedule:
+    # Daily, not monthly-on-the-1st — different clients have different start-date
+    # anniversaries, so the app itself decides per-service whether an invoice is due.
+    - cron: "0 6 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the recurring-invoice generation endpoint
+        run: |
+          response=$(curl -sS -o response.json -w "%{http_code}" -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            https://www.bunyandigital.co/crm/api/cron/generate-recurring-invoices)
+          echo "HTTP status: $response"
+          cat response.json
+          if [ "$response" -ge 300 ]; then
+            exit 1
+          fi
