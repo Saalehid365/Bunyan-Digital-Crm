@@ -10,8 +10,10 @@ import { AccountDisabledError } from "@/lib/auth-errors";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Explicitly setting this (even to Auth.js's own default) is what makes it combine
   // correctly with Next.js's `basePath` config — left implicit, Auth.js's internal
-  // redirects/fetches ignore the app's basePath entirely and 404.
-  basePath: "/api/auth",
+  // redirects/fetches ignore the app's basePath entirely and 404. Must be prefixed
+  // with NEXT_PUBLIC_BASE_PATH itself (Next.js's basePath applies to routing, not to
+  // what Auth.js thinks its own path is) or generated URLs drop the "/crm" prefix.
+  basePath: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`,
   // Required once this app sits behind Netlify's site-to-site proxy (www.bunyandigital.co/crm
   // forwarding to this app's own bunyandigitalcrm.netlify.app origin): the request Auth.js
   // actually receives carries an x-forwarded-host that doesn't match this origin's own host,
