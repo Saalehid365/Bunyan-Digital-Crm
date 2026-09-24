@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import logo from "@/components/brand/logo-mark-light.png";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import {
@@ -43,12 +45,8 @@ export const NAV_ITEMS: NavItem[] = [
 export function SidebarBrand() {
   return (
     <div className="flex h-14 items-center gap-2.5 border-b border-sidebar-border px-5">
-      <div className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] bg-sidebar-primary text-sidebar-primary-foreground">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-          <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
-      <span className="font-serif text-base font-semibold tracking-tight text-white">
+      <Image src={logo} alt="" width={40} height={40} className="h-10 w-auto" priority />
+      <span className="font-serif text-[1.05rem] font-semibold tracking-[-0.03em] text-white">
         Bunyan Digital
       </span>
     </div>
@@ -107,10 +105,11 @@ export function SidebarNav({
 
 export function Sidebar({ role, permissions }: { role: "ADMIN" | "MEMBER"; permissions: Permission[] }) {
   return (
-    <aside className="rise hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar shadow-[1px_0_3px_rgba(0,0,0,0.03)] md:flex">
-      <SidebarBrand />
-      <SidebarNav role={role} permissions={permissions} />
-      <div className="border-t border-sidebar-border px-3 py-3">
+    <aside className="rise relative hidden w-60 shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar md:flex">
+      <div aria-hidden className="blueprint pointer-events-none absolute inset-0 opacity-[0.22] [mask-image:linear-gradient(to_bottom,black,transparent_50%)]" />
+      <div className="relative"><SidebarBrand /></div>
+      <div className="relative flex flex-1 flex-col"><SidebarNav role={role} permissions={permissions} /></div>
+      <div className="relative border-t border-sidebar-border px-3 py-3">
         <p className="px-2 text-[11px] leading-relaxed text-sidebar-foreground/50">
           Bunyan Digital Ltd
         </p>

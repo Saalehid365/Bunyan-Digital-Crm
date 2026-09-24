@@ -7,6 +7,7 @@ import { getKanbanJobs, getClientServicesByClient, getQuotesAndInvoicesByClient,
 import { getStaleLeads } from "@/lib/stale-leads";
 import { getInvoiceCalendarEntries } from "@/lib/invoice-calendar";
 import { MetricPanel } from "@/components/dashboard/metric-panel";
+import { DashboardHero } from "@/components/dashboard/dashboard-hero";
 import { StaleLeadsCard } from "@/components/dashboard/stale-leads-card";
 import { GlobalBoard } from "@/components/kanban/global-board";
 import { PaymentsCalendar } from "@/components/billing/payments-calendar";
@@ -64,26 +65,21 @@ export default async function DashboardPage() {
 
     return (
       <div className="flex flex-1 flex-col">
+        <DashboardHero eyebrow="Agency overview" title="Dashboard" subtitle="Agency-wide view across every client.">
+          <MetricPanel
+            heroLabel="Active monthly recurring value"
+            heroValue={GBP.format(mrr)}
+            heroSublabel={`Across ${activeServices._count} active service${activeServices._count === 1 ? "" : "s"}`}
+            ledger={[
+              { label: "Active clients", value: String(activeClients) },
+              { label: "Open jobs", value: String(openJobs) },
+              { label: "Completed this week", value: String(doneThisWeek) },
+              { label: "Logged this week", value: formatMinutes(minutesThisWeekAgg._sum.minutes ?? 0) },
+            ]}
+          />
+        </DashboardHero>
+
         <div className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
-          <div className="rise" style={{ animationDelay: "0ms" }}>
-            <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Agency-wide view across every client.</p>
-          </div>
-
-          <div className="rise" style={{ animationDelay: "80ms" }}>
-            <MetricPanel
-              heroLabel="Active monthly recurring value"
-              heroValue={GBP.format(mrr)}
-              heroSublabel={`Across ${activeServices._count} active service${activeServices._count === 1 ? "" : "s"}`}
-              ledger={[
-                { label: "Active clients", value: String(activeClients) },
-                { label: "Open jobs", value: String(openJobs) },
-                { label: "Completed this week", value: String(doneThisWeek) },
-                { label: "Logged this week", value: formatMinutes(minutesThisWeekAgg._sum.minutes ?? 0) },
-              ]}
-            />
-          </div>
-
           {staleLeads.length > 0 ? (
             <StaleLeadsCard leads={staleLeads} style={{ animationDelay: "140ms" }} />
           ) : null}
@@ -150,27 +146,24 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-1 flex-col">
+      <DashboardHero
+        eyebrow="Your day"
+        title={`Welcome back${user.name ? `, ${user.name.split(" ")[0]}` : ""}`}
+        subtitle="Here's what's on for your clients."
+      >
+        <MetricPanel
+          heroLabel="Your open jobs"
+          heroValue={String(myOpenJobs)}
+          heroSublabel={`${myCompletedThisWeek} completed this week`}
+          ledger={[
+            { label: "Assigned clients", value: String(activeClients) },
+            { label: "Due within 14 days", value: String(dueSoonCount) },
+            { label: "Logged this week", value: formatMinutes(myMinutesThisWeekAgg._sum.minutes ?? 0) },
+          ]}
+        />
+      </DashboardHero>
+
       <div className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-6">
-        <div className="rise" style={{ animationDelay: "0ms" }}>
-          <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
-            Welcome back{user.name ? `, ${user.name.split(" ")[0]}` : ""}
-          </h1>
-          <p className="text-sm text-muted-foreground">Here&apos;s what&apos;s on for your clients.</p>
-        </div>
-
-        <div className="rise" style={{ animationDelay: "80ms" }}>
-          <MetricPanel
-            heroLabel="Your open jobs"
-            heroValue={String(myOpenJobs)}
-            heroSublabel={`${myCompletedThisWeek} completed this week`}
-            ledger={[
-              { label: "Assigned clients", value: String(activeClients) },
-              { label: "Due within 14 days", value: String(dueSoonCount) },
-              { label: "Logged this week", value: formatMinutes(myMinutesThisWeekAgg._sum.minutes ?? 0) },
-            ]}
-          />
-        </div>
-
         {canManageBilling ? (
           <Card className="rise" style={{ animationDelay: "140ms" }}>
             <CardHeader>

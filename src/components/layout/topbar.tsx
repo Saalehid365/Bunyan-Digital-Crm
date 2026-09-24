@@ -24,12 +24,12 @@ export function Topbar({
   onOpenPalette: () => void;
 }) {
   return (
-    <header className="rise relative z-10 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-topbar px-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] md:px-6">
+    <header className="dark relative z-10 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-white/10 bg-[#05081a] px-4 text-foreground md:px-6">
       <div className="flex min-w-0 items-center gap-2">
         <MobileNav role={role} permissions={permissions} />
         <button
           onClick={onOpenPalette}
-          className="flex w-9 items-center gap-2 rounded-[var(--radius-sm)] border border-border bg-muted/40 px-2.5 py-1.5 text-sm text-muted-foreground transition-all duration-150 hover:border-primary/40 hover:bg-muted hover:text-foreground hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary),transparent_88%)] sm:w-56 sm:px-3"
+          className="flex w-9 items-center gap-2 rounded-full border border-border bg-white/[0.06] px-3 py-1.5 text-sm text-muted-foreground transition-all duration-150 hover:border-primary/40 hover:bg-muted hover:text-foreground hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary),transparent_88%)] sm:w-56 sm:px-3"
         >
           <Search className="h-3.5 w-3.5 shrink-0" />
           <span className="hidden flex-1 text-left sm:inline">Search…</span>

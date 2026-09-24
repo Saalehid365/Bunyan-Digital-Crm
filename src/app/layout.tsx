@@ -1,28 +1,35 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono, Fraunces } from "next/font/google";
+import { Hanken_Grotesk, JetBrains_Mono, Bricolage_Grotesque, Reem_Kufi } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthSessionProvider } from "@/components/auth-session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const plexSans = IBM_Plex_Sans({
+const sans = Hanken_Grotesk({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const plexMono = IBM_Plex_Mono({
+const mono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["400", "500"],
 });
 
-const fraunces = Fraunces({
+// Display face — bound to --font-serif so every existing `font-serif` heading picks it up.
+const display = Bricolage_Grotesque({
   variable: "--font-serif",
   subsets: ["latin"],
   weight: "variable",
   axes: ["opsz"],
+});
+
+const arabic = Reem_Kufi({
+  variable: "--font-arabic",
+  subsets: ["arabic"],
+  weight: ["500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -35,7 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${plexSans.variable} ${plexMono.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${sans.variable} ${mono.variable} ${display.variable} ${arabic.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider

@@ -53,86 +53,95 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Light theme (default): brand navy ink on a warm cream ground — matches the
-   Bunyan Digital logo. Navy is primary (buttons, links, focus); green is a
-   deliberate accent reserved for success/active states, never the base neutral. */
+/* "Bunyan OS" — ink / paper / electric blue, shared with the marketing site.
+   Light: cool paper ground, white cards, ink text, electric-blue primary.
+   Green is reserved for success/active states only. */
 :root {
-  --background: #faf8f3;
-  --foreground: #101c26;
+  --background: #f3f2ec;
+  --foreground: #0b1024;
   --card: #ffffff;
-  --card-foreground: #101c26;
+  --card-foreground: #0b1024;
   --popover: #ffffff;
-  --popover-foreground: #101c26;
-  --primary: #101c26;
+  --popover-foreground: #0b1024;
+  --primary: #2323ff;
   --primary-foreground: #ffffff;
-  --secondary: #eef1ee;
-  --secondary-foreground: #101c26;
-  --muted: #eef1ee;
-  --muted-foreground: #6b7570;
-  --accent: #eef1ee;
-  --accent-foreground: #101c26;
-  --destructive: #b8433a;
-  --border: #e8e3d8;
-  --input: #e8e3d8;
-  --ring: #101c26;
-  --success: #1c7a50;
+  --secondary: #ebeae2;
+  --secondary-foreground: #0b1024;
+  --muted: #ebeae2;
+  --muted-foreground: #5f647a;
+  --accent: #e9e9f6;
+  --accent-foreground: #0b1024;
+  --destructive: #c23b3b;
+  --border: rgba(11, 16, 36, 0.1);
+  --input: rgba(11, 16, 36, 0.14);
+  --ring: #2323ff;
+  --success: #17804f;
   --success-foreground: #ffffff;
-  --line: #d8d3c6;
-  --chart-1: #101c26;
-  --chart-2: #1c7a50;
-  --chart-3: #4c6a86;
-  --chart-4: #b3703f;
-  --chart-5: #7c5c9c;
-  --radius: 0.65rem;
-  --sidebar: #101c26;
-  --sidebar-foreground: #cfd8dc;
-  --sidebar-primary: #2fae6c;
-  --sidebar-primary-foreground: #06140c;
-  --sidebar-accent: #1b2e3d;
+  --line: rgba(11, 16, 36, 0.12);
+  --chart-1: #2323ff;
+  --chart-2: #5865ff;
+  --chart-3: #17804f;
+  --chart-4: #c1782f;
+  --chart-5: #8a5fd0;
+  --radius: 0.9rem;
+  --sidebar: #05081a;
+  --sidebar-foreground: #c5cae0;
+  --sidebar-primary: #7480ff;
+  --sidebar-primary-foreground: #05081a;
+  --sidebar-accent: rgba(255, 255, 255, 0.07);
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(207, 216, 220, 0.1);
-  --sidebar-ring: #2fae6c;
-  --topbar: #faf8f3;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #7480ff;
+  --topbar: rgba(243, 242, 236, 0.72);
+  --material: rgba(255, 255, 255, 0.88);
+  --material-border: rgba(255, 255, 255, 0.6);
+  --shadow-1: 0 1px 2px rgba(11, 16, 36, 0.05), 0 8px 24px -12px rgba(11, 16, 36, 0.14);
+  --shadow-2: 0 1px 2px rgba(11, 16, 36, 0.06), 0 18px 44px -14px rgba(11, 16, 36, 0.24);
+  --shadow-3: 0 2px 4px rgba(11, 16, 36, 0.08), 0 32px 80px -20px rgba(11, 16, 36, 0.4);
 }
 
-/* Dark theme: near-black navy ground, brand green as the primary interactive
-   color (navy itself has no contrast on a navy background). */
+/* Dark: ink ground, lifted blue for legibility, translucent materials. */
 .dark {
-  --background: #0f171d;
-  --foreground: #eef0ea;
-  --card: #182229;
-  --card-foreground: #eef0ea;
-  --popover: #182229;
-  --popover-foreground: #eef0ea;
-  --primary: #2fae6c;
-  --primary-foreground: #06140c;
-  --secondary: #223038;
-  --secondary-foreground: #eef0ea;
-  --muted: #1c272e;
-  --muted-foreground: #93a3ac;
-  --accent: #223038;
-  --accent-foreground: #eef0ea;
-  --destructive: #e2685c;
-  --border: rgba(200, 215, 220, 0.14);
-  --input: rgba(200, 215, 220, 0.18);
-  --ring: #2fae6c;
-  --success: #2fae6c;
-  --success-foreground: #06140c;
-  --line: rgba(200, 215, 220, 0.2);
-  --chart-1: #2fae6c;
-  --chart-2: #7c93a3;
-  --chart-3: #d9a441;
-  --chart-4: #93a3ac;
-  --chart-5: #b98fd0;
-  --sidebar: #0a1116;
-  --sidebar-foreground: #cfd8dc;
-  --sidebar-primary: #2fae6c;
-  --sidebar-primary-foreground: #06140c;
-  --sidebar-accent: #182229;
+  --background: #05081a;
+  --foreground: #eceefb;
+  --card: #0d1230;
+  --card-foreground: #eceefb;
+  --popover: #10163a;
+  --popover-foreground: #eceefb;
+  --primary: #7480ff;
+  --primary-foreground: #05081a;
+  --secondary: #151b42;
+  --secondary-foreground: #eceefb;
+  --muted: #10163a;
+  --muted-foreground: #9aa1c4;
+  --accent: #171e4a;
+  --accent-foreground: #eceefb;
+  --destructive: #ee6b6b;
+  --border: rgba(255, 255, 255, 0.09);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #7480ff;
+  --success: #3cc98b;
+  --success-foreground: #05140d;
+  --line: rgba(255, 255, 255, 0.12);
+  --chart-1: #7480ff;
+  --chart-2: #b4bbff;
+  --chart-3: #3cc98b;
+  --chart-4: #e0a35a;
+  --chart-5: #b797ee;
+  --sidebar: #03051a;
+  --sidebar-foreground: #c5cae0;
+  --sidebar-primary: #7480ff;
+  --sidebar-primary-foreground: #05081a;
+  --sidebar-accent: rgba(255, 255, 255, 0.07);
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(200, 215, 220, 0.1);
-  --sidebar-ring: #2fae6c;
-  --topbar: #0f171d;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #7480ff;
+  --topbar: rgba(5, 8, 26, 0.7);
+  --material: rgba(18, 24, 62, 0.82);
+  --material-border: rgba(255, 255, 255, 0.1);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -14px rgba(0, 0, 0, 0.6);
+  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.5), 0 22px 50px -16px rgba(0, 0, 0, 0.7);
+  --shadow-3: 0 2px 4px rgba(0, 0, 0, 0.5), 0 36px 90px -22px rgba(0, 0, 0, 0.8);
 }
 
 @layer base {
@@ -144,6 +153,14 @@
   }
   html {
     @apply font-sans;
+    font-feature-settings: "ss01", "cv11";
+  }
+  /* Type: size-specific tracking. Display sizes tighten; body stays near 0. */
+  .font-serif,
+  h1,
+  h2 {
+    font-optical-sizing: auto;
+    letter-spacing: -0.03em;
   }
   ::selection {
     background: var(--primary);
@@ -155,6 +172,47 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+  /* Translucent functional layer: content scrolls beneath, light catches the top edge. */
+  .material {
+    background: var(--material);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: inset 0 1px 0 var(--material-border), var(--shadow-2);
+  }
+  .shadow-elev-1 { box-shadow: var(--shadow-1); }
+  .shadow-elev-2 { box-shadow: var(--shadow-2); }
+  .shadow-elev-3 { box-shadow: var(--shadow-3); }
+  /* Blueprint grid used on hero surfaces (login, dashboard hero). */
+  .blueprint {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+}
+
+/* Response: feedback lands on press, instantly — not on release. */
+[data-slot="button"],
+[data-slot="tabs-trigger"],
+[role="menuitem"],
+[role="option"] {
+  -webkit-tap-highlight-color: transparent;
+}
+[data-slot="button"]:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(0.97);
+  transition-duration: 90ms;
+}
+
+/* Scroll-edge effect: soft fade where content meets the floating top bar. */
+.scroll-edge::after {
+  content: "";
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  display: block;
+  height: 24px;
+  margin-top: -24px;
+  background: linear-gradient(to top, var(--background), transparent);
 }
 
 @keyframes shimmer {
@@ -167,22 +225,102 @@
 @keyframes bunyan-rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px) scale(0.995);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 .rise {
-  animation: bunyan-rise 0.5s cubic-bezier(0.16, 0.8, 0.3, 1) both;
+  animation: bunyan-rise 0.6s cubic-bezier(0.2, 0.7, 0.1, 1) both;
 }
 
+/* Reduced motion: keep the state change, drop the travel. */
 @media (prefers-reduced-motion: reduce) {
   .rise {
     animation: none;
   }
+  [data-slot="button"]:active:not(:disabled) {
+    transform: none;
+  }
   [data-slot="skeleton"]::before {
     animation: none;
   }
+}
+
+/* Reduced transparency: frostier → solid. */
+@media (prefers-reduced-transparency: reduce) {
+  .material {
+    background: var(--popover);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  header[data-topbar] {
+    background: var(--background) !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* Increased contrast: defined borders, near-solid surfaces. */
+@media (prefers-contrast: more) {
+  :root {
+    --border: rgba(11, 16, 36, 0.4);
+    --input: rgba(11, 16, 36, 0.5);
+    --muted-foreground: #3a3f55;
+  }
+  .dark {
+    --border: rgba(255, 255, 255, 0.4);
+    --input: rgba(255, 255, 255, 0.5);
+    --muted-foreground: #c8ceee;
+  }
+}
+
+/* ================= Homepage match (v2) =================
+   Flat hairline surfaces, pill controls with the site's sliding-fill hover, mono labels. */
+[data-slot="button"] { border-radius: 9999px; }
+[data-slot="button"][data-variant="default"] { position: relative; overflow: hidden; isolation: isolate; }
+[data-slot="button"][data-variant="default"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--card);
+  transform: translateY(102%);
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+[data-slot="button"][data-variant="default"]:hover:not(:disabled)::before { transform: translateY(0); }
+[data-slot="button"][data-variant="default"]:hover:not(:disabled) { color: var(--foreground); }
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="button"][data-variant="default"]::before { transition: none; }
+}
+
+main h1.font-serif {
+  font-size: clamp(2rem, 3.6vw, 3.1rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+[data-slot="table-head"] {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7480ff;
+}
+.eyebrow::before {
+  content: "";
+  width: 1.6rem;
+  height: 1px;
+  background: currentColor;
 }
