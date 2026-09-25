@@ -5,7 +5,9 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { CommandPalette } from "@/components/command-palette";
 import type { Permission } from "@prisma/client";
+import { RevenueFinderLiveAlerts } from "@/components/revenue-finder/live-alerts";
 import type { DueSoonJob } from "@/lib/due-soon-jobs";
+import type { NewApplications } from "@/lib/revenue-finder-alerts";
 
 export function DashboardShell({
   role,
@@ -21,7 +23,7 @@ export function DashboardShell({
   email: string;
   permissions: Permission[];
   dueSoonJobs: DueSoonJob[];
-  newApplications: number;
+  newApplications: NewApplications;
   children: React.ReactNode;
 }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -39,7 +41,7 @@ export function DashboardShell({
 
   return (
     <div className="flex h-screen w-full bg-background">
-      <Sidebar role={role} permissions={permissions} newApplications={newApplications} />
+      <Sidebar role={role} permissions={permissions} newApplications={newApplications.count} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar
           name={name}
@@ -52,6 +54,7 @@ export function DashboardShell({
         />
         <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
       </div>
+      {role === "ADMIN" ? <RevenueFinderLiveAlerts initial={newApplications.items} /> : null}
       <CommandPalette role={role} permissions={permissions} open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
   );

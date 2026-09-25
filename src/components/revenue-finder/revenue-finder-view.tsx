@@ -184,7 +184,7 @@ function ApplicationSheet({
     startTransition(async () => {
       const res = await convertRevenueFinderToClient(a.id);
       if ("error" in res && res.error) toast.error(res.error);
-      else toast.success("Client created");
+      else toast.success("Client created with the Revenue Finder service and a job for the Director");
     });
   }
 

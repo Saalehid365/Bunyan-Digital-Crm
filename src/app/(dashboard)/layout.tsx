@@ -1,6 +1,6 @@
 import { requireUser, getUserPermissions, getVisibleClientIds } from "@/lib/permissions";
 import { getDueSoonJobs } from "@/lib/due-soon-jobs";
-import { prisma } from "@/lib/prisma";
+import { getNewApplications } from "@/lib/revenue-finder-alerts";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -11,8 +11,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const clientIds = user.role === "ADMIN" ? undefined : await getVisibleClientIds(user.id);
   const dueSoonJobs = await getDueSoonJobs(clientIds);
 
-  const newApplications =
-    user.role === "ADMIN" ? await prisma.revenueFinderApplication.count({ where: { status: "NEW" } }) : 0;
+  const newApplications = user.role === "ADMIN" ? await getNewApplications() : { count: 0, items: [] };
 
   return (
     <DashboardShell
