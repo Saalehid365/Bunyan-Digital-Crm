@@ -13,6 +13,7 @@ export function DashboardShell({
   email,
   permissions,
   dueSoonJobs,
+  newApplications,
   children,
 }: {
   role: "ADMIN" | "MEMBER";
@@ -20,6 +21,7 @@ export function DashboardShell({
   email: string;
   permissions: Permission[];
   dueSoonJobs: DueSoonJob[];
+  newApplications: number;
   children: React.ReactNode;
 }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -37,7 +39,7 @@ export function DashboardShell({
 
   return (
     <div className="flex h-screen w-full bg-background">
-      <Sidebar role={role} permissions={permissions} />
+      <Sidebar role={role} permissions={permissions} newApplications={newApplications} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar
           name={name}
@@ -45,6 +47,7 @@ export function DashboardShell({
           role={role}
           permissions={permissions}
           dueSoonJobs={dueSoonJobs}
+          newApplications={newApplications}
           onOpenPalette={() => setPaletteOpen(true)}
         />
         <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>

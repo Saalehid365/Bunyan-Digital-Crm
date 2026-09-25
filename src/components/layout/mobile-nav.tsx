@@ -7,7 +7,15 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { SidebarBrand, SidebarNav } from "@/components/layout/sidebar";
 import type { Permission } from "@prisma/client";
 
-export function MobileNav({ role, permissions }: { role: "ADMIN" | "MEMBER"; permissions: Permission[] }) {
+export function MobileNav({
+  role,
+  permissions,
+  newApplications,
+}: {
+  role: "ADMIN" | "MEMBER";
+  permissions: Permission[];
+  newApplications?: number;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -26,7 +34,7 @@ export function MobileNav({ role, permissions }: { role: "ADMIN" | "MEMBER"; per
           <SheetTitle>Navigation</SheetTitle>
         </SheetHeader>
         <SidebarBrand />
-        <SidebarNav role={role} permissions={permissions} onNavigate={() => setOpen(false)} />
+        <SidebarNav role={role} permissions={permissions} onNavigate={() => setOpen(false)} newApplications={newApplications} />
       </SheetContent>
     </Sheet>
   );

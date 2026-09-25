@@ -35,6 +35,7 @@ export const config = {
     "/clients/:path*",
     "/board/:path*",
     "/team/:path*",
+    "/revenue-finder/:path*",
     "/settings/:path*",
   ],
 };

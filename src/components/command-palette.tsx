@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LayoutDashboard, Users, KanbanSquare, Clock, BarChart3, UsersRound, Settings, Plus, Receipt } from "lucide-react";
+import { LayoutDashboard, Users, KanbanSquare, Clock, BarChart3, UsersRound, Settings, Plus, Receipt, Radar } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -61,6 +61,11 @@ export function CommandPalette({
           {canManageBilling ? (
             <CommandItem onSelect={() => go("/invoices")}>
               <Receipt className="h-4 w-4" /> Quotes & Invoices
+            </CommandItem>
+          ) : null}
+          {isAdmin ? (
+            <CommandItem onSelect={() => go("/revenue-finder")}>
+              <Radar className="h-4 w-4" /> Revenue Finder
             </CommandItem>
           ) : null}
           {isAdmin ? (

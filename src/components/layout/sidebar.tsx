@@ -15,6 +15,7 @@ import {
   UsersRound,
   Settings,
   Receipt,
+  Radar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Permission } from "@prisma/client";
@@ -38,6 +39,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/timesheets", label: "Timesheets", icon: Clock },
   { href: "/invoices", label: "Quotes & Invoices", icon: Receipt, permission: "MANAGE_BILLING" },
   { href: "/reports", label: "Reports", icon: BarChart3, permission: "VIEW_REPORTS" },
+  { href: "/revenue-finder", label: "Revenue Finder", icon: Radar, adminOnly: true },
   { href: "/team", label: "Team", icon: UsersRound, adminOnly: true },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -57,10 +59,13 @@ export function SidebarNav({
   role,
   permissions = [],
   onNavigate,
+  newApplications = 0,
 }: {
   role: "ADMIN" | "MEMBER";
   permissions?: Permission[];
   onNavigate?: () => void;
+  /** Un-triaged Revenue Finder applications, shown as a badge on that nav item. */
+  newApplications?: number;
 }) {
   const pathname = usePathname();
   const isAdmin = role === "ADMIN";
@@ -96,6 +101,11 @@ export function SidebarNav({
             )}
             <Icon className={cn("relative h-4 w-4", active && "text-sidebar-primary")} />
             <span className="relative">{item.label}</span>
+            {item.href === "/revenue-finder" && newApplications > 0 ? (
+              <span className="relative ml-auto rounded-full bg-primary px-1.5 py-0.5 text-[10px] leading-none font-semibold text-primary-foreground">
+                {newApplications > 99 ? "99+" : newApplications}
+              </span>
+            ) : null}
           </Link>
         );
       })}
@@ -103,12 +113,20 @@ export function SidebarNav({
   );
 }
 
-export function Sidebar({ role, permissions }: { role: "ADMIN" | "MEMBER"; permissions: Permission[] }) {
+export function Sidebar({
+  role,
+  permissions,
+  newApplications,
+}: {
+  role: "ADMIN" | "MEMBER";
+  permissions: Permission[];
+  newApplications?: number;
+}) {
   return (
     <aside className="rise relative hidden w-60 shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar md:flex">
       <div aria-hidden className="blueprint pointer-events-none absolute inset-0 opacity-[0.22] [mask-image:linear-gradient(to_bottom,black,transparent_50%)]" />
       <div className="relative"><SidebarBrand /></div>
-      <div className="relative flex flex-1 flex-col"><SidebarNav role={role} permissions={permissions} /></div>
+      <div className="relative flex flex-1 flex-col"><SidebarNav role={role} permissions={permissions} newApplications={newApplications} /></div>
       <div className="relative border-t border-sidebar-border px-3 py-3">
         <p className="px-2 text-[11px] leading-relaxed text-sidebar-foreground/50">
           Bunyan Digital Ltd
