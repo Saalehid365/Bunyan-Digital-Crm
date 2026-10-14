@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -39,6 +40,7 @@ export function ClientForm({
 }) {
   const router = useRouter();
   const isEdit = Boolean(client?.id);
+  const [createPortalLogin, setCreatePortalLogin] = useState(false);
 
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initialState, formData: FormData): Promise<typeof initialState> => {
@@ -108,6 +110,35 @@ export function ClientForm({
         <Label htmlFor="notes">Notes</Label>
         <Textarea id="notes" name="notes" rows={4} defaultValue={client?.notes ?? ""} />
       </div>
+
+      {!isEdit ? (
+        <div className="space-y-2 rounded-[var(--radius-md)] border border-border p-3">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="createPortalLogin"
+              name="createPortalLogin"
+              checked={createPortalLogin}
+              onCheckedChange={(checked) => setCreatePortalLogin(checked === true)}
+            />
+            <Label htmlFor="createPortalLogin" className="text-sm font-normal">
+              Set up client portal login now
+            </Label>
+          </div>
+          {createPortalLogin ? (
+            <div className="grid gap-3 pl-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="portalEmail">Portal email</Label>
+                <Input id="portalEmail" name="portalEmail" type="email" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="portalPassword">Portal password</Label>
+                <Input id="portalPassword" name="portalPassword" type="text" minLength={8} required />
+                <p className="text-xs text-muted-foreground">Share this with the client yourself — it&apos;s shown once.</p>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 

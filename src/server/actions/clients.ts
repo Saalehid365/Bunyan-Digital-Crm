@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin, requireUser, requirePermission, canAccessClient } from "@/lib/permissions";
 import { clientSchema } from "@/lib/validations/client";
 import { startOnboardingIfNeeded } from "@/lib/client-activation";
+import { hashPassword } from "@/lib/password";
 
 function emptyToUndefined(v: string | undefined) {
   return v && v.trim() !== "" ? v.trim() : undefined;
@@ -21,34 +22,67 @@ export async function createClient(formData: FormData) {
     contactPhone: formData.get("contactPhone"),
     status: formData.get("status") || "LEAD",
     notes: formData.get("notes"),
+    createPortalLogin: formData.get("createPortalLogin") ?? undefined,
+    // Only rendered while "Set up client portal login now" is checked — `?? undefined`
+    // for the same reason addClientService's invoiceDueDate needs it (see there).
+    portalEmail: formData.get("portalEmail") ?? undefined,
+    portalPassword: formData.get("portalPassword") ?? undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const data = parsed.data;
 
-  const client = await prisma.client.create({
-    data: {
-      name: data.name,
-      companyName: emptyToUndefined(data.companyName),
-      contactName: emptyToUndefined(data.contactName),
-      contactEmail: emptyToUndefined(data.contactEmail),
-      contactPhone: emptyToUndefined(data.contactPhone),
-      status: data.status,
-      notes: emptyToUndefined(data.notes),
-      activities: {
-        create: {
-          type: "CREATED",
-          message: `Client created by ${user.name ?? user.email}`,
-          userId: user.id,
+  const wantsPortalLogin = Boolean(data.createPortalLogin);
+  if (wantsPortalLogin) {
+    if (!data.portalEmail || !data.portalPassword) {
+      return { error: "Enter a portal email and password, or untick “Set up client portal login now”." };
+    }
+    if (data.portalPassword.length < 8) {
+      return { error: "Portal password must be at least 8 characters." };
+    }
+    if (await prisma.clientPortalUser.findUnique({ where: { email: data.portalEmail } })) {
+      return { error: "A portal contact with that email already exists." };
+    }
+  }
+
+  const client = await prisma.$transaction(async (tx) => {
+    const created = await tx.client.create({
+      data: {
+        name: data.name,
+        companyName: emptyToUndefined(data.companyName),
+        contactName: emptyToUndefined(data.contactName),
+        contactEmail: emptyToUndefined(data.contactEmail),
+        contactPhone: emptyToUndefined(data.contactPhone),
+        status: data.status,
+        notes: emptyToUndefined(data.notes),
+        activities: {
+          create: {
+            type: "CREATED",
+            message: `Client created by ${user.name ?? user.email}`,
+            userId: user.id,
+          },
         },
+        // A member (not a full admin) granted this permission has no standing assignment
+        // to a client that didn't exist yet — assign them to what they just made so they
+        // retain access to it, consistent with every other permission being scoped to a
+        // member's own assigned clients.
+        ...(user.role === "MEMBER" ? { members: { create: { userId: user.id } } } : {}),
       },
-      // A member (not a full admin) granted this permission has no standing assignment
-      // to a client that didn't exist yet — assign them to what they just made so they
-      // retain access to it, consistent with every other permission being scoped to a
-      // member's own assigned clients.
-      ...(user.role === "MEMBER" ? { members: { create: { userId: user.id } } } : {}),
-    },
+    });
+
+    if (wantsPortalLogin) {
+      await tx.clientPortalUser.create({
+        data: {
+          clientId: created.id,
+          name: data.contactName || data.name,
+          email: data.portalEmail!,
+          passwordHash: hashPassword(data.portalPassword!),
+        },
+      });
+    }
+
+    return created;
   });
 
   if (data.status === "ACTIVE") {

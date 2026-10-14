@@ -44,7 +44,11 @@ export async function addClientService(formData: FormData) {
     startDate: formData.get("startDate"),
     notes: formData.get("notes"),
     createInitialInvoice: formData.get("createInitialInvoice") ?? undefined,
-    invoiceDueDate: formData.get("invoiceDueDate"),
+    // The due-date input only exists in the DOM while "Create first invoice now" is
+    // checked, so formData.get returns null (not "") whenever it's unchecked — the
+    // schema's string-or-empty-string validator rejects null, so this fails validation
+    // on every normal "add service" submission without `?? undefined` here.
+    invoiceDueDate: formData.get("invoiceDueDate") ?? undefined,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
   const data = parsed.data;

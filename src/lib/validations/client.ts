@@ -10,6 +10,13 @@ export const clientSchema = z.object({
   contactPhone: z.string().trim().max(40).optional().or(z.literal("")),
   status: clientStatusEnum.default("LEAD"),
   notes: z.string().trim().max(4000).optional().or(z.literal("")),
+  // Optional "set up the client's portal login now" fields — only present on create,
+  // and only meaningful together with createPortalLogin checked (see addClientService's
+  // identical createInitialInvoice pattern for why these need `?? undefined` wherever
+  // they're read from a conditionally-rendered form field).
+  createPortalLogin: z.union([z.literal("on"), z.literal("true")]).optional(),
+  portalEmail: z.string().trim().email("Enter a valid email").optional().or(z.literal("")),
+  portalPassword: z.string().optional().or(z.literal("")),
 });
 
 export type ClientInput = z.infer<typeof clientSchema>;
