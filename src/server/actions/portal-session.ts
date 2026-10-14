@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { createPortalSession, destroyPortalSession } from "@/lib/portal-auth";
-import { BASE_PATH } from "@/lib/base-path";
 
 const GENERIC_ERROR = "Incorrect email or password.";
 const DISABLED_ERROR = "This account has been disabled. Ask your account manager for access.";
@@ -20,10 +19,10 @@ export async function portalSignIn(formData: FormData) {
 
   await prisma.clientPortalUser.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
   await createPortalSession(user.id);
-  redirect(`${BASE_PATH}/portal`);
+  redirect("/portal");
 }
 
 export async function portalSignOut() {
   await destroyPortalSession();
-  redirect(`${BASE_PATH}/portal/login`);
+  redirect("/portal/login");
 }

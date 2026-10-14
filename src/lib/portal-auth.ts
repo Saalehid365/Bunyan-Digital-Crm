@@ -80,6 +80,6 @@ export async function getPortalUser(): Promise<PortalUser | null> {
 /** Use at the top of every gated portal page/layout. Redirects to the portal login if there's no valid session. */
 export async function requirePortalUser(): Promise<PortalUser> {
   const user = await getPortalUser();
-  if (!user) redirect(`${BASE_PATH}/portal/login`);
+  if (!user) redirect("/portal/login");
   return user;
 }
