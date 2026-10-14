@@ -60,6 +60,29 @@ export const brandKitSchema = z.object({
   logoFileId: z.string().trim().optional().or(z.literal("")),
 });
 
+/** The client's whole "Brand & access" page — one submit for the brand kit, logo, one
+ * optional extra file, and one optional access login, instead of separate forms with
+ * their own buttons. The "extra file" and "access" fields are each only acted on if
+ * their own required field (fileLabel / accessLabel) was actually filled in. */
+export const portalBrandPageSchema = z.object({
+  clientId: z.string().min(1),
+  primaryColor: z.string().trim().max(20).optional().or(z.literal("")),
+  secondaryColor: z.string().trim().max(20).optional().or(z.literal("")),
+  accentColor: z.string().trim().max(20).optional().or(z.literal("")),
+  notes: z.string().trim().max(4000).optional().or(z.literal("")),
+  logoUrl: z.string().trim().max(600).optional().or(z.literal("")),
+  logoFileId: z.string().trim().optional().or(z.literal("")),
+  fileLabel: z.string().trim().max(120).optional().or(z.literal("")),
+  fileUrl: z.string().trim().max(600).optional().or(z.literal("")),
+  fileFileId: z.string().trim().optional().or(z.literal("")),
+  fileKind: clientAssetKindEnum.default("BRAND_FILE"),
+  accessLabel: z.string().trim().max(120).optional().or(z.literal("")),
+  accessUsername: z.string().trim().max(200).optional().or(z.literal("")),
+  accessSecret: z.string().trim().max(500).optional().or(z.literal("")),
+  accessUrl: z.string().trim().max(500).optional().or(z.literal("")),
+  accessNotes: z.string().trim().max(1000).optional().or(z.literal("")),
+});
+
 export const clientMessageSchema = z.object({
   clientId: z.string().min(1),
   body: z.string().trim().min(1, "Message can't be empty").max(4000),

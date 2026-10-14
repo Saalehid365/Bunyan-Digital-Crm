@@ -6,8 +6,7 @@ import { requirePortalUser } from "@/lib/portal-auth";
 import { encryptSecret } from "@/lib/crypto";
 import { deleteBlob } from "@/lib/blob-store";
 import { notifyTeamOfPortalActivity } from "@/lib/portal-activity";
-import { clientAssetSchema, brandKitSchema, clientMessageSchema } from "@/lib/validations/portal";
-import { clientAccessSchema } from "@/lib/validations/access";
+import { portalBrandPageSchema, clientMessageSchema } from "@/lib/validations/portal";
 
 function emptyToUndefined(v: string | undefined) {
   return v && v.trim() !== "" ? v.trim() : undefined;
@@ -24,34 +23,6 @@ async function deleteFileIfAny(fileId: string | null) {
 
 /** Every action here scopes to the signed-in portal user's own clientId — never a
  * clientId taken from the form — so one client can never read or write another's data. */
-
-export async function addPortalAsset(formData: FormData) {
-  const portalUser = await requirePortalUser();
-  const parsed = clientAssetSchema.safeParse({
-    clientId: portalUser.clientId,
-    kind: formData.get("kind") || "OTHER",
-    label: formData.get("label"),
-    url: formData.get("url"),
-    fileId: formData.get("fileId") || undefined,
-  });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
-  const data = parsed.data;
-
-  await prisma.clientAsset.create({
-    data: {
-      clientId: portalUser.clientId,
-      kind: data.kind,
-      label: data.label,
-      url: data.url,
-      fileId: emptyToUndefined(data.fileId),
-      addedByPortal: true,
-      addedByPortalUserId: portalUser.id,
-    },
-  });
-  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} added "${data.label}" to brand files`);
-  revalidatePath("/portal/brand");
-  return { ok: true };
-}
 
 export async function deletePortalAsset(id: string) {
   const portalUser = await requirePortalUser();
@@ -95,9 +66,14 @@ async function upsertLogoAsset(
   }
 }
 
-export async function savePortalBrandKit(formData: FormData) {
+/**
+ * The whole "Brand & access" page in one submit: colours, logo, notes always save;
+ * an additional file and an access login are each created only if their own label was
+ * filled in. One button at the end of the page, not a separate save per section.
+ */
+export async function savePortalBrandPage(formData: FormData) {
   const portalUser = await requirePortalUser();
-  const parsed = brandKitSchema.safeParse({
+  const parsed = portalBrandPageSchema.safeParse({
     clientId: portalUser.clientId,
     primaryColor: formData.get("primaryColor"),
     secondaryColor: formData.get("secondaryColor"),
@@ -105,9 +81,34 @@ export async function savePortalBrandKit(formData: FormData) {
     notes: formData.get("notes"),
     logoUrl: formData.get("logoUrl"),
     logoFileId: formData.get("logoFileId"),
+    fileLabel: formData.get("fileLabel"),
+    fileUrl: formData.get("fileUrl"),
+    fileFileId: formData.get("fileFileId"),
+    fileKind: formData.get("fileKind") || "BRAND_FILE",
+    accessLabel: formData.get("accessLabel"),
+    accessUsername: formData.get("accessUsername"),
+    accessSecret: formData.get("accessSecret"),
+    accessUrl: formData.get("accessUrl"),
+    accessNotes: formData.get("accessNotes"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
   const data = parsed.data;
+
+  const fileLabel = emptyToUndefined(data.fileLabel);
+  const fileLink = emptyToUndefined(data.fileUrl) ?? emptyToUndefined(data.fileFileId);
+  const wantsAccess = Boolean(emptyToUndefined(data.accessLabel));
+  if (fileLabel && !fileLink) {
+    return { error: "Add a link or upload a file for “" + fileLabel + "”, or clear its label." };
+  }
+  if (fileLink && !fileLabel) {
+    return { error: "Give the additional file a label, or remove it." };
+  }
+  const wantsFile = Boolean(fileLabel && fileLink);
+  if ((emptyToUndefined(data.accessUsername) || emptyToUndefined(data.accessSecret)) && !wantsAccess) {
+    return { error: "Say what the login is for, or clear its details." };
+  }
+
+  const sent: string[] = ["brand kit"];
 
   await prisma.clientBrandKit.upsert({
     where: { clientId: portalUser.clientId },
@@ -126,38 +127,37 @@ export async function savePortalBrandKit(formData: FormData) {
     },
   });
   await upsertLogoAsset(portalUser.clientId, portalUser.id, emptyToUndefined(data.logoUrl), emptyToUndefined(data.logoFileId));
-  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} updated their brand kit`);
-  revalidatePath("/portal/brand");
-  return { ok: true };
-}
 
-/** The client submitting one of their own platform logins (store admin, GA4…) for the
- * team to use — stored encrypted, in the same ClientAccess table and with the same
- * encryptSecret() the team's own Access tab already uses. */
-export async function submitPortalAccess(formData: FormData) {
-  const portalUser = await requirePortalUser();
-  const parsed = clientAccessSchema.safeParse({
-    clientId: portalUser.clientId,
-    label: formData.get("label"),
-    username: formData.get("username"),
-    secret: formData.get("secret"),
-    url: formData.get("url"),
-    notes: formData.get("notes"),
-  });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
-  const data = parsed.data;
+  if (wantsFile) {
+    await prisma.clientAsset.create({
+      data: {
+        clientId: portalUser.clientId,
+        kind: data.fileKind,
+        label: data.fileLabel!.trim(),
+        url: emptyToUndefined(data.fileUrl) ?? "",
+        fileId: emptyToUndefined(data.fileFileId),
+        addedByPortal: true,
+        addedByPortalUserId: portalUser.id,
+      },
+    });
+    sent.push(`"${data.fileLabel!.trim()}"`);
+  }
 
-  await prisma.clientAccess.create({
-    data: {
-      clientId: portalUser.clientId,
-      label: data.label,
-      username: emptyToUndefined(data.username),
-      secretCipher: encryptSecret(data.secret?.trim() ?? ""),
-      url: emptyToUndefined(data.url),
-      notes: emptyToUndefined(data.notes),
-    },
-  });
-  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} submitted access details for "${data.label}"`);
+  if (wantsAccess) {
+    await prisma.clientAccess.create({
+      data: {
+        clientId: portalUser.clientId,
+        label: data.accessLabel!.trim(),
+        username: emptyToUndefined(data.accessUsername),
+        secretCipher: encryptSecret(data.accessSecret?.trim() ?? ""),
+        url: emptyToUndefined(data.accessUrl),
+        notes: emptyToUndefined(data.accessNotes),
+      },
+    });
+    sent.push(`access to "${data.accessLabel!.trim()}"`);
+  }
+
+  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} sent ${sent.join(", ")}`);
   revalidatePath("/portal/brand");
   return { ok: true };
 }
