@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireUser, getClientForUser, hasPermission } from "@/lib/permissions";
+import { prisma } from "@/lib/prisma";
 import { ClientStatusBadge } from "@/components/clients/client-status-badge";
 import { ClientAvatar } from "@/components/clients/client-avatar";
 import { ClientTabs } from "@/components/clients/client-tabs";
@@ -16,6 +17,9 @@ export default async function ClientLayout({
   const client = await getClientForUser(user, clientId);
   if (!client) notFound();
   const canManageBilling = await hasPermission(user, "MANAGE_BILLING");
+  const unreadPortalMessages = await prisma.clientMessage.count({
+    where: { clientId, senderKind: "CLIENT", createdAt: { gt: client.portalMessagesReadByTeamAt ?? new Date(0) } },
+  });
 
   return (
     <div className="flex flex-1 flex-col">
@@ -33,7 +37,7 @@ export default async function ClientLayout({
           </div>
         </div>
       </div>
-      <ClientTabs clientId={clientId} canManageBilling={canManageBilling} />
+      <ClientTabs clientId={clientId} canManageBilling={canManageBilling} unreadPortalMessages={unreadPortalMessages} />
       <div className="flex-1">{children}</div>
     </div>
   );

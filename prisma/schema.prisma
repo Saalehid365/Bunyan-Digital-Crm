@@ -115,17 +115,20 @@ model User {
   calendlyName        String?
   calendlyConnectedAt DateTime?
 
-  accounts          Account[]
-  sessions          Session[]
-  clientMembers     ClientMember[]
-  assignedJobs      Job[]          @relation("JobAssignee")
-  activities        Activity[]
-  timeEntries       TimeEntry[]
-  createdQuotes     Quote[]
-  createdInvoices   Invoice[]
-  personalTasks     PersonalTask[]
-  followUpsAssigned FollowUp[]     @relation("FollowUpAssignee")
-  followUpsCreated  FollowUp[]     @relation("FollowUpCreator")
+  accounts           Account[]
+  sessions           Session[]
+  clientMembers      ClientMember[]
+  assignedJobs       Job[]           @relation("JobAssignee")
+  activities         Activity[]
+  timeEntries        TimeEntry[]
+  createdQuotes      Quote[]
+  createdInvoices    Invoice[]
+  personalTasks      PersonalTask[]
+  followUpsAssigned  FollowUp[]      @relation("FollowUpAssignee")
+  followUpsCreated   FollowUp[]      @relation("FollowUpCreator")
+  portalAssetsAdded  ClientAsset[]
+  portalMessagesSent ClientMessage[]
+  clientFiles        ClientFile[]
 }
 
 model Account {
@@ -187,6 +190,22 @@ model Client {
   accessEntries             ClientAccess[]
   followUps                 FollowUp[]
   revenueFinderApplications RevenueFinderApplication[]
+
+  // Client portal (results/campaigns/reports dashboard, brand kit, messaging) — a
+  // separate login surface for the client themselves, isolated from the team's Auth.js
+  // session (see src/lib/portal-auth.ts).
+  portalUsers                ClientPortalUser[]
+  results                    ClientResult[]
+  campaigns                  ClientCampaign[]
+  reports                    ClientReport[]
+  assets                     ClientAsset[]
+  brandKit                   ClientBrandKit?
+  messages                   ClientMessage[]
+  // Last time a team member viewed this client's portal messages — unread count for the
+  // team is simply "messages from the client newer than this".
+  portalMessagesReadByTeamAt DateTime?
+  documents                  ClientDocument[]
+  clientFiles                ClientFile[]
 
   @@index([status])
 }
@@ -527,4 +546,249 @@ model RevenueFinderApplication {
 
   @@index([status])
   @@index([createdAt])
+}
+
+/**
+ * ================= Client portal =================
+ */
+
+/// A named contact at the client who can sign in to their own portal — separate identity
+/// from the team's User model, with its own hand-rolled session (ClientPortalSession),
+/// deliberately outside Auth.js so a portal session can never satisfy a team-side
+/// requireUser()/requireAdmin() check by accident.
+model ClientPortalUser {
+  id             String    @id @default(cuid())
+  clientId       String
+  name           String
+  email          String    @unique
+  passwordHash   String
+  disabledAt     DateTime?
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  // Last time this contact viewed the message thread — unread count on their side is
+  // "messages from the team newer than this".
+  messagesReadAt DateTime?
+
+  client      Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  sessions    ClientPortalSession[]
+  messages    ClientMessage[]
+  assetsAdded ClientAsset[]
+  clientFiles ClientFile[]
+
+  @@index([clientId])
+}
+
+model ClientPortalSession {
+  id           String   @id @default(cuid())
+  portalUserId String
+  // SHA-256 of the session token — the raw token only ever lives in the httpOnly cookie,
+  // mirroring how a password is never stored in plaintext.
+  tokenHash    String   @unique
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+
+  portalUser ClientPortalUser @relation(fields: [portalUserId], references: [id], onDelete: Cascade)
+
+  @@index([portalUserId])
+}
+
+/// A KPI/metric snapshot the team publishes for the client to see (e.g. "Revenue —
+/// September 2026 — £18,400 — +12%"). Deliberately free-text value/change, not numeric
+/// columns — the metrics that matter vary a lot client to client (revenue, ROAS,
+/// sessions, repeat rate…).
+model ClientResult {
+  id        String   @id @default(cuid())
+  clientId  String
+  period    String
+  label     String
+  value     String
+  change    String?
+  position  Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+enum ClientCampaignStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+model ClientCampaign {
+  id        String               @id @default(cuid())
+  clientId  String
+  name      String
+  platform  String
+  status    ClientCampaignStatus @default(ACTIVE)
+  startDate DateTime?
+  endDate   DateTime?
+  spend     Decimal?             @db.Decimal(10, 2)
+  revenue   Decimal?             @db.Decimal(10, 2)
+  roas      Decimal?             @db.Decimal(6, 2)
+  notes     String?              @db.Text
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+/// A link to a report document (PDF, Google Doc/Sheet, Canva…) — this app has no binary
+/// file storage, so reports are hosted wherever the team already builds them and linked
+/// in, the same convention ClientAccess.url and Invoice already use for external links.
+model ClientReport {
+  id        String   @id @default(cuid())
+  clientId  String
+  title     String
+  period    String?
+  url       String
+  summary   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+enum ClientAssetKind {
+  LOGO
+  BRAND_FILE
+  PRODUCT_PHOTO
+  OTHER
+}
+
+/// A logo, brand file or product photo — either side can add one. Also URL-based (no
+/// binary storage): paste a link (Google Drive, Dropbox, Canva…) rather than uploading a
+/// file directly.
+model ClientAsset {
+  id                  String          @id @default(cuid())
+  clientId            String
+  kind                ClientAssetKind @default(OTHER)
+  label               String
+  // Wherever the content lives — an external link (Drive, Dropbox…), or, when fileId is
+  // set, this app's own authenticated download route for that uploaded file.
+  url                 String
+  // Set only when `url` points at an uploaded file rather than an external link, so
+  // deleting the asset can also delete the underlying blob.
+  fileId              String?         @unique
+  addedByPortal       Boolean         @default(false)
+  addedByUserId       String?
+  addedByPortalUserId String?
+  createdAt           DateTime        @default(now())
+
+  client            Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  file              ClientFile?       @relation(fields: [fileId], references: [id], onDelete: SetNull)
+  addedByUser       User?             @relation(fields: [addedByUserId], references: [id], onDelete: SetNull)
+  addedByPortalUser ClientPortalUser? @relation(fields: [addedByPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+}
+
+/// One brand kit per client — theme colours and freeform notes, editable from either
+/// side (the client's own brand spec; the team can also keep it current).
+model ClientBrandKit {
+  id             String   @id @default(cuid())
+  clientId       String   @unique
+  primaryColor   String?
+  secondaryColor String?
+  accentColor    String?
+  notes          String?  @db.Text
+  updatedAt      DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+enum ClientMessageSender {
+  TEAM
+  CLIENT
+}
+
+/// A single flat message thread per client — simplest shape for "communicate with
+/// them", not a multi-subject inbox. Shown on both the team's Portal tab and the
+/// client's own Messages page.
+model ClientMessage {
+  id                 String              @id @default(cuid())
+  clientId           String
+  body               String              @db.Text
+  senderKind         ClientMessageSender
+  senderUserId       String?
+  senderPortalUserId String?
+  createdAt          DateTime            @default(now())
+
+  client           Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  senderUser       User?             @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
+  senderPortalUser ClientPortalUser? @relation(fields: [senderPortalUserId], references: [id], onDelete: SetNull)
+
+  @@index([clientId, createdAt])
+}
+
+enum ClientDocumentKind {
+  AGREEMENT
+  QUESTIONNAIRE
+  FORM
+  OTHER
+}
+
+enum ClientDocumentStatus {
+  PENDING
+  COMPLETED
+}
+
+/// A document the team sends a client to act on — an agreement to sign, a Google Form
+/// questionnaire to fill in. Not real e-signature capture: `url` links out to wherever
+/// the document actually lives (Google Forms, a PDF, PandaDoc/DocuSign…) and the client
+/// marks it COMPLETED themselves once they've done it there, or the team can mark it on
+/// their behalf (e.g. signed over email instead).
+model ClientDocument {
+  id          String               @id @default(cuid())
+  clientId    String
+  title       String
+  kind        ClientDocumentKind   @default(OTHER)
+  url         String
+  // Set when `url` points at an uploaded file — either the team's original document, or
+  // the client's signed/completed copy uploaded back when they mark it done.
+  fileId      String?              @unique
+  notes       String?              @db.Text
+  status      ClientDocumentStatus @default(PENDING)
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  client Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  file   ClientFile? @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+}
+
+/// An uploaded file, stored in Netlify Blobs (not in Postgres) — this row is the
+/// metadata + authorization record; `key` is the blob's object key in the "client-files"
+/// store. Downloaded only via /api/files/[fileId], which checks the requester (team
+/// member with access to this client, or a portal user of this client) before streaming
+/// the blob back — the key itself is never exposed to the browser.
+model ClientFile {
+  id                     String   @id @default(cuid())
+  clientId               String
+  key                    String   @unique
+  fileName               String
+  contentType            String
+  size                   Int
+  uploadedByPortal       Boolean  @default(false)
+  uploadedByUserId       String?
+  uploadedByPortalUserId String?
+  createdAt              DateTime @default(now())
+
+  client               Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  uploadedByUser       User?             @relation(fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  uploadedByPortalUser ClientPortalUser? @relation(fields: [uploadedByPortalUserId], references: [id], onDelete: SetNull)
+  asset                ClientAsset?
+  document             ClientDocument?
+
+  @@index([clientId])
 }

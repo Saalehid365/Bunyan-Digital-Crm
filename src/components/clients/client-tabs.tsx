@@ -4,13 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export function ClientTabs({ clientId, canManageBilling }: { clientId: string; canManageBilling: boolean }) {
+export function ClientTabs({
+  clientId,
+  canManageBilling,
+  unreadPortalMessages = 0,
+}: {
+  clientId: string;
+  canManageBilling: boolean;
+  unreadPortalMessages?: number;
+}) {
   const pathname = usePathname();
   const base = `/clients/${clientId}`;
   const tabs = [
     { href: base, label: "Overview", exact: true },
     { href: `${base}/services`, label: "Services" },
     { href: `${base}/access`, label: "Access" },
+    { href: `${base}/portal`, label: "Portal", badge: unreadPortalMessages },
     { href: `${base}/board`, label: "Board" },
     ...(canManageBilling ? [{ href: `${base}/billing`, label: "Billing", exact: false }] : []),
     { href: `${base}/activity`, label: "Activity" },
@@ -30,6 +39,11 @@ export function ClientTabs({ clientId, canManageBilling }: { clientId: string; c
             )}
           >
             {tab.label}
+            {"badge" in tab && tab.badge ? (
+              <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                {tab.badge > 9 ? "9+" : tab.badge}
+              </span>
+            ) : null}
             {active ? (
               <span className="absolute inset-x-0 -bottom-px h-[2px] bg-primary" />
             ) : null}

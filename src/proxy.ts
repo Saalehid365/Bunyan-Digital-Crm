@@ -7,13 +7,30 @@ const SESSION_COOKIE_NAMES = [
   "__Secure-authjs.session-token",
 ];
 
+// The client portal has its own, separate session cookie (see src/lib/portal-auth.ts) —
+// deliberately not an Auth.js cookie, so this gate can never mistake a client session
+// for a team one or vice versa.
+const PORTAL_COOKIE_NAME = "bunyan-portal-session";
+
 /**
- * Cheap, cookie-presence-only gate for the dashboard route group — it deliberately does not
- * touch Prisma or verify the session server-side (that happens per-route via requireUser() in
- * src/lib/permissions.ts). This just keeps unauthenticated visitors from ever seeing dashboard
- * markup before the real check runs.
+ * Cheap, cookie-presence-only gate — it deliberately does not touch Prisma or verify the
+ * session server-side (that happens per-route via requireUser()/requirePortalUser()).
+ * This just keeps unauthenticated visitors from ever seeing gated markup before the real
+ * check runs. Portal paths are gated by the portal cookie and redirect to /portal/login;
+ * every other matched path is gated by the team session and redirects to /login.
  */
 export default function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isPortal = pathname.startsWith("/portal");
+
+  if (isPortal) {
+    // /portal/login itself must stay reachable while signed out.
+    if (pathname.startsWith("/portal/login")) return NextResponse.next();
+    if (request.cookies.has(PORTAL_COOKIE_NAME)) return NextResponse.next();
+    const loginUrl = new URL(`${BASE_PATH}/portal/login`, request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
   const hasSessionCookie = SESSION_COOKIE_NAMES.some((name) =>
     request.cookies.has(name),
   );
@@ -37,5 +54,6 @@ export const config = {
     "/team/:path*",
     "/revenue-finder/:path*",
     "/settings/:path*",
+    "/portal/:path*",
   ],
 };
