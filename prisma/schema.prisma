@@ -204,6 +204,9 @@ model Client {
   // Last time a team member viewed this client's portal messages — unread count for the
   // team is simply "messages from the client newer than this".
   portalMessagesReadByTeamAt DateTime?
+  // Last time a team member viewed this client's Portal tab — unread "activity" alerts
+  // (brand kit saved, asset added, access submitted) are entries newer than this.
+  portalActivityReadByTeamAt DateTime?
   documents                  ClientDocument[]
   clientFiles                ClientFile[]
 

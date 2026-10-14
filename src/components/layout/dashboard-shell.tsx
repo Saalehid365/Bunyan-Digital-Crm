@@ -6,8 +6,10 @@ import { Topbar } from "@/components/layout/topbar";
 import { CommandPalette } from "@/components/command-palette";
 import type { Permission } from "@prisma/client";
 import { RevenueFinderLiveAlerts } from "@/components/revenue-finder/live-alerts";
+import { PortalActivityLiveAlerts } from "@/components/layout/portal-activity-live-alerts";
 import type { DueSoonJob } from "@/lib/due-soon-jobs";
 import type { NewApplications } from "@/lib/revenue-finder-alerts";
+import type { NewPortalActivities } from "@/lib/portal-activity";
 
 export function DashboardShell({
   role,
@@ -16,6 +18,7 @@ export function DashboardShell({
   permissions,
   dueSoonJobs,
   newApplications,
+  newPortalActivity,
   children,
 }: {
   role: "ADMIN" | "MEMBER";
@@ -24,6 +27,7 @@ export function DashboardShell({
   permissions: Permission[];
   dueSoonJobs: DueSoonJob[];
   newApplications: NewApplications;
+  newPortalActivity: NewPortalActivities;
   children: React.ReactNode;
 }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -55,6 +59,7 @@ export function DashboardShell({
         <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
       </div>
       {role === "ADMIN" ? <RevenueFinderLiveAlerts initial={newApplications.items} /> : null}
+      <PortalActivityLiveAlerts initial={newPortalActivity.items} />
       <CommandPalette role={role} permissions={permissions} open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
   );

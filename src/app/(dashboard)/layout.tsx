@@ -1,6 +1,7 @@
 import { requireUser, getUserPermissions, getVisibleClientIds } from "@/lib/permissions";
 import { getDueSoonJobs } from "@/lib/due-soon-jobs";
 import { getNewApplications } from "@/lib/revenue-finder-alerts";
+import { getNewPortalActivity } from "@/lib/portal-activity";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -12,6 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const dueSoonJobs = await getDueSoonJobs(clientIds);
 
   const newApplications = user.role === "ADMIN" ? await getNewApplications() : { count: 0, items: [] };
+  const newPortalActivity = await getNewPortalActivity(clientIds);
 
   return (
     <DashboardShell
@@ -21,6 +23,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       permissions={permissions}
       dueSoonJobs={dueSoonJobs}
       newApplications={newApplications}
+      newPortalActivity={newPortalActivity}
     >
       {children}
     </DashboardShell>

@@ -33,27 +33,34 @@ function ColorSwatch({ hex }: { hex: string | null }) {
   return <span className="h-4 w-4 shrink-0 rounded-full border border-white/20" style={isHex ? { background: hex } : undefined} />;
 }
 
-function BrandKitForm({ brandKit }: { brandKit: BrandKit | null }) {
+function BrandKitForm({ brandKit, logo }: { brandKit: BrandKit | null; logo: Asset | undefined }) {
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initial, formData: FormData) => (await savePortalBrandKit(formData)) ?? {},
     initial,
   );
   const [seen, setSeen] = useState(state);
+  const [uploadedLogo, setUploadedLogo] = useState<UploadedFile | null>(null);
   if (state !== seen) {
     setSeen(state);
     if (state.ok) toast.success("Brand kit saved");
   }
+
+  const logoUrlValue = uploadedLogo?.url;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Palette className="h-4 w-4 text-muted-foreground" />
-          Theme colours
+          Brand kit
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Colours, logo and notes all submit together — one Save for the whole brand kit,
+            not a separate step per field. */}
         <form action={formAction} className="space-y-4">
+          <input type="hidden" name="logoFileId" value={uploadedLogo?.id ?? ""} />
+          {!uploadedLogo ? <input type="hidden" name="logoUrl" value={logo?.url ?? ""} /> : null}
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label htmlFor="primaryColor">Primary</Label>
@@ -71,6 +78,24 @@ function BrandKitForm({ brandKit }: { brandKit: BrandKit | null }) {
               <Input id="accentColor" name="accentColor" placeholder="#6E7DFF" defaultValue={brandKit?.accentColor ?? ""} />
             </div>
           </div>
+          <div className="space-y-2">
+            <Label>Logo</Label>
+            {uploadedLogo ? (
+              <p className="rounded-md border border-white/10 bg-background/40 px-2.5 py-1.5 text-sm text-foreground">{uploadedLogo.fileName}</p>
+            ) : logo ? (
+              <a href={logo.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 truncate text-sm text-foreground hover:text-primary">
+                Current logo <ExternalLink className="h-3 w-3 shrink-0" />
+              </a>
+            ) : (
+              <p className="text-sm text-muted-foreground">No logo uploaded yet.</p>
+            )}
+            <FileUploadField
+              label={logo || uploadedLogo ? "Replace logo" : "Upload a logo"}
+              accept="image/*"
+              onUploaded={(f) => setUploadedLogo(f)}
+            />
+          </div>
+          {logoUrlValue ? <input type="hidden" name="logoUrl" value={logoUrlValue} /> : null}
           <div className="space-y-2">
             <Label htmlFor="notes">Other brand information</Label>
             <Textarea
@@ -123,12 +148,16 @@ function AssetForm() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="asset-kind">Type</Label>
-          <Select name="kind" defaultValue="LOGO">
+          {/* Logo has its own field in the brand kit above — not offered here, so there's
+              only ever one place to send it. */}
+          <Select name="kind" defaultValue="BRAND_FILE">
             <SelectTrigger id="asset-kind" className="w-full"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {(Object.keys(KIND_LABEL) as Asset["kind"][]).map((k) => (
-                <SelectItem key={k} value={k}>{KIND_LABEL[k]}</SelectItem>
-              ))}
+              {(Object.keys(KIND_LABEL) as Asset["kind"][])
+                .filter((k) => k !== "LOGO")
+                .map((k) => (
+                  <SelectItem key={k} value={k}>{KIND_LABEL[k]}</SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
@@ -168,7 +197,7 @@ function AssetsSection({ assets }: { assets: Asset[] }) {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <ImageIcon className="h-4 w-4 text-muted-foreground" />
-          Logos &amp; files
+          Additional files
         </CardTitle>
         <AssetForm />
       </CardHeader>
@@ -176,8 +205,8 @@ function AssetsSection({ assets }: { assets: Asset[] }) {
         {assets.length === 0 ? (
           <EmptyState
             icon={ImageIcon}
-            title="No assets yet"
-            description="Add a link to your logo, brand files or product photos — Google Drive, Dropbox, Canva, anywhere we can open it."
+            title="No additional files yet"
+            description="Add a link to any other brand files or product photos — Google Drive, Dropbox, Canva, anywhere we can open it."
           />
         ) : (
           <ul className="divide-y divide-white/10">
@@ -302,10 +331,13 @@ export function PortalBrandView({
   assets: Asset[];
   accessEntries: AccessEntry[];
 }) {
+  const logo = assets.find((a) => a.kind === "LOGO");
+  const otherAssets = assets.filter((a) => a.kind !== "LOGO");
+
   return (
     <div className="space-y-5">
-      <BrandKitForm brandKit={brandKit} />
-      <AssetsSection assets={assets} />
+      <BrandKitForm brandKit={brandKit} logo={logo} />
+      <AssetsSection assets={otherAssets} />
       <AccessSection entries={accessEntries} />
     </div>
   );

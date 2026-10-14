@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { markPortalActivityReadByTeam } from "@/server/actions/client-portal";
 import { PortalAccessSection, type PortalUserRow } from "@/components/clients/portal/portal-access-section";
 import { PortalResultsSection, type ResultRow } from "@/components/clients/portal/portal-results-section";
 import { PortalCampaignsSection, type CampaignRow } from "@/components/clients/portal/portal-campaigns-section";
@@ -46,6 +47,10 @@ export function ClientPortalManagement({
   messages: MessageRow[];
 }) {
   const [tab, setTab] = useState<Tab>("access");
+
+  useEffect(() => {
+    markPortalActivityReadByTeam(clientId);
+  }, [clientId]);
 
   return (
     <div className="space-y-4">

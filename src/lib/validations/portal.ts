@@ -54,6 +54,10 @@ export const brandKitSchema = z.object({
   secondaryColor: z.string().trim().max(20).optional().or(z.literal("")),
   accentColor: z.string().trim().max(20).optional().or(z.literal("")),
   notes: z.string().trim().max(4000).optional().or(z.literal("")),
+  // Submitted together with the rest of the brand kit so there's one save for the whole
+  // form, not a separate add-a-logo step — see savePortalBrandKit/saveBrandKit.
+  logoUrl: z.string().trim().max(600).optional().or(z.literal("")),
+  logoFileId: z.string().trim().optional().or(z.literal("")),
 });
 
 export const clientMessageSchema = z.object({

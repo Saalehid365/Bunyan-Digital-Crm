@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePortalUser } from "@/lib/portal-auth";
 import { encryptSecret } from "@/lib/crypto";
 import { deleteBlob } from "@/lib/blob-store";
+import { notifyTeamOfPortalActivity } from "@/lib/portal-activity";
 import { clientAssetSchema, brandKitSchema, clientMessageSchema } from "@/lib/validations/portal";
 import { clientAccessSchema } from "@/lib/validations/access";
 
@@ -47,6 +48,7 @@ export async function addPortalAsset(formData: FormData) {
       addedByPortalUserId: portalUser.id,
     },
   });
+  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} added "${data.label}" to brand files`);
   revalidatePath("/portal/brand");
   return { ok: true };
 }
@@ -60,6 +62,39 @@ export async function deletePortalAsset(id: string) {
   revalidatePath("/portal/brand");
 }
 
+/** Finds this client's single "logo" asset (the first one, if more than one ever existed)
+ * so the brand kit form can treat the logo as one field instead of a separate add-a-file
+ * step — upserting it keeps a client from having to visit two different forms to send
+ * their colours and their logo together. */
+async function upsertLogoAsset(
+  clientId: string,
+  portalUserId: string,
+  logoUrl: string | undefined,
+  logoFileId: string | undefined,
+) {
+  if (!logoUrl) return;
+  const existing = await prisma.clientAsset.findFirst({ where: { clientId, kind: "LOGO" }, orderBy: { createdAt: "asc" } });
+  if (existing) {
+    if (existing.fileId && existing.fileId !== logoFileId) await deleteFileIfAny(existing.fileId);
+    await prisma.clientAsset.update({
+      where: { id: existing.id },
+      data: { url: logoUrl, fileId: logoFileId || null, addedByPortal: true, addedByPortalUserId: portalUserId },
+    });
+  } else {
+    await prisma.clientAsset.create({
+      data: {
+        clientId,
+        kind: "LOGO",
+        label: "Logo",
+        url: logoUrl,
+        fileId: logoFileId || undefined,
+        addedByPortal: true,
+        addedByPortalUserId: portalUserId,
+      },
+    });
+  }
+}
+
 export async function savePortalBrandKit(formData: FormData) {
   const portalUser = await requirePortalUser();
   const parsed = brandKitSchema.safeParse({
@@ -68,6 +103,8 @@ export async function savePortalBrandKit(formData: FormData) {
     secondaryColor: formData.get("secondaryColor"),
     accentColor: formData.get("accentColor"),
     notes: formData.get("notes"),
+    logoUrl: formData.get("logoUrl"),
+    logoFileId: formData.get("logoFileId"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
   const data = parsed.data;
@@ -88,6 +125,8 @@ export async function savePortalBrandKit(formData: FormData) {
       notes: emptyToUndefined(data.notes) ?? null,
     },
   });
+  await upsertLogoAsset(portalUser.clientId, portalUser.id, emptyToUndefined(data.logoUrl), emptyToUndefined(data.logoFileId));
+  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} updated their brand kit`);
   revalidatePath("/portal/brand");
   return { ok: true };
 }
@@ -118,13 +157,7 @@ export async function submitPortalAccess(formData: FormData) {
       notes: emptyToUndefined(data.notes),
     },
   });
-  await prisma.activity.create({
-    data: {
-      clientId: portalUser.clientId,
-      type: "CLIENT_UPDATED",
-      message: `${portalUser.name} submitted access details for "${data.label}" via the client portal`,
-    },
-  });
+  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} submitted access details for "${data.label}"`);
   revalidatePath("/portal/brand");
   return { ok: true };
 }

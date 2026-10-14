@@ -358,3 +358,9 @@ export async function deleteClientDocument(id: string, clientId: string) {
   await deleteFileIfAny(existing?.fileId ?? null);
   path(clientId);
 }
+
+export async function markPortalActivityReadByTeam(clientId: string) {
+  const user = await requireUser();
+  if (!(await canAccessClient(user, clientId))) return;
+  await prisma.client.update({ where: { id: clientId }, data: { portalActivityReadByTeamAt: new Date() } });
+}
