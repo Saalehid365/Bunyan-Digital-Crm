@@ -32,7 +32,7 @@ export default function PortalLoginPage() {
             </p>
           </div>
 
-          <div className="auth-stack relative z-10 h-[clamp(220px,30vw,340px)] w-full">
+          <div className="auth-stack relative z-10 mb-4 h-[clamp(240px,40vh,420px)] w-full">
             <figure className="s1">
               <Image src={kingdomAppliances} alt="" sizes="30vw" />
             </figure>
