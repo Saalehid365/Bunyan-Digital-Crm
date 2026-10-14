@@ -1,5 +1,6 @@
 import { requirePortalUser } from "@/lib/portal-auth";
 import { prisma } from "@/lib/prisma";
+import { toColorsArray } from "@/lib/brand-colors";
 import { PortalBrandView } from "@/components/portal/portal-brand-view";
 
 export default async function PortalBrandPage() {
@@ -24,16 +25,7 @@ export default async function PortalBrandPage() {
         </p>
       </div>
       <PortalBrandView
-        brandKit={
-          brandKit
-            ? {
-                primaryColor: brandKit.primaryColor,
-                secondaryColor: brandKit.secondaryColor,
-                accentColor: brandKit.accentColor,
-                notes: brandKit.notes,
-              }
-            : null
-        }
+        brandKit={brandKit ? { colors: toColorsArray(brandKit.colors), notes: brandKit.notes } : null}
         assets={assets.map((a) => ({ ...a, createdAt: a.createdAt.toISOString() }))}
         accessEntries={accessEntries.map((a) => ({ ...a, createdAt: a.createdAt.toISOString() }))}
       />

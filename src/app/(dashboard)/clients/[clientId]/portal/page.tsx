@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireUser, getClientForUser, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { toColorsArray } from "@/lib/brand-colors";
 import { ClientPortalManagement } from "@/components/clients/portal/client-portal-management";
 
 export default async function ClientPortalPage({ params }: { params: Promise<{ clientId: string }> }) {
@@ -53,11 +54,7 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ c
           completedAt: d.completedAt?.toISOString() ?? null,
         }))}
         assets={assets.map((a) => ({ ...a, createdAt: a.createdAt.toISOString() }))}
-        brandKit={
-          brandKit
-            ? { primaryColor: brandKit.primaryColor, secondaryColor: brandKit.secondaryColor, accentColor: brandKit.accentColor, notes: brandKit.notes }
-            : null
-        }
+        brandKit={brandKit ? { colors: toColorsArray(brandKit.colors), notes: brandKit.notes } : null}
         messages={messages.map((m) => ({
           id: m.id,
           body: m.body,

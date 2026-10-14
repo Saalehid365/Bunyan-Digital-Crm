@@ -48,11 +48,13 @@ export const clientAssetSchema = z.object({
   fileId: z.string().trim().optional().or(z.literal("")),
 });
 
+// A client's colour palette is a flexible 0–5 list, not fixed primary/secondary/accent
+// roles — different clients want different numbers of brand colours.
+export const brandColorsSchema = z.array(z.string().trim().max(20)).max(5, "Up to 5 colours").optional();
+
 export const brandKitSchema = z.object({
   clientId: z.string().min(1),
-  primaryColor: z.string().trim().max(20).optional().or(z.literal("")),
-  secondaryColor: z.string().trim().max(20).optional().or(z.literal("")),
-  accentColor: z.string().trim().max(20).optional().or(z.literal("")),
+  colors: brandColorsSchema,
   notes: z.string().trim().max(4000).optional().or(z.literal("")),
   // Submitted together with the rest of the brand kit so there's one save for the whole
   // form, not a separate add-a-logo step — see savePortalBrandKit/saveBrandKit.
@@ -66,9 +68,7 @@ export const brandKitSchema = z.object({
  * their own required field (fileLabel / accessLabel) was actually filled in. */
 export const portalBrandPageSchema = z.object({
   clientId: z.string().min(1),
-  primaryColor: z.string().trim().max(20).optional().or(z.literal("")),
-  secondaryColor: z.string().trim().max(20).optional().or(z.literal("")),
-  accentColor: z.string().trim().max(20).optional().or(z.literal("")),
+  colors: brandColorsSchema,
   notes: z.string().trim().max(4000).optional().or(z.literal("")),
   logoUrl: z.string().trim().max(600).optional().or(z.literal("")),
   logoFileId: z.string().trim().optional().or(z.literal("")),

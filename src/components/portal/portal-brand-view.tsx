@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileUploadField, type UploadedFile } from "@/components/upload/file-upload-field";
 import { savePortalBrandPage, deletePortalAsset } from "@/server/actions/portal-actions";
 
-type BrandKit = { primaryColor: string | null; secondaryColor: string | null; accentColor: string | null; notes: string | null };
+type BrandKit = { colors: string[]; notes: string | null };
 type Asset = { id: string; kind: "LOGO" | "BRAND_FILE" | "PRODUCT_PHOTO" | "OTHER"; label: string; url: string; createdAt: string; addedByPortal: boolean };
 type AccessEntry = { id: string; label: string; username: string | null; url: string | null; createdAt: string };
 
@@ -79,21 +79,15 @@ export function PortalBrandView({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="primaryColor">Primary</Label>
-              <div className="flex items-center gap-2">
-                <ColorSwatch hex={brandKit?.primaryColor ?? null} />
-                <Input id="primaryColor" name="primaryColor" placeholder="#3347FF" defaultValue={brandKit?.primaryColor ?? ""} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="secondaryColor">Secondary</Label>
-              <Input id="secondaryColor" name="secondaryColor" placeholder="#0A0E17" defaultValue={brandKit?.secondaryColor ?? ""} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="accentColor">Accent</Label>
-              <Input id="accentColor" name="accentColor" placeholder="#6E7DFF" defaultValue={brandKit?.accentColor ?? ""} />
+          <div className="space-y-2">
+            <Label>Colours (up to 5)</Label>
+            <div className="grid grid-cols-5 gap-2">
+              {Array.from({ length: 5 }, (_, i) => (
+                <div key={i} className="flex items-center gap-1.5">
+                  <ColorSwatch hex={brandKit?.colors[i] ?? null} />
+                  <Input name="colors" placeholder="#______" defaultValue={brandKit?.colors[i] ?? ""} aria-label={`Colour ${i + 1}`} />
+                </div>
+              ))}
             </div>
           </div>
           <div className="space-y-2">

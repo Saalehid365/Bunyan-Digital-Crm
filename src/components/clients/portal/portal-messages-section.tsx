@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Send, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ const initial: { error?: string; ok?: boolean } = {};
 export function PortalMessagesSection({ clientId, messages }: { clientId: string; messages: MessageRow[] }) {
   const listRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initial, formData: FormData) => (await sendTeamMessage(formData)) ?? {},
     initial,
@@ -27,8 +29,10 @@ export function PortalMessagesSection({ clientId, messages }: { clientId: string
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
-    markPortalMessagesReadByTeam(clientId);
-  }, [clientId, messages.length]);
+    // Refresh so the unread badge next to the Portal tab (rendered in the parent layout)
+    // clears right away instead of only on the next navigation.
+    markPortalMessagesReadByTeam(clientId).then(() => router.refresh());
+  }, [clientId, messages.length, router]);
 
   return (
     <Card className="flex flex-col overflow-hidden">

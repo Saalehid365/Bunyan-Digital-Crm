@@ -696,13 +696,13 @@ model ClientAsset {
 /// One brand kit per client — theme colours and freeform notes, editable from either
 /// side (the client's own brand spec; the team can also keep it current).
 model ClientBrandKit {
-  id             String   @id @default(cuid())
-  clientId       String   @unique
-  primaryColor   String?
-  secondaryColor String?
-  accentColor    String?
-  notes          String?  @db.Text
-  updatedAt      DateTime @updatedAt
+  id        String   @id @default(cuid())
+  clientId  String   @unique
+  // Up to 5 hex colours, in display order — a flexible count instead of fixed
+  // primary/secondary/accent roles, since different clients want different numbers.
+  colors    Json?
+  notes     String?  @db.Text
+  updatedAt DateTime @updatedAt
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 }

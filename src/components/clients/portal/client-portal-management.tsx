@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { markPortalActivityReadByTeam } from "@/server/actions/client-portal";
+import { markPortalActivityReadByTeam, markPortalMessagesReadByTeam } from "@/server/actions/client-portal";
 import { PortalAccessSection, type PortalUserRow } from "@/components/clients/portal/portal-access-section";
 import { PortalResultsSection, type ResultRow } from "@/components/clients/portal/portal-results-section";
 import { PortalCampaignsSection, type CampaignRow } from "@/components/clients/portal/portal-campaigns-section";
@@ -47,10 +48,16 @@ export function ClientPortalManagement({
   messages: MessageRow[];
 }) {
   const [tab, setTab] = useState<Tab>("access");
+  const router = useRouter();
 
   useEffect(() => {
-    markPortalActivityReadByTeam(clientId);
-  }, [clientId]);
+    // The Portal tab's badge is one combined number (messages + other activity), so
+    // landing on any sub-tab here clears both — not just whichever one you happen to
+    // land on. Marking as read updates the client's row, but the badge lives in the
+    // parent layout (already rendered) — refresh so it clears immediately instead of
+    // only on the next navigation.
+    Promise.all([markPortalActivityReadByTeam(clientId), markPortalMessagesReadByTeam(clientId)]).then(() => router.refresh());
+  }, [clientId, router]);
 
   return (
     <div className="space-y-4">

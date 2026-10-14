@@ -14,7 +14,7 @@ import { EmptyState } from "@/components/empty-state";
 import { FileUploadField, type UploadedFile } from "@/components/upload/file-upload-field";
 import { saveBrandKit, addClientAsset, deleteClientAsset } from "@/server/actions/client-portal";
 
-export type BrandKit = { primaryColor: string | null; secondaryColor: string | null; accentColor: string | null; notes: string | null };
+export type BrandKit = { colors: string[]; notes: string | null };
 export type AssetRow = { id: string; kind: "LOGO" | "BRAND_FILE" | "PRODUCT_PHOTO" | "OTHER"; label: string; url: string; createdAt: string; addedByPortal: boolean };
 
 const KIND_LABEL: Record<AssetRow["kind"], string> = { LOGO: "Logo", BRAND_FILE: "Brand file", PRODUCT_PHOTO: "Product photo", OTHER: "Other" };
@@ -29,18 +29,12 @@ function BrandKitForm({ clientId, brandKit }: { clientId: string; brandKit: Bran
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="clientId" value={clientId} />
-      <div className="grid grid-cols-3 gap-3">
-        <div className="space-y-2">
-          <Label htmlFor="b-primary">Primary</Label>
-          <Input id="b-primary" name="primaryColor" placeholder="#3347FF" defaultValue={brandKit?.primaryColor ?? ""} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="b-secondary">Secondary</Label>
-          <Input id="b-secondary" name="secondaryColor" defaultValue={brandKit?.secondaryColor ?? ""} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="b-accent">Accent</Label>
-          <Input id="b-accent" name="accentColor" defaultValue={brandKit?.accentColor ?? ""} />
+      <div className="space-y-2">
+        <Label>Colours (up to 5)</Label>
+        <div className="grid grid-cols-5 gap-2">
+          {Array.from({ length: 5 }, (_, i) => (
+            <Input key={i} name="colors" placeholder={`#______`} defaultValue={brandKit?.colors[i] ?? ""} aria-label={`Colour ${i + 1}`} />
+          ))}
         </div>
       </div>
       <div className="space-y-2">

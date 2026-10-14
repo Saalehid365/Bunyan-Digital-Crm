@@ -75,9 +75,9 @@ export async function savePortalBrandPage(formData: FormData) {
   const portalUser = await requirePortalUser();
   const parsed = portalBrandPageSchema.safeParse({
     clientId: portalUser.clientId,
-    primaryColor: formData.get("primaryColor"),
-    secondaryColor: formData.get("secondaryColor"),
-    accentColor: formData.get("accentColor"),
+    // Five fixed inputs all named "colors" — getAll() collects them as an array; blanks
+    // are filtered out below rather than in the schema, so leaving slots empty is fine.
+    colors: formData.getAll("colors").map(String),
     notes: formData.get("notes"),
     logoUrl: formData.get("logoUrl"),
     logoFileId: formData.get("logoFileId"),
@@ -109,20 +109,17 @@ export async function savePortalBrandPage(formData: FormData) {
   }
 
   const sent: string[] = ["brand kit"];
+  const colors = (data.colors ?? []).map((c) => c.trim()).filter(Boolean).slice(0, 5);
 
   await prisma.clientBrandKit.upsert({
     where: { clientId: portalUser.clientId },
     create: {
       clientId: portalUser.clientId,
-      primaryColor: emptyToUndefined(data.primaryColor),
-      secondaryColor: emptyToUndefined(data.secondaryColor),
-      accentColor: emptyToUndefined(data.accentColor),
+      colors,
       notes: emptyToUndefined(data.notes),
     },
     update: {
-      primaryColor: emptyToUndefined(data.primaryColor) ?? null,
-      secondaryColor: emptyToUndefined(data.secondaryColor) ?? null,
-      accentColor: emptyToUndefined(data.accentColor) ?? null,
+      colors,
       notes: emptyToUndefined(data.notes) ?? null,
     },
   });
@@ -182,7 +179,7 @@ export async function markPortalMessagesReadByClient() {
 
 export async function markPortalDocumentCompleted(id: string, uploadedFile?: { id: string; url: string }) {
   const portalUser = await requirePortalUser();
-  const existing = await prisma.clientDocument.findUnique({ where: { id }, select: { clientId: true } });
+  const existing = await prisma.clientDocument.findUnique({ where: { id }, select: { clientId: true, title: true } });
   if (!existing || existing.clientId !== portalUser.clientId) return { error: "Not found" };
 
   // If the client attached their signed/completed copy, it replaces the original link —
@@ -199,6 +196,10 @@ export async function markPortalDocumentCompleted(id: string, uploadedFile?: { i
     where: { id },
     data: { status: "COMPLETED", completedAt: new Date(), ...fileUpdate },
   });
+  await notifyTeamOfPortalActivity(
+    portalUser.clientId,
+    `${portalUser.name} marked "${existing.title}" as done${fileUpdate ? ", with a file attached" : ""}`,
+  );
   revalidatePath("/portal/documents");
   return { ok: true };
 }

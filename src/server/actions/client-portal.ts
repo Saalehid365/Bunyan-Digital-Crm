@@ -21,6 +21,10 @@ function emptyToUndefined(v: string | undefined) {
 }
 function path(clientId: string) {
   revalidatePath(`/clients/${clientId}/portal`);
+  // The unread badge next to the Portal tab is computed in the client's shared layout
+  // (every /clients/[clientId]/* route), not just the Portal page itself — revalidate
+  // that whole segment too, or the badge keeps showing a stale count after it's read.
+  revalidatePath(`/clients/${clientId}`, "layout");
 }
 
 /** Deletes an uploaded file's row and its underlying blob — a no-op if fileId is unset. */
@@ -255,28 +259,29 @@ export async function saveBrandKit(formData: FormData) {
   const user = await requirePermission("MANAGE_CLIENTS");
   const parsed = brandKitSchema.safeParse({
     clientId: formData.get("clientId"),
-    primaryColor: formData.get("primaryColor"),
-    secondaryColor: formData.get("secondaryColor"),
-    accentColor: formData.get("accentColor"),
+    colors: formData.getAll("colors").map(String),
     notes: formData.get("notes"),
+    // This form has no logo control (that's portal-only for now) — `?? undefined`
+    // because a field with no matching input returns null, not "", from formData.get,
+    // and the schema's string-or-empty-string validator rejects null.
+    logoUrl: formData.get("logoUrl") ?? undefined,
+    logoFileId: formData.get("logoFileId") ?? undefined,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
   const data = parsed.data;
   if (!(await canAccessClient(user, data.clientId))) return { error: "You don't have access to this client." };
 
+  const colors = (data.colors ?? []).map((c) => c.trim()).filter(Boolean).slice(0, 5);
+
   await prisma.clientBrandKit.upsert({
     where: { clientId: data.clientId },
     create: {
       clientId: data.clientId,
-      primaryColor: emptyToUndefined(data.primaryColor),
-      secondaryColor: emptyToUndefined(data.secondaryColor),
-      accentColor: emptyToUndefined(data.accentColor),
+      colors,
       notes: emptyToUndefined(data.notes),
     },
     update: {
-      primaryColor: emptyToUndefined(data.primaryColor) ?? null,
-      secondaryColor: emptyToUndefined(data.secondaryColor) ?? null,
-      accentColor: emptyToUndefined(data.accentColor) ?? null,
+      colors,
       notes: emptyToUndefined(data.notes) ?? null,
     },
   });
@@ -363,4 +368,5 @@ export async function markPortalActivityReadByTeam(clientId: string) {
   const user = await requireUser();
   if (!(await canAccessClient(user, clientId))) return;
   await prisma.client.update({ where: { id: clientId }, data: { portalActivityReadByTeamAt: new Date() } });
+  path(clientId);
 }
