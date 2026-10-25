@@ -48,6 +48,7 @@ export async function createPortalUser(formData: FormData) {
     clientId: formData.get("clientId"),
     name: formData.get("name"),
     email: formData.get("email"),
+    password: formData.get("password") ?? undefined,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
   const data = parsed.data;
@@ -59,9 +60,9 @@ export async function createPortalUser(formData: FormData) {
   const client = await prisma.client.findUnique({ where: { id: data.clientId }, select: { name: true } });
   if (!client) return { error: "Client not found." };
 
-  // A random password, emailed straight to the contact — mirrors how a client invites
-  // their own teammates, so neither side has to invent and relay a password by hand.
-  const password = generateTempPassword();
+  // Use the password the team set, or fall back to a random one — either way it's
+  // emailed straight to the contact so no one has to relay it by hand.
+  const password = data.password?.trim() || generateTempPassword();
   await prisma.clientPortalUser.create({
     data: { clientId: data.clientId, name: data.name, email: data.email, passwordHash: hashPassword(password) },
   });

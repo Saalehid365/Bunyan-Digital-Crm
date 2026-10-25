@@ -53,8 +53,12 @@ function CreateDialog({ clientId }: { clientId: string }) {
             <Label htmlFor="pu-email">Email</Label>
             <Input id="pu-email" name="email" type="email" required />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="pu-password">Password</Label>
+            <Input id="pu-password" name="password" minLength={8} placeholder="Leave blank to auto-generate one" />
+          </div>
           <p className="text-xs text-muted-foreground">
-            They&apos;ll get an email with a sign-in link and a one-time password — nothing to share yourself.
+            They&apos;ll get an email with a sign-in link and this password — or one we generate for you if you leave it blank.
           </p>
           {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
           <Button type="submit" className="w-full" disabled={pending}>{pending ? "Sending invite…" : "Send invite"}</Button>
