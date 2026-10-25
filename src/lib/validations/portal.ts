@@ -4,7 +4,6 @@ export const portalUserSchema = z.object({
   clientId: z.string().min(1),
   name: z.string().trim().min(1, "Name is required").max(120),
   email: z.string().trim().email("Enter a valid email"),
-  password: z.string().min(8, "Use at least 8 characters"),
 });
 
 export const clientResultSchema = z.object({
@@ -98,4 +97,9 @@ export const clientDocumentSchema = z.object({
   fileId: z.string().trim().optional().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().or(z.literal("")),
   dueDate: z.string().trim().optional().or(z.literal("")),
+});
+
+export const portalTeammateInviteSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(120),
+  email: z.string().trim().email("Enter a valid email"),
 });

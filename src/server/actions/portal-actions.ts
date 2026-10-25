@@ -6,7 +6,9 @@ import { requirePortalUser } from "@/lib/portal-auth";
 import { encryptSecret } from "@/lib/crypto";
 import { deleteBlob } from "@/lib/blob-store";
 import { notifyTeamOfPortalActivity } from "@/lib/portal-activity";
-import { portalBrandPageSchema, clientMessageSchema } from "@/lib/validations/portal";
+import { hashPassword, generateTempPassword } from "@/lib/password";
+import { sendPortalInviteEmail } from "@/lib/email/send-portal-invite";
+import { portalBrandPageSchema, clientMessageSchema, portalTeammateInviteSchema } from "@/lib/validations/portal";
 
 function emptyToUndefined(v: string | undefined) {
   return v && v.trim() !== "" ? v.trim() : undefined;
@@ -201,5 +203,68 @@ export async function markPortalDocumentCompleted(id: string, uploadedFile?: { i
     `${portalUser.name} marked "${existing.title}" as done${fileUpdate ? ", with a file attached" : ""}`,
   );
   revalidatePath("/portal/documents");
+  return { ok: true };
+}
+
+/* ---------- teammates (other people at the client who can use the portal) ---------- */
+
+export async function invitePortalTeammate(formData: FormData) {
+  const portalUser = await requirePortalUser();
+  const parsed = portalTeammateInviteSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  const { name, email } = parsed.data;
+
+  if (await prisma.clientPortalUser.findUnique({ where: { email } })) {
+    return { error: "Someone with that email already has portal access." };
+  }
+
+  // A random, readable-enough password — emailed directly to the teammate so the
+  // inviting client never has to relay it themselves.
+  const password = generateTempPassword();
+
+  await prisma.clientPortalUser.create({
+    data: { clientId: portalUser.clientId, name, email, passwordHash: hashPassword(password) },
+  });
+
+  const portalUrl = `${process.env.AUTH_URL ?? "http://localhost:3000"}/portal/login`;
+  const emailResult = await sendPortalInviteEmail({
+    to: email,
+    name,
+    inviterName: portalUser.name,
+    clientName: portalUser.clientName,
+    password,
+    portalUrl,
+  });
+  if (!emailResult.ok) {
+    // The login still exists — the team can see it on their side and share the
+    // password another way if the email itself failed to send.
+    return { error: `Added, but the invite email failed to send: ${emailResult.error}` };
+  }
+
+  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} invited ${name} (${email}) to the portal`);
+  revalidatePath("/portal/team");
+  return { ok: true };
+}
+
+export async function setPortalTeammateDisabled(id: string, disabled: boolean) {
+  const portalUser = await requirePortalUser();
+  if (id === portalUser.id) return { error: "You can't disable your own access." };
+  const existing = await prisma.clientPortalUser.findUnique({ where: { id }, select: { clientId: true } });
+  if (!existing || existing.clientId !== portalUser.clientId) return { error: "Not found" };
+  await prisma.clientPortalUser.update({ where: { id }, data: { disabledAt: disabled ? new Date() : null } });
+  revalidatePath("/portal/team");
+  return { ok: true };
+}
+
+export async function removePortalTeammate(id: string) {
+  const portalUser = await requirePortalUser();
+  if (id === portalUser.id) return { error: "You can't remove your own access." };
+  const existing = await prisma.clientPortalUser.findUnique({ where: { id }, select: { clientId: true } });
+  if (!existing || existing.clientId !== portalUser.clientId) return { error: "Not found" };
+  await prisma.clientPortalUser.delete({ where: { id } });
+  revalidatePath("/portal/team");
   return { ok: true };
 }

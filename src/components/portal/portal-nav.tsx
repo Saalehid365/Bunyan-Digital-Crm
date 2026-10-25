@@ -11,6 +11,7 @@ const TABS = [
   { href: "/portal/documents", label: "Documents", exact: false, badgeKey: "documents" },
   { href: "/portal/brand", label: "Brand", exact: false, badgeKey: null },
   { href: "/portal/messages", label: "Messages", exact: false, badgeKey: "messages" },
+  { href: "/portal/team", label: "Team", exact: false, badgeKey: null },
 ] as const;
 
 export function PortalNav({

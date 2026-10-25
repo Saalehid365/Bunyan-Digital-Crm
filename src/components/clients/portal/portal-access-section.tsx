@@ -37,11 +37,11 @@ function CreateDialog({ clientId }: { clientId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <Button size="sm" onClick={() => setOpen(true)}>
-        <Plus className="h-3.5 w-3.5" /> Add contact
+        <Plus className="h-3.5 w-3.5" /> Add teammate
       </Button>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Give portal access</DialogTitle>
+          <DialogTitle>Add a teammate to this client’s portal</DialogTitle>
         </DialogHeader>
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="clientId" value={clientId} />
@@ -53,13 +53,11 @@ function CreateDialog({ clientId }: { clientId: string }) {
             <Label htmlFor="pu-email">Email</Label>
             <Input id="pu-email" name="email" type="email" required />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="pu-password">Password</Label>
-            <Input id="pu-password" name="password" type="text" minLength={8} required />
-            <p className="text-xs text-muted-foreground">Share this with the client yourself — it&apos;s shown once.</p>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            They&apos;ll get an email with a sign-in link and a one-time password — nothing to share yourself.
+          </p>
           {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-          <Button type="submit" className="w-full" disabled={pending}>{pending ? "Creating…" : "Create login"}</Button>
+          <Button type="submit" className="w-full" disabled={pending}>{pending ? "Sending invite…" : "Send invite"}</Button>
         </form>
       </DialogContent>
     </Dialog>
