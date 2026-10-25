@@ -129,6 +129,7 @@ model User {
   portalAssetsAdded  ClientAsset[]
   portalMessagesSent ClientMessage[]
   clientFiles        ClientFile[]
+  clientProducts     ClientProduct[]
 }
 
 model Account {
@@ -209,6 +210,7 @@ model Client {
   portalActivityReadByTeamAt DateTime?
   documents                  ClientDocument[]
   clientFiles                ClientFile[]
+  products                   ClientProduct[]
 
   @@index([status])
 }
@@ -573,11 +575,12 @@ model ClientPortalUser {
   // "messages from the team newer than this".
   messagesReadAt DateTime?
 
-  client      Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  sessions    ClientPortalSession[]
-  messages    ClientMessage[]
-  assetsAdded ClientAsset[]
-  clientFiles ClientFile[]
+  client         Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  sessions       ClientPortalSession[]
+  messages       ClientMessage[]
+  assetsAdded    ClientAsset[]
+  clientFiles    ClientFile[]
+  clientProducts ClientProduct[]
 
   @@index([clientId])
 }
@@ -794,4 +797,69 @@ model ClientFile {
   document             ClientDocument?
 
   @@index([clientId])
+}
+
+enum ClientProductCategory {
+  CLOTHING
+  HEALTH_BEAUTY
+  ELECTRONICS
+  HOME_KITCHEN
+  TOYS_GAMES
+  OTHER
+}
+
+enum ClientProductStatus {
+  PENDING
+  LISTED
+  DECLINED
+}
+
+/// A product the client wants the agency to list (eBay, marketplace, etc.). Universal
+/// fields (name, price, quantity, description, photos) apply to every category; the
+/// category-specific ones (size, expiry date, warranty…) live in `attributes` as a flat
+/// key→value map, since the fields that matter vary a lot by category — see
+/// src/lib/product-categories.ts for what each category actually asks for.
+model ClientProduct {
+  id                  String                @id @default(cuid())
+  clientId            String
+  name                String
+  category            ClientProductCategory @default(OTHER)
+  price               Decimal?              @db.Decimal(10, 2)
+  quantity            Int?
+  description         String?               @db.Text
+  attributes          Json?
+  // Up to a few uploaded/linked photos — [{ fileId?, url, fileName? }]
+  photos              Json?
+  status              ClientProductStatus   @default(PENDING)
+  // Team-only notes (listing progress, questions, etc.) — never shown to the client.
+  notes               String?               @db.Text
+  addedByPortal       Boolean               @default(false)
+  addedByUserId       String?
+  addedByPortalUserId String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  client            Client                 @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  addedByUser       User?                  @relation(fields: [addedByUserId], references: [id], onDelete: SetNull)
+  addedByPortalUser ClientPortalUser?      @relation(fields: [addedByPortalUserId], references: [id], onDelete: SetNull)
+  variants          ClientProductVariant[]
+
+  @@index([clientId])
+}
+
+/// One option of a product that comes in more than one — a size, a colour, a bundle —
+/// each with its own price/quantity/SKU. A free-text label rather than fixed
+/// size/colour columns, so it fits any category without per-category variant fields.
+model ClientProductVariant {
+  id        String   @id @default(cuid())
+  productId String
+  label     String
+  price     Decimal? @db.Decimal(10, 2)
+  quantity  Int?
+  sku       String?
+  createdAt DateTime @default(now())
+
+  product ClientProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }

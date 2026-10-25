@@ -8,6 +8,7 @@ import { portalSignOut } from "@/server/actions/portal-session";
 
 const TABS = [
   { href: "/portal", label: "Overview", exact: true, badgeKey: null },
+  { href: "/portal/products", label: "Products", exact: false, badgeKey: null },
   { href: "/portal/documents", label: "Documents", exact: false, badgeKey: "documents" },
   { href: "/portal/brand", label: "Brand", exact: false, badgeKey: null },
   { href: "/portal/messages", label: "Messages", exact: false, badgeKey: "messages" },

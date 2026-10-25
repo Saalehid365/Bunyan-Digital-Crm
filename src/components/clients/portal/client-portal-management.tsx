@@ -9,16 +9,18 @@ import { PortalResultsSection, type ResultRow } from "@/components/clients/porta
 import { PortalCampaignsSection, type CampaignRow } from "@/components/clients/portal/portal-campaigns-section";
 import { PortalReportsSection, type ReportRow } from "@/components/clients/portal/portal-reports-section";
 import { PortalDocumentsSection, type DocumentRow } from "@/components/clients/portal/portal-documents-section";
+import { PortalProductsSection, type ProductRow } from "@/components/clients/portal/portal-products-section";
 import { PortalBrandSection, type AssetRow, type BrandKit } from "@/components/clients/portal/portal-brand-section";
 import { PortalMessagesSection, type MessageRow } from "@/components/clients/portal/portal-messages-section";
 
-const TABS = ["access", "results", "campaigns", "reports", "documents", "brand", "messages"] as const;
+const TABS = ["access", "results", "campaigns", "reports", "products", "documents", "brand", "messages"] as const;
 type Tab = (typeof TABS)[number];
 const TAB_LABEL: Record<Tab, string> = {
   access: "Logins",
   results: "Results",
   campaigns: "Campaigns",
   reports: "Reports",
+  products: "Products",
   documents: "Documents",
   brand: "Brand",
   messages: "Messages",
@@ -32,6 +34,7 @@ export function ClientPortalManagement({
   campaigns,
   reports,
   documents,
+  products,
   assets,
   brandKit,
   messages,
@@ -43,6 +46,7 @@ export function ClientPortalManagement({
   campaigns: CampaignRow[];
   reports: ReportRow[];
   documents: DocumentRow[];
+  products: ProductRow[];
   assets: AssetRow[];
   brandKit: BrandKit | null;
   messages: MessageRow[];
@@ -85,6 +89,7 @@ export function ClientPortalManagement({
       {tab === "results" ? <PortalResultsSection clientId={clientId} results={results} canManage={canManageClients} /> : null}
       {tab === "campaigns" ? <PortalCampaignsSection clientId={clientId} campaigns={campaigns} canManage={canManageClients} /> : null}
       {tab === "reports" ? <PortalReportsSection clientId={clientId} reports={reports} canManage={canManageClients} /> : null}
+      {tab === "products" ? <PortalProductsSection clientId={clientId} products={products} canManage={canManageClients} /> : null}
       {tab === "documents" ? <PortalDocumentsSection clientId={clientId} documents={documents} canManage={canManageClients} /> : null}
       {tab === "brand" ? <PortalBrandSection clientId={clientId} brandKit={brandKit} assets={assets} canManage={canManageClients} /> : null}
       {tab === "messages" ? <PortalMessagesSection clientId={clientId} messages={messages} /> : null}

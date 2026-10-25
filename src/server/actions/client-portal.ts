@@ -6,6 +6,7 @@ import { requireUser, requirePermission, canAccessClient } from "@/lib/permissio
 import { hashPassword, generateTempPassword } from "@/lib/password";
 import { deleteBlob } from "@/lib/blob-store";
 import { sendPortalInviteEmail } from "@/lib/email/send-portal-invite";
+import { notifyPortalUsersByEmail } from "@/lib/portal-notify";
 import {
   portalUserSchema,
   clientResultSchema,
@@ -15,7 +16,9 @@ import {
   brandKitSchema,
   clientMessageSchema,
   clientDocumentSchema,
+  clientProductSchema,
 } from "@/lib/validations/portal";
+import { readProductAttributes, parseProductPhotos, parseProductVariants } from "@/lib/products";
 
 function emptyToUndefined(v: string | undefined) {
   return v && v.trim() !== "" ? v.trim() : undefined;
@@ -135,6 +138,13 @@ export async function addClientResult(formData: FormData) {
     },
   });
   path(data.clientId);
+  await notifyPortalUsersByEmail({
+    clientId: data.clientId,
+    heading: "New result for you",
+    body: `${user.name ?? user.email} added a new result — ${data.label} for ${data.period}: ${data.value}.`,
+    ctaLabel: "View results",
+    ctaPath: "/portal",
+  });
   return { ok: true };
 }
 
@@ -183,6 +193,13 @@ export async function addClientCampaign(formData: FormData) {
     },
   });
   path(data.clientId);
+  await notifyPortalUsersByEmail({
+    clientId: data.clientId,
+    heading: "New campaign added",
+    body: `${user.name ?? user.email} added a new campaign — ${data.name} on ${data.platform}.`,
+    ctaLabel: "View campaigns",
+    ctaPath: "/portal",
+  });
   return { ok: true };
 }
 
@@ -227,6 +244,13 @@ export async function addClientReport(formData: FormData) {
     },
   });
   path(data.clientId);
+  await notifyPortalUsersByEmail({
+    clientId: data.clientId,
+    heading: "New report ready",
+    body: `${user.name ?? user.email} added a new report — ${data.title}${data.period ? ` (${data.period})` : ""}.`,
+    ctaLabel: "View reports",
+    ctaPath: "/portal",
+  });
   return { ok: true };
 }
 
@@ -325,6 +349,13 @@ export async function sendTeamMessage(formData: FormData) {
   });
   await prisma.client.update({ where: { id: data.clientId }, data: { portalMessagesReadByTeamAt: new Date() } });
   path(data.clientId);
+  await notifyPortalUsersByEmail({
+    clientId: data.clientId,
+    heading: `New message from ${user.name ?? "Bunyan Digital"}`,
+    body: data.body.length > 200 ? `${data.body.slice(0, 200)}…` : data.body,
+    ctaLabel: "Reply",
+    ctaPath: "/portal/messages",
+  });
   return { ok: true };
 }
 
@@ -364,6 +395,13 @@ export async function addClientDocument(formData: FormData) {
     },
   });
   path(data.clientId);
+  await notifyPortalUsersByEmail({
+    clientId: data.clientId,
+    heading: "New document to review",
+    body: `${user.name ?? user.email} sent you a document — ${data.title}.${data.dueDate ? ` Due ${new Date(data.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.` : ""}`,
+    ctaLabel: "View document",
+    ctaPath: "/portal/documents",
+  });
   return { ok: true };
 }
 
@@ -390,5 +428,64 @@ export async function markPortalActivityReadByTeam(clientId: string) {
   const user = await requireUser();
   if (!(await canAccessClient(user, clientId))) return;
   await prisma.client.update({ where: { id: clientId }, data: { portalActivityReadByTeamAt: new Date() } });
+  path(clientId);
+}
+
+/* ---------- products the client wants listed ---------- */
+
+export async function addClientProduct(formData: FormData) {
+  const user = await requirePermission("MANAGE_CLIENTS");
+  const parsed = clientProductSchema.safeParse({
+    clientId: formData.get("clientId"),
+    name: formData.get("name"),
+    category: formData.get("category") || "OTHER",
+    price: formData.get("price") || undefined,
+    quantity: formData.get("quantity") || undefined,
+    description: formData.get("description"),
+    photos: formData.get("photos") || undefined,
+    variants: formData.get("variants") || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  const data = parsed.data;
+  if (!(await canAccessClient(user, data.clientId))) return { error: "You don't have access to this client." };
+  const variants = parseProductVariants(data.variants);
+
+  await prisma.clientProduct.create({
+    data: {
+      clientId: data.clientId,
+      name: data.name,
+      category: data.category,
+      price: data.price,
+      quantity: data.quantity,
+      description: emptyToUndefined(data.description),
+      attributes: readProductAttributes(formData, data.category),
+      photos: parseProductPhotos(data.photos),
+      addedByUserId: user.id,
+      variants: variants.length > 0 ? { create: variants } : undefined,
+    },
+  });
+  path(data.clientId);
+  return { ok: true };
+}
+
+export async function setClientProductStatus(id: string, clientId: string, status: "PENDING" | "LISTED" | "DECLINED") {
+  const user = await requirePermission("MANAGE_CLIENTS");
+  if (!(await canAccessClient(user, clientId))) return { error: "You don't have access to this client." };
+  await prisma.clientProduct.update({ where: { id }, data: { status } });
+  path(clientId);
+}
+
+export async function setClientProductNotes(id: string, clientId: string, notes: string) {
+  const user = await requirePermission("MANAGE_CLIENTS");
+  if (!(await canAccessClient(user, clientId))) return { error: "You don't have access to this client." };
+  await prisma.clientProduct.update({ where: { id }, data: { notes: notes.trim() || null } });
+  path(clientId);
+  return { ok: true };
+}
+
+export async function deleteClientProduct(id: string, clientId: string) {
+  const user = await requirePermission("MANAGE_CLIENTS");
+  if (!(await canAccessClient(user, clientId))) return { error: "You don't have access to this client." };
+  await prisma.clientProduct.delete({ where: { id } });
   path(clientId);
 }

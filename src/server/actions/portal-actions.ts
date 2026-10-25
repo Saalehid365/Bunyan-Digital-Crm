@@ -8,7 +8,8 @@ import { deleteBlob } from "@/lib/blob-store";
 import { notifyTeamOfPortalActivity } from "@/lib/portal-activity";
 import { hashPassword, generateTempPassword } from "@/lib/password";
 import { sendPortalInviteEmail } from "@/lib/email/send-portal-invite";
-import { portalBrandPageSchema, clientMessageSchema, portalTeammateInviteSchema } from "@/lib/validations/portal";
+import { portalBrandPageSchema, clientMessageSchema, portalTeammateInviteSchema, clientProductSchema } from "@/lib/validations/portal";
+import { readProductAttributes, parseProductPhotos, parseProductVariants } from "@/lib/products";
 
 function emptyToUndefined(v: string | undefined) {
   return v && v.trim() !== "" ? v.trim() : undefined;
@@ -266,5 +267,55 @@ export async function removePortalTeammate(id: string) {
   if (!existing || existing.clientId !== portalUser.clientId) return { error: "Not found" };
   await prisma.clientPortalUser.delete({ where: { id } });
   revalidatePath("/portal/team");
+  return { ok: true };
+}
+
+/* ---------- products the client wants listed ---------- */
+
+export async function addPortalProduct(formData: FormData) {
+  const portalUser = await requirePortalUser();
+  const parsed = clientProductSchema.safeParse({
+    clientId: portalUser.clientId,
+    name: formData.get("name"),
+    category: formData.get("category") || "OTHER",
+    price: formData.get("price") || undefined,
+    quantity: formData.get("quantity") || undefined,
+    description: formData.get("description"),
+    photos: formData.get("photos") || undefined,
+    variants: formData.get("variants") || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  const data = parsed.data;
+  const variants = parseProductVariants(data.variants);
+
+  await prisma.clientProduct.create({
+    data: {
+      clientId: portalUser.clientId,
+      name: data.name,
+      category: data.category,
+      price: data.price,
+      quantity: data.quantity,
+      description: emptyToUndefined(data.description),
+      attributes: readProductAttributes(formData, data.category),
+      photos: parseProductPhotos(data.photos),
+      addedByPortal: true,
+      addedByPortalUserId: portalUser.id,
+      variants: variants.length > 0 ? { create: variants } : undefined,
+    },
+  });
+  await notifyTeamOfPortalActivity(
+    portalUser.clientId,
+    `${portalUser.name} added a product to list — "${data.name}"${variants.length > 0 ? ` (${variants.length} variant${variants.length === 1 ? "" : "s"})` : ""}`,
+  );
+  revalidatePath("/portal/products");
+  return { ok: true };
+}
+
+export async function deletePortalProduct(id: string) {
+  const portalUser = await requirePortalUser();
+  const existing = await prisma.clientProduct.findUnique({ where: { id }, select: { clientId: true } });
+  if (!existing || existing.clientId !== portalUser.clientId) return { error: "Not found" };
+  await prisma.clientProduct.delete({ where: { id } });
+  revalidatePath("/portal/products");
   return { ok: true };
 }

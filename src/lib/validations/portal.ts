@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PRODUCT_CATEGORIES } from "@/lib/product-categories";
 
 export const portalUserSchema = z.object({
   clientId: z.string().min(1),
@@ -102,4 +103,21 @@ export const clientDocumentSchema = z.object({
 export const portalTeammateInviteSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),
   email: z.string().trim().email("Enter a valid email"),
+});
+
+export const clientProductCategoryEnum = z.enum(PRODUCT_CATEGORIES);
+
+export const clientProductSchema = z.object({
+  clientId: z.string().min(1),
+  name: z.string().trim().min(1, "Name is required").max(160),
+  category: clientProductCategoryEnum.default("OTHER"),
+  price: z.coerce.number().min(0).max(1_000_000).optional(),
+  quantity: z.coerce.number().int().min(0).max(1_000_000).optional(),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+  // A JSON-encoded array of { fileId?, url, fileName? }, built client-side — see
+  // MAX_PRODUCT_PHOTOS in product-categories.ts for the cap.
+  photos: z.string().trim().optional().or(z.literal("")),
+  // A JSON-encoded array of { label, price?, quantity?, sku? } — same pattern as
+  // photos, see MAX_PRODUCT_VARIANTS.
+  variants: z.string().trim().optional().or(z.literal("")),
 });

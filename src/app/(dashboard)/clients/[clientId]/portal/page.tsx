@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requireUser, getClientForUser, hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { toColorsArray } from "@/lib/brand-colors";
+import { toAttributesRecord, toPhotosArray } from "@/lib/products";
 import { ClientPortalManagement } from "@/components/clients/portal/client-portal-management";
 
 export default async function ClientPortalPage({ params }: { params: Promise<{ clientId: string }> }) {
@@ -11,12 +12,17 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ c
   if (!client) notFound();
   const canManageClients = await hasPermission(user, "MANAGE_CLIENTS");
 
-  const [portalUsers, results, campaigns, reports, documents, assets, brandKit, messages] = await Promise.all([
+  const [portalUsers, results, campaigns, reports, documents, products, assets, brandKit, messages] = await Promise.all([
     prisma.clientPortalUser.findMany({ where: { clientId }, orderBy: { createdAt: "asc" } }),
     prisma.clientResult.findMany({ where: { clientId }, orderBy: [{ period: "desc" }, { position: "asc" }] }),
     prisma.clientCampaign.findMany({ where: { clientId }, orderBy: { createdAt: "desc" } }),
     prisma.clientReport.findMany({ where: { clientId }, orderBy: { createdAt: "desc" } }),
     prisma.clientDocument.findMany({ where: { clientId }, orderBy: [{ status: "asc" }, { createdAt: "desc" }] }),
+    prisma.clientProduct.findMany({
+      where: { clientId },
+      orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+      include: { variants: { orderBy: { createdAt: "asc" } } },
+    }),
     prisma.clientAsset.findMany({ where: { clientId }, orderBy: { createdAt: "desc" } }),
     prisma.clientBrandKit.findUnique({ where: { clientId } }),
     prisma.clientMessage.findMany({
@@ -52,6 +58,26 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ c
           ...d,
           dueDate: d.dueDate?.toISOString() ?? null,
           completedAt: d.completedAt?.toISOString() ?? null,
+        }))}
+        products={products.map((p) => ({
+          id: p.id,
+          name: p.name,
+          category: p.category,
+          price: p.price ? Number(p.price) : null,
+          quantity: p.quantity,
+          description: p.description,
+          attributes: toAttributesRecord(p.attributes),
+          photos: toPhotosArray(p.photos),
+          status: p.status,
+          addedByPortal: p.addedByPortal,
+          createdAt: p.createdAt.toISOString(),
+          variants: p.variants.map((v) => ({
+            id: v.id,
+            label: v.label,
+            price: v.price ? Number(v.price) : null,
+            quantity: v.quantity,
+            sku: v.sku,
+          })),
         }))}
         assets={assets.map((a) => ({ ...a, createdAt: a.createdAt.toISOString() }))}
         brandKit={brandKit ? { colors: toColorsArray(brandKit.colors), notes: brandKit.notes } : null}
