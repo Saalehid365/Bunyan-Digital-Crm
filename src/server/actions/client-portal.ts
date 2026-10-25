@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser, requirePermission, canAccessClient } from "@/lib/permissions";
-import { hashPassword, generateTempPassword } from "@/lib/password";
+import { hashPassword } from "@/lib/password";
 import { deleteBlob } from "@/lib/blob-store";
-import { sendPortalInviteEmail } from "@/lib/email/send-portal-invite";
 import { notifyPortalUsersByEmail } from "@/lib/portal-notify";
 import {
   portalUserSchema,
@@ -57,30 +56,11 @@ export async function createPortalUser(formData: FormData) {
   const existing = await prisma.clientPortalUser.findUnique({ where: { email: data.email } });
   if (existing) return { error: "A portal contact with that email already exists." };
 
-  const client = await prisma.client.findUnique({ where: { id: data.clientId }, select: { name: true } });
-  if (!client) return { error: "Client not found." };
-
-  // Use the password the team set, or fall back to a random one — either way it's
-  // emailed straight to the contact so no one has to relay it by hand.
-  const password = data.password?.trim() || generateTempPassword();
+  // No email is sent for a team-created login — the team sets the password and shares
+  // it with the contact themselves.
   await prisma.clientPortalUser.create({
-    data: { clientId: data.clientId, name: data.name, email: data.email, passwordHash: hashPassword(password) },
+    data: { clientId: data.clientId, name: data.name, email: data.email, passwordHash: hashPassword(data.password) },
   });
-
-  const portalUrl = `${process.env.AUTH_URL ?? "http://localhost:3000"}/portal/login`;
-  const emailResult = await sendPortalInviteEmail({
-    to: data.email,
-    name: data.name,
-    inviterName: user.name ?? user.email ?? "The Bunyan Digital team",
-    clientName: client.name,
-    password,
-    portalUrl,
-  });
-  if (!emailResult.ok) {
-    // The login still exists — share the password another way if the email bounced.
-    path(data.clientId);
-    return { error: `Added, but the invite email failed to send: ${emailResult.error}` };
-  }
 
   path(data.clientId);
   return { ok: true };

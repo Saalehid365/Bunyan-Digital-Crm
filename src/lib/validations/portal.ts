@@ -5,8 +5,8 @@ export const portalUserSchema = z.object({
   clientId: z.string().min(1),
   name: z.string().trim().min(1, "Name is required").max(120),
   email: z.string().trim().email("Enter a valid email"),
-  // Optional — leave blank and one is generated and emailed, same as before.
-  password: z.string().trim().min(8, "Use at least 8 characters").max(200).optional().or(z.literal("")),
+  // The team sets this themselves and shares it with the contact — no email is sent.
+  password: z.string().trim().min(8, "Use at least 8 characters").max(200),
 });
 
 export const clientResultSchema = z.object({

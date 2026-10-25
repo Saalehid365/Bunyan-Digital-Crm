@@ -55,13 +55,13 @@ function CreateDialog({ clientId }: { clientId: string }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="pu-password">Password</Label>
-            <Input id="pu-password" name="password" minLength={8} placeholder="Leave blank to auto-generate one" />
+            <Input id="pu-password" name="password" minLength={8} required />
           </div>
           <p className="text-xs text-muted-foreground">
-            They&apos;ll get an email with a sign-in link and this password — or one we generate for you if you leave it blank.
+            No email is sent — share this password with them yourself so they can sign in at /portal/login.
           </p>
           {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-          <Button type="submit" className="w-full" disabled={pending}>{pending ? "Sending invite…" : "Send invite"}</Button>
+          <Button type="submit" className="w-full" disabled={pending}>{pending ? "Adding…" : "Add teammate"}</Button>
         </form>
       </DialogContent>
     </Dialog>
