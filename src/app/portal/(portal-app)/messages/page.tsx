@@ -25,7 +25,7 @@ export default async function PortalMessagesPage() {
           id: m.id,
           body: m.body,
           senderKind: m.senderKind,
-          senderName: m.senderKind === "TEAM" ? (m.senderUser?.name ?? "Bunyan Digital") : (m.senderPortalUser?.name ?? portalUser.name),
+          senderName: m.senderKind === "TEAM" ? (m.senderUser?.name ?? "Nabna Tech") : (m.senderPortalUser?.name ?? portalUser.name),
           createdAt: m.createdAt.toISOString(),
         }))}
       />

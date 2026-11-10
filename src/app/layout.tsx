@@ -33,8 +33,8 @@ const arabic = Reem_Kufi({
 });
 
 export const metadata: Metadata = {
-  title: "Bunyan Digital CRM",
-  description: "Client and service operations for Bunyan Digital",
+  title: "Nabna Tech CRM",
+  description: "Client and service operations for Nabna Tech",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -62,7 +62,7 @@ export function InviteMemberDialog() {
   async function copyCredentials() {
     if (!invited) return;
     await navigator.clipboard.writeText(
-      `Bunyan Digital CRM login\nEmail: ${invited.email}\nPassword: ${invited.password}`,
+      `Nabna Tech CRM login\nEmail: ${invited.email}\nPassword: ${invited.password}`,
     );
     setCopied(true);
     toast.success("Copied to clipboard");

@@ -217,7 +217,7 @@ export function PortalBrandView({
             <Label htmlFor="accessNotes">Notes</Label>
             <Textarea id="accessNotes" name="accessNotes" rows={2} placeholder="Anything the team should know" />
           </div>
-          <p className="text-xs text-muted-foreground">Stored encrypted — only the Bunyan Digital team can see it.</p>
+          <p className="text-xs text-muted-foreground">Stored encrypted — only the Nabna Tech team can see it.</p>
 
           {accessEntries.length > 0 ? (
             <ul className="divide-y divide-white/10 border-t border-white/10 pt-1">

@@ -49,7 +49,7 @@ export function SidebarBrand() {
     <div className="flex h-14 items-center gap-2.5 border-b border-sidebar-border px-5">
       <Image src={logo} alt="" width={40} height={40} className="h-10 w-auto" priority />
       <span className="font-serif text-[1.05rem] font-semibold tracking-[-0.03em] text-white">
-        Bunyan Digital
+        Nabna Tech
       </span>
     </div>
   );

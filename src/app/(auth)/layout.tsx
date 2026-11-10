@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { SmokeyBackground } from "@/components/ui/login-form";
-import mark from "@/components/brand/bd-mark-light.png";
+import mark from "@/components/brand/nabna-mark-light.png";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,14 +13,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&display=swap"
         rel="stylesheet"
       />
-      <main className="auth-midnight relative min-h-screen w-full flex-1 overflow-hidden bg-[#0a0e17]">
-        <SmokeyBackground color="#3347ff" />
+      <main className="auth-midnight relative min-h-screen w-full flex-1 overflow-hidden bg-[#082315]">
+        <SmokeyBackground color="#0a5c32" />
         <a
-          href="https://bunyandigital.co"
+          href="https://nabnatech.com"
           className="absolute top-6 left-6 z-20 flex items-center gap-2.5 text-white sm:top-8 sm:left-10"
         >
           <Image src={mark} alt="" className="h-7 w-auto" priority />
-          <span className="text-lg font-bold tracking-tight">Bunyan Digital</span>
+          <span className="text-lg font-bold tracking-tight">Nabna Tech</span>
         </a>
         <div className="relative z-10 flex min-h-screen w-full items-center justify-center px-4 py-24">
           <div className="w-full max-w-sm">{children}</div>

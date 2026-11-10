@@ -332,7 +332,7 @@ export async function sendTeamMessage(formData: FormData) {
   path(data.clientId);
   await notifyPortalUsersByEmail({
     clientId: data.clientId,
-    heading: `New message from ${user.name ?? "Bunyan Digital"}`,
+    heading: `New message from ${user.name ?? "Nabna Tech"}`,
     body: data.body.length > 200 ? `${data.body.slice(0, 200)}…` : data.body,
     ctaLabel: "Reply",
     ctaPath: "/portal/messages",

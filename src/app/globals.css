@@ -334,24 +334,24 @@ main h1.font-serif {
    split), so this overrides regardless of the visitor's system theme or the app's own
    light/dark toggle. */
 .auth-midnight {
-  --background: #0a0e17;
+  --background: #082315;
   --foreground: #f2f4f8;
-  --card: #131a29;
+  --card: #0a3d23;
   --card-foreground: #f2f4f8;
-  --popover: #131a29;
+  --popover: #0a3d23;
   --popover-foreground: #f2f4f8;
-  --primary: #3347ff;
+  --primary: #0a5c32;
   --primary-foreground: #ffffff;
-  --secondary: #131a29;
+  --secondary: #0a3d23;
   --secondary-foreground: #f2f4f8;
-  --muted: #131a29;
-  --muted-foreground: #98a1b3;
-  --accent: #171e4a;
+  --muted: #0a3d23;
+  --muted-foreground: #a9c9b8;
+  --accent: #0a5c32;
   --accent-foreground: #f2f4f8;
   --destructive: #ff8f8f;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.25);
-  --ring: #6e7dff;
+  --ring: #64c492;
   --radius: 0.85rem;
   --font-sans: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
   --font-serif: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;

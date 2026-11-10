@@ -61,7 +61,7 @@ export function SetPasswordDialog({
   }
 
   async function copyCredentials() {
-    await navigator.clipboard.writeText(`Bunyan Digital CRM login\nEmail: ${email}\nPassword: ${password}`);
+    await navigator.clipboard.writeText(`Nabna Tech CRM login\nEmail: ${email}\nPassword: ${password}`);
     setCopied(true);
     toast.success("Copied to clipboard");
   }

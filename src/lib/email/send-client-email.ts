@@ -61,7 +61,7 @@ function clientEmailHtml(body: string): string {
           <table role="presentation" width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #dcded9;border-radius:6px;overflow:hidden;">
             <tr>
               <td style="background:#101c26;padding:24px 32px;">
-                <span style="color:#ffffff;font-size:17px;font-weight:600;letter-spacing:0.2px;">Bunyan Digital</span>
+                <span style="color:#ffffff;font-size:17px;font-weight:600;letter-spacing:0.2px;">Nabna Tech</span>
               </td>
             </tr>
             <tr>

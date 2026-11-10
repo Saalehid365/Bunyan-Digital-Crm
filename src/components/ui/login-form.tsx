@@ -48,7 +48,7 @@ type BlurSize = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
 
 interface SmokeyBackgroundProps {
   backdropBlurAmount?: BlurSize;
-  /** Hex colour, e.g. "#3347ff". */
+  /** Hex colour, e.g. "#0a5c32". */
   color?: string;
   className?: string;
 }
@@ -76,7 +76,7 @@ const hexToRgb = (hex: string): [number, number, number] => [
  */
 export function SmokeyBackground({
   backdropBlurAmount = "sm",
-  color = "#3347ff",
+  color = "#0a5c32",
   className = "",
 }: SmokeyBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -198,9 +198,9 @@ interface LoginFormProps {
 }
 
 const inputClass =
-  "peer block w-full appearance-none border-0 border-b-2 border-white/40 bg-transparent px-0 py-2.5 text-sm text-white focus:border-[#6e7dff] focus:outline-none focus:ring-0";
+  "peer block w-full appearance-none border-0 border-b-2 border-white/40 bg-transparent px-0 py-2.5 text-sm text-white focus:border-[#64c492] focus:outline-none focus:ring-0";
 const labelClass =
-  "absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-[#b8bfcc] duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#9aa5ff]";
+  "absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-[#b8bfcc] duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#9ed1b7]";
 
 /** Glass sign-in card with floating labels, wired to a server action. */
 export function LoginForm({
@@ -223,7 +223,7 @@ export function LoginForm({
   );
 
   return (
-    <div className="w-full max-w-sm space-y-6 rounded-2xl border border-white/15 bg-[#0a0e17]/60 p-8 shadow-2xl backdrop-blur-lg">
+    <div className="w-full max-w-sm space-y-6 rounded-2xl border border-white/15 bg-[#082315]/60 p-8 shadow-2xl backdrop-blur-lg">
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight text-white">{title}</h1>
         <p className="mt-2 text-sm text-[#b8bfcc]">{subtitle}</p>
@@ -263,7 +263,7 @@ export function LoginForm({
         <button
           type="submit"
           disabled={pending}
-          className="group flex w-full items-center justify-center rounded-lg bg-[#3347ff] px-4 py-3 font-semibold text-white transition-colors duration-200 hover:bg-[#2537e6] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6e7dff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0e17] disabled:cursor-progress disabled:opacity-70"
+          className="group flex w-full items-center justify-center rounded-lg bg-[#0a5c32] px-4 py-3 font-semibold text-white transition-colors duration-200 hover:bg-[#0a3d23] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64c492] focus-visible:ring-offset-2 focus-visible:ring-offset-[#082315] disabled:cursor-progress disabled:opacity-70"
         >
           {pending ? pendingLabel : submitLabel}
           {!pending ? <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden /> : null}

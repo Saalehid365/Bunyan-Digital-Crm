@@ -17,7 +17,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   // incoming requests at all (every route 400s). The "/crm" prefix missing from
   // generated sign-in/callback URLs is a separate concern, fixed via AUTH_URL instead.
   basePath: "/api/auth",
-  // Required once this app sits behind Netlify's site-to-site proxy (www.bunyandigital.co/crm
+  // Required once this app sits behind Netlify's site-to-site proxy (nabnatech.com/crm
   // forwarding to this app's own bunyandigitalcrm.netlify.app origin): the request Auth.js
   // actually receives carries an x-forwarded-host that doesn't match this origin's own host,
   // which Auth.js rejects by default outside of known platforms like Vercel.

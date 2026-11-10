@@ -20,9 +20,9 @@ export async function sendVerificationRequest({
   const { error } = await resend.emails.send({
     from: provider.from ?? process.env.EMAIL_FROM ?? "onboarding@resend.dev",
     to: identifier,
-    subject: "Sign in to Bunyan Digital CRM",
+    subject: "Sign in to Nabna Tech CRM",
     html: magicLinkEmailHtml(url),
-    text: `Sign in to Bunyan Digital CRM: ${url}`,
+    text: `Sign in to Nabna Tech CRM: ${url}`,
   });
 
   if (error) {
@@ -39,7 +39,7 @@ function magicLinkEmailHtml(url: string) {
           <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #D7DEE3;border-radius:6px;overflow:hidden;">
             <tr>
               <td style="background:#132C4F;padding:28px 32px;">
-                <span style="color:#F4F8FB;font-size:18px;font-weight:600;letter-spacing:0.2px;">Bunyan Digital</span>
+                <span style="color:#F4F8FB;font-size:18px;font-weight:600;letter-spacing:0.2px;">Nabna Tech</span>
               </td>
             </tr>
             <tr>

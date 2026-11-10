@@ -42,7 +42,7 @@ export async function sendPortalInviteEmail({
     to,
     subject: `${inviterName} added you to the ${clientName} portal`,
     html: inviteHtml({ to, name, inviterName, clientName, password, portalUrl }),
-    text: `${inviterName} has given you access to the ${clientName} client portal on Bunyan Digital.\n\nSign in: ${portalUrl}\nEmail: ${to}\nPassword: ${password}\n\nYou can see results, campaigns, reports, documents and messages, and reply to the team.`,
+    text: `${inviterName} has given you access to the ${clientName} client portal on Nabna Tech.\n\nSign in: ${portalUrl}\nEmail: ${to}\nPassword: ${password}\n\nYou can see results, campaigns, reports, documents and messages, and reply to the team.`,
   });
 
   if (error) return { ok: false, error: error.message };
@@ -72,7 +72,7 @@ function inviteHtml({
           <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#131a29;border:1px solid rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;">
             <tr>
               <td style="padding:28px 32px;border-bottom:1px solid rgba(255,255,255,0.1);">
-                <span style="color:#f2f4f8;font-size:18px;font-weight:700;letter-spacing:-0.01em;">Bunyan Digital</span>
+                <span style="color:#f2f4f8;font-size:18px;font-weight:700;letter-spacing:-0.01em;">Nabna Tech</span>
               </td>
             </tr>
             <tr>
@@ -85,7 +85,7 @@ function inviteHtml({
                 <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:#0e1420;border:1px solid rgba(255,255,255,0.1);border-radius:8px;margin:0 0 24px;">
                   <tr><td style="padding:14px 16px;color:#98a1b3;font-size:12px;">Email<br/><span style="color:#f2f4f8;font-size:14px;">${escapeHtml(to)}</span></td></tr>
                 </table>
-                <a href="${portalUrl}" style="display:inline-block;background:#3347ff;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:999px;">Sign in</a>
+                <a href="${portalUrl}" style="display:inline-block;background:#0a5c32;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:999px;">Sign in</a>
                 <p style="margin:24px 0 0;color:#98a1b3;font-size:12px;line-height:1.6;">Your temporary password: <strong style="color:#f2f4f8;">${escapeHtml(password)}</strong></p>
                 <p style="margin:8px 0 0;color:#6b7280;font-size:12px;line-height:1.6;">If you weren't expecting this, you can ignore this email.</p>
               </td>

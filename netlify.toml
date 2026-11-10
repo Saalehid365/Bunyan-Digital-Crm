@@ -4,7 +4,7 @@
 [build.environment]
   NODE_VERSION = "24"
 
-# The app only exists under /crm (basePath, for the www.bunyandigital.co/crm reverse
+# The app only exists under /crm (basePath, for the nabnatech.com/crm reverse
 # proxy) — without this, the bare Netlify domain root 404s instead of reaching the app.
 [[redirects]]
   from = "/"

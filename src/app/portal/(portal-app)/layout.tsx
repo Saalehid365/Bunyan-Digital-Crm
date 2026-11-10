@@ -2,7 +2,7 @@ import Image from "next/image";
 import { requirePortalUser } from "@/lib/portal-auth";
 import { prisma } from "@/lib/prisma";
 import { PortalNav } from "@/components/portal/portal-nav";
-import mark from "@/components/brand/bd-mark-light.png";
+import mark from "@/components/brand/nabna-mark-light.png";
 
 export default async function PortalAppLayout({ children }: { children: React.ReactNode }) {
   const portalUser = await requirePortalUser();
@@ -31,7 +31,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
           <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-5">
             <div className="flex items-center gap-2.5">
               <Image src={mark} alt="" className="h-6 w-auto" priority />
-              <span className="hidden text-sm font-semibold tracking-tight sm:inline">Bunyan Digital</span>
+              <span className="hidden text-sm font-semibold tracking-tight sm:inline">Nabna Tech</span>
             </div>
             <PortalNav clientName={portalUser.clientName} unreadMessages={unread} pendingDocuments={pendingDocuments} />
           </div>

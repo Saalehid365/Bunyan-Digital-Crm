@@ -6,7 +6,7 @@ export default function RootNotFound() {
       <p className="font-mono text-sm text-muted-foreground">404</p>
       <h1 className="text-lg font-semibold text-foreground">Page not found</h1>
       <Link href="/" className="text-sm text-primary hover:underline">
-        Back to Bunyan Digital CRM
+        Back to Nabna Tech CRM
       </Link>
     </div>
   );
