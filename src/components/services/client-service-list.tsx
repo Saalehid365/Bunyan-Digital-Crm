@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Trash2, Repeat, RepeatOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +41,7 @@ export function ClientServiceList({
   canManageServices: boolean;
 }) {
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   return (
     <ul className="divide-y divide-border">
@@ -81,7 +83,9 @@ export function ClientServiceList({
                     }
                     onClick={() =>
                       startTransition(() =>
-                        updateClientServiceAutoInvoice(service.id, clientId, !service.autoInvoice).then(() => {}),
+                        updateClientServiceAutoInvoice(service.id, clientId, !service.autoInvoice).then(() =>
+                          router.refresh(),
+                        ),
                       )
                     }
                   >
@@ -93,7 +97,9 @@ export function ClientServiceList({
                   disabled={pending}
                   onValueChange={(value) =>
                     startTransition(() =>
-                      updateClientServiceStatus(service.id, clientId, value as ServiceStatus).then(() => {}),
+                      updateClientServiceStatus(service.id, clientId, value as ServiceStatus).then(() =>
+                        router.refresh(),
+                      ),
                     )
                   }
                 >
@@ -113,7 +119,9 @@ export function ClientServiceList({
                   size="icon"
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
                   disabled={pending}
-                  onClick={() => startTransition(() => deleteClientService(service.id, clientId).then(() => {}))}
+                  onClick={() =>
+                    startTransition(() => deleteClientService(service.id, clientId).then(() => router.refresh()))
+                  }
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
