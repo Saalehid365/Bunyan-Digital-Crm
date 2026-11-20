@@ -54,18 +54,18 @@ function clientEmailHtml(body: string): string {
     .join("");
 
   return `
-  <div style="font-family:'IBM Plex Sans',Arial,sans-serif;background:#f4f4f0;padding:40px 0;">
+  <div style="font-family:'Manrope',Arial,sans-serif;background:#f5f9f7;padding:40px 0;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
       <tr>
         <td align="center">
-          <table role="presentation" width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #dcded9;border-radius:6px;overflow:hidden;">
+          <table role="presentation" width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #e6f2ec;border-radius:6px;overflow:hidden;">
             <tr>
-              <td style="background:#101c26;padding:24px 32px;">
+              <td style="background:#082315;padding:24px 32px;">
                 <span style="color:#ffffff;font-size:17px;font-weight:600;letter-spacing:0.2px;">Nabna Tech</span>
               </td>
             </tr>
             <tr>
-              <td style="padding:32px;color:#101c26;font-size:14px;line-height:1.65;">
+              <td style="padding:32px;color:#0f1412;font-size:14px;line-height:1.65;">
                 ${paragraphs}
               </td>
             </tr>

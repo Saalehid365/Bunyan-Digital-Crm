@@ -53,91 +53,90 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* "Bunyan OS" — ink / paper / electric blue, shared with the marketing site.
-   Light: cool paper ground, white cards, ink text, electric-blue primary.
-   Green is reserved for success/active states only. */
+/* "Nabna Tech" — paper / forest-green, matching nabnatech.com exactly: pale mint ground,
+   white cards, near-black ink text, forest-green primary, bright emerald for accents. */
 :root {
-  --background: #f3f2ec;
-  --foreground: #0b1024;
+  --background: #f5f9f7;
+  --foreground: #0f1412;
   --card: #ffffff;
-  --card-foreground: #0b1024;
+  --card-foreground: #0f1412;
   --popover: #ffffff;
-  --popover-foreground: #0b1024;
-  --primary: #2323ff;
+  --popover-foreground: #0f1412;
+  --primary: #0a5c32;
   --primary-foreground: #ffffff;
-  --secondary: #ebeae2;
-  --secondary-foreground: #0b1024;
-  --muted: #ebeae2;
-  --muted-foreground: #5f647a;
-  --accent: #e9e9f6;
-  --accent-foreground: #0b1024;
+  --secondary: #e6f2ec;
+  --secondary-foreground: #0f1412;
+  --muted: #e6f2ec;
+  --muted-foreground: #56635d;
+  --accent: #e6f2ec;
+  --accent-foreground: #0a5c32;
   --destructive: #c23b3b;
-  --border: rgba(11, 16, 36, 0.1);
-  --input: rgba(11, 16, 36, 0.14);
-  --ring: #2323ff;
-  --success: #17804f;
+  --border: rgba(15, 20, 18, 0.1);
+  --input: rgba(15, 20, 18, 0.14);
+  --ring: #0a5c32;
+  --success: #1db868;
   --success-foreground: #ffffff;
-  --line: rgba(11, 16, 36, 0.12);
-  --chart-1: #2323ff;
-  --chart-2: #5865ff;
-  --chart-3: #17804f;
+  --line: rgba(15, 20, 18, 0.12);
+  --chart-1: #0a5c32;
+  --chart-2: #1db868;
+  --chart-3: #64c492;
   --chart-4: #c1782f;
   --chart-5: #8a5fd0;
-  --radius: 0.9rem;
-  --sidebar: #05081a;
-  --sidebar-foreground: #c5cae0;
-  --sidebar-primary: #7480ff;
-  --sidebar-primary-foreground: #05081a;
+  --radius: 0.5rem;
+  --sidebar: #082315;
+  --sidebar-foreground: #c9ddd1;
+  --sidebar-primary: #1db868;
+  --sidebar-primary-foreground: #082315;
   --sidebar-accent: rgba(255, 255, 255, 0.07);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #7480ff;
-  --topbar: rgba(243, 242, 236, 0.72);
+  --sidebar-ring: #1db868;
+  --topbar: rgba(245, 249, 247, 0.72);
   --material: rgba(255, 255, 255, 0.88);
   --material-border: rgba(255, 255, 255, 0.6);
-  --shadow-1: 0 1px 2px rgba(11, 16, 36, 0.05), 0 8px 24px -12px rgba(11, 16, 36, 0.14);
-  --shadow-2: 0 1px 2px rgba(11, 16, 36, 0.06), 0 18px 44px -14px rgba(11, 16, 36, 0.24);
-  --shadow-3: 0 2px 4px rgba(11, 16, 36, 0.08), 0 32px 80px -20px rgba(11, 16, 36, 0.4);
+  --shadow-1: 0 1px 2px rgba(15, 20, 18, 0.05), 0 8px 24px -12px rgba(15, 20, 18, 0.14);
+  --shadow-2: 0 1px 2px rgba(15, 20, 18, 0.06), 0 18px 44px -14px rgba(15, 20, 18, 0.24);
+  --shadow-3: 0 2px 4px rgba(15, 20, 18, 0.08), 0 32px 80px -20px rgba(15, 20, 18, 0.4);
 }
 
-/* Dark: ink ground, lifted blue for legibility, translucent materials. */
+/* Dark: the same forest ground as the marketing site's own hero/footer sections. */
 .dark {
-  --background: #05081a;
-  --foreground: #eceefb;
-  --card: #0d1230;
-  --card-foreground: #eceefb;
-  --popover: #10163a;
-  --popover-foreground: #eceefb;
-  --primary: #7480ff;
-  --primary-foreground: #05081a;
-  --secondary: #151b42;
-  --secondary-foreground: #eceefb;
-  --muted: #10163a;
-  --muted-foreground: #9aa1c4;
-  --accent: #171e4a;
-  --accent-foreground: #eceefb;
-  --destructive: #ee6b6b;
+  --background: #082315;
+  --foreground: #f2f4f8;
+  --card: #0a3d23;
+  --card-foreground: #f2f4f8;
+  --popover: #0a3d23;
+  --popover-foreground: #f2f4f8;
+  --primary: #64c492;
+  --primary-foreground: #082315;
+  --secondary: #0a3d23;
+  --secondary-foreground: #f2f4f8;
+  --muted: #0a3d23;
+  --muted-foreground: #a9c9b8;
+  --accent: #0a5c32;
+  --accent-foreground: #f2f4f8;
+  --destructive: #ff8f8f;
   --border: rgba(255, 255, 255, 0.09);
   --input: rgba(255, 255, 255, 0.14);
-  --ring: #7480ff;
+  --ring: #64c492;
   --success: #3cc98b;
   --success-foreground: #05140d;
   --line: rgba(255, 255, 255, 0.12);
-  --chart-1: #7480ff;
-  --chart-2: #b4bbff;
+  --chart-1: #64c492;
+  --chart-2: #9ed1b7;
   --chart-3: #3cc98b;
   --chart-4: #e0a35a;
   --chart-5: #b797ee;
-  --sidebar: #03051a;
-  --sidebar-foreground: #c5cae0;
-  --sidebar-primary: #7480ff;
-  --sidebar-primary-foreground: #05081a;
+  --sidebar: #082315;
+  --sidebar-foreground: #c9ddd1;
+  --sidebar-primary: #1db868;
+  --sidebar-primary-foreground: #082315;
   --sidebar-accent: rgba(255, 255, 255, 0.07);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #7480ff;
-  --topbar: rgba(5, 8, 26, 0.7);
-  --material: rgba(18, 24, 62, 0.82);
+  --sidebar-ring: #1db868;
+  --topbar: rgba(8, 35, 21, 0.7);
+  --material: rgba(10, 61, 35, 0.82);
   --material-border: rgba(255, 255, 255, 0.1);
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -14px rgba(0, 0, 0, 0.6);
   --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.5), 0 22px 50px -16px rgba(0, 0, 0, 0.7);
@@ -276,9 +275,10 @@
   }
 }
 
-/* ================= Homepage match (v2) =================
-   Flat hairline surfaces, pill controls with the site's sliding-fill hover, mono labels. */
-[data-slot="button"] { border-radius: 9999px; }
+/* ================= Homepage match =================
+   Flat hairline surfaces, the site's own crisp 4px-radius buttons with its sliding-fill
+   hover, mono labels. Nabnatech.com's real CTAs are barely rounded, not pills — see the
+   --radius token above, which now drives this instead of a forced override. */
 [data-slot="button"][data-variant="default"] { position: relative; overflow: hidden; isolation: isolate; }
 [data-slot="button"][data-variant="default"]::before {
   content: "";
@@ -316,7 +316,7 @@ main h1.font-serif {
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #7480ff;
+  color: #1db868;
 }
 .eyebrow::before {
   content: "";
@@ -326,13 +326,13 @@ main h1.font-serif {
 }
 
 /* ================= Sign-in: Midnight Studio =================
-   Matches the marketing site's current redesign (dark navy, electric blue, Familjen
-   Grotesk). Scoped to the .auth-midnight wrapper in src/app/(auth)/layout.tsx — re-themes
-   shadcn's token-driven components (Card, Button, Input…) for just that route group,
-   same technique the topbar/sidebar already use with the "dark" class, without touching
-   the rest of the app's ink/paper identity. The site itself is dark-only (no light/dark
-   split), so this overrides regardless of the visitor's system theme or the app's own
-   light/dark toggle. */
+   Matches the marketing site's dark hero/footer sections (forest green, Urbanist +
+   Manrope — same fonts the rest of the app now uses, so no font override is needed here
+   any more). Scoped to the .auth-midnight wrapper in src/app/(auth)/layout.tsx —
+   re-themes shadcn's token-driven components (Card, Button, Input…) for just that route
+   group, same technique the topbar/sidebar already use with the "dark" class. The site's
+   hero is dark-only (no light/dark split), so this overrides regardless of the visitor's
+   system theme or the app's own light/dark toggle. */
 .auth-midnight {
   --background: #082315;
   --foreground: #f2f4f8;
@@ -352,9 +352,7 @@ main h1.font-serif {
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.25);
   --ring: #64c492;
-  --radius: 0.85rem;
-  --font-sans: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
-  --font-serif: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --radius: 0.5rem;
   background: var(--background);
   color: var(--foreground);
 }

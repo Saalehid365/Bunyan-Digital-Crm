@@ -20,14 +20,8 @@ export default async function PortalAppLayout({ children }: { children: React.Re
 
   return (
     <>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&display=swap"
-        rel="stylesheet"
-      />
       <div className="auth-midnight flex min-h-screen flex-col">
-        <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0a0e17]/90 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-white/10 bg-background/90 backdrop-blur">
           <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-5">
             <div className="flex items-center gap-2.5">
               <Image src={mark} alt="" className="h-6 w-auto" priority />

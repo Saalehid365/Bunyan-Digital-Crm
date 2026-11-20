@@ -225,7 +225,7 @@ export function LoginForm({
   return (
     <div className="w-full max-w-sm space-y-6 rounded-2xl border border-white/15 bg-[#082315]/60 p-8 shadow-2xl backdrop-blur-lg">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-white">{title}</h1>
+        <h1 className="font-serif text-3xl font-bold tracking-tight text-white">{title}</h1>
         <p className="mt-2 text-sm text-[#b8bfcc]">{subtitle}</p>
       </div>
       <form action={formAction} className="space-y-8">

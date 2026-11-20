@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@/components/brand/logo-mark-light.png";
+import logo from "@/components/brand/nabna-mark-light.png";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import {

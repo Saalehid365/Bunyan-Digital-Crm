@@ -6,12 +6,6 @@ import mark from "@/components/brand/nabna-mark-light.png";
 export default function PortalLoginPage() {
   return (
     <>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&display=swap"
-        rel="stylesheet"
-      />
       <main className="auth-midnight relative min-h-screen w-full flex-1 overflow-hidden bg-[#082315]">
         <SmokeyBackground color="#0a5c32" />
         <a

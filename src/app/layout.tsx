@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Hanken_Grotesk, JetBrains_Mono, Bricolage_Grotesque, Reem_Kufi } from "next/font/google";
+import { Manrope, JetBrains_Mono, Urbanist, Reem_Kufi } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthSessionProvider } from "@/components/auth-session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const sans = Hanken_Grotesk({
+// Matches nabnatech.com's own font pairing, so the app reads as the same product.
+const sans = Manrope({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const mono = JetBrains_Mono({
@@ -19,11 +20,10 @@ const mono = JetBrains_Mono({
 });
 
 // Display face — bound to --font-serif so every existing `font-serif` heading picks it up.
-const display = Bricolage_Grotesque({
+const display = Urbanist({
   variable: "--font-serif",
   subsets: ["latin"],
-  weight: "variable",
-  axes: ["opsz"],
+  weight: ["600", "700", "800"],
 });
 
 const arabic = Reem_Kufi({

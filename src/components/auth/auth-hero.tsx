@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Sign-in hero: the Arabic wordmark ("bunyan" — to build) as the focal asset, with a blue
+ * Sign-in hero: the Arabic wordmark ("nabna" — we build) as the focal asset, with a green
  * spotlight that eases toward the pointer. Purely additive: the static first frame is
  * complete on its own, and it stays still under reduced motion or on touch.
  */
@@ -77,12 +77,12 @@ export function AuthHero({ size = "hero" }: { size?: "hero" | "band" }) {
       className="pointer-events-none absolute inset-0 select-none [--mx:58%] [--my:48%]"
     >
       <span className={`absolute block font-[family-name:var(--font-arabic)] leading-none font-bold text-transparent [-webkit-text-stroke:1.5px_rgba(255,255,255,0.16)] ${glyph}`}>
-        بنيان
+        نبنا
       </span>
       <span
-        className={`absolute block font-[family-name:var(--font-arabic)] leading-none font-bold text-[#2323ff] [mask-image:radial-gradient(circle_clamp(160px,20vw,320px)_at_var(--mx)_var(--my),#000_0%,transparent_100%)] ${glyph}`}
+        className={`absolute block font-[family-name:var(--font-arabic)] leading-none font-bold text-[#1db868] [mask-image:radial-gradient(circle_clamp(160px,20vw,320px)_at_var(--mx)_var(--my),#000_0%,transparent_100%)] ${glyph}`}
       >
-        بنيان
+        نبنا
       </span>
     </div>
   );

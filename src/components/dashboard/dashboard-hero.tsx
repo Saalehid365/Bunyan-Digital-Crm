@@ -1,7 +1,7 @@
 import { AuthHero } from "@/components/auth/auth-hero";
 
-/** Dark hero band — the CRM's take on the marketing site's page hero: blueprint grid,
- * blue glow, mono eyebrow, oversized display title and the Arabic wordmark. */
+/** Dark hero band — the CRM's take on the marketing site's own dark hero: blueprint grid,
+ * forest-green glow, mono eyebrow, oversized display title and the Arabic wordmark. */
 export function DashboardHero({
   eyebrow,
   title,
@@ -14,10 +14,10 @@ export function DashboardHero({
   children: React.ReactNode;
 }) {
   return (
-    <section className="dark relative overflow-hidden bg-[#05081a] text-foreground">
+    <section className="dark relative overflow-hidden bg-[#082315] text-foreground">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_70%_at_85%_0%,rgba(35,35,255,0.34),transparent_60%),radial-gradient(60%_60%_at_5%_100%,rgba(116,128,255,0.14),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_70%_at_85%_0%,rgba(10,92,50,0.4),transparent_60%),radial-gradient(60%_60%_at_5%_100%,rgba(100,196,146,0.16),transparent_60%)]"
       />
       <div
         aria-hidden

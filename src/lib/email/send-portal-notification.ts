@@ -61,11 +61,11 @@ function notificationHtml({
   ctaUrl: string;
 }) {
   return `
-  <div style="font-family:'IBM Plex Sans',Arial,sans-serif;background:#0a0e17;padding:40px 0;">
+  <div style="font-family:'Manrope',Arial,sans-serif;background:#082315;padding:40px 0;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
       <tr>
         <td align="center">
-          <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#131a29;border:1px solid rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;">
+          <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#0a3d23;border:1px solid rgba(255,255,255,0.1);border-radius:8px;overflow:hidden;">
             <tr>
               <td style="padding:28px 32px;border-bottom:1px solid rgba(255,255,255,0.1);">
                 <span style="color:#f2f4f8;font-size:18px;font-weight:700;letter-spacing:-0.01em;">Nabna Tech</span>
@@ -73,11 +73,11 @@ function notificationHtml({
             </tr>
             <tr>
               <td style="padding:32px;">
-                <p style="margin:0 0 4px;color:#6e7dff;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">${escapeHtml(heading)}</p>
+                <p style="margin:0 0 4px;color:#64c492;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">${escapeHtml(heading)}</p>
                 <p style="margin:0 0 8px;color:#f2f4f8;font-size:20px;font-weight:700;">Hi ${escapeHtml(name)},</p>
-                <p style="margin:0 0 24px;color:#98a1b3;font-size:14px;line-height:1.6;">${escapeHtml(body)}</p>
-                <a href="${ctaUrl}" style="display:inline-block;background:#0a5c32;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:999px;">${escapeHtml(ctaLabel)}</a>
-                <p style="margin:24px 0 0;color:#6b7280;font-size:12px;line-height:1.6;">You're receiving this because you have access to this client's portal.</p>
+                <p style="margin:0 0 24px;color:#a9c9b8;font-size:14px;line-height:1.6;">${escapeHtml(body)}</p>
+                <a href="${ctaUrl}" style="display:inline-block;background:#0a5c32;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:4px;">${escapeHtml(ctaLabel)}</a>
+                <p style="margin:24px 0 0;color:#6b8a78;font-size:12px;line-height:1.6;">You're receiving this because you have access to this client's portal.</p>
               </td>
             </tr>
           </table>
