@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import { portalSignOut } from "@/server/actions/portal-session";
 
 const TABS = [
-  { href: "/portal", label: "Overview", exact: true, badgeKey: null },
-  { href: "/portal/products", label: "Products", exact: false, badgeKey: null },
+  { href: "/portal", label: "Overview", exact: true, badgeKey: "overview" },
+  { href: "/portal/products", label: "Products", exact: false, badgeKey: "products" },
   { href: "/portal/documents", label: "Documents", exact: false, badgeKey: "documents" },
   { href: "/portal/brand", label: "Brand", exact: false, badgeKey: null },
   { href: "/portal/messages", label: "Messages", exact: false, badgeKey: "messages" },
@@ -19,13 +19,22 @@ export function PortalNav({
   clientName,
   unreadMessages,
   pendingDocuments,
+  unreadProducts,
+  unreadOverview,
 }: {
   clientName: string;
   unreadMessages: number;
   pendingDocuments: number;
+  unreadProducts: number;
+  unreadOverview: number;
 }) {
   const pathname = usePathname();
-  const badgeCounts: Record<string, number> = { messages: unreadMessages, documents: pendingDocuments };
+  const badgeCounts: Record<string, number> = {
+    messages: unreadMessages,
+    documents: pendingDocuments,
+    products: unreadProducts,
+    overview: unreadOverview,
+  };
 
   return (
     <div className="flex items-center gap-5">

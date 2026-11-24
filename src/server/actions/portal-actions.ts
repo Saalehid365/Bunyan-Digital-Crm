@@ -10,6 +10,8 @@ import { hashPassword, generateTempPassword } from "@/lib/password";
 import { sendPortalInviteEmail } from "@/lib/email/send-portal-invite";
 import { portalBrandPageSchema, clientMessageSchema, portalTeammateInviteSchema, clientProductSchema } from "@/lib/validations/portal";
 import { readProductAttributes, parseProductPhotos, parseProductVariants } from "@/lib/products";
+import { markPortalNotificationsRead } from "@/lib/portal-notifications";
+import type { PortalNotificationKind } from "@prisma/client";
 
 function emptyToUndefined(v: string | undefined) {
   return v && v.trim() !== "" ? v.trim() : undefined;
@@ -318,4 +320,12 @@ export async function deletePortalProduct(id: string) {
   await prisma.clientProduct.delete({ where: { id } });
   revalidatePath("/portal/products");
   return { ok: true };
+}
+
+/** Marks one nav tab's "new from the team" badge as seen — called on mount of the
+ * Products/Overview pages (see MarkNotificationsRead). Always the signed-in portal
+ * user's own client, never a clientId taken from the caller. */
+export async function markPortalTabRead(kind: PortalNotificationKind) {
+  const portalUser = await requirePortalUser();
+  await markPortalNotificationsRead(portalUser.clientId, kind);
 }

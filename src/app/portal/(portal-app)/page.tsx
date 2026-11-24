@@ -1,6 +1,7 @@
 import { requirePortalUser } from "@/lib/portal-auth";
 import { prisma } from "@/lib/prisma";
 import { PortalOverview } from "@/components/portal/portal-overview";
+import { MarkNotificationsRead } from "@/components/portal/mark-notifications-read";
 
 export default async function PortalOverviewPage() {
   const portalUser = await requirePortalUser();
@@ -16,6 +17,7 @@ export default async function PortalOverviewPage() {
 
   return (
     <div className="space-y-6">
+      <MarkNotificationsRead kind="OVERVIEW" />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Welcome back{portalUser.name ? `, ${portalUser.name.split(" ")[0]}` : ""}.</h1>
         <p className="mt-1 text-sm text-muted-foreground">Results, campaigns and reports for {portalUser.clientName}.</p>

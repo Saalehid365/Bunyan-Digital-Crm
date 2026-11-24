@@ -211,6 +211,13 @@ model Client {
   documents                  ClientDocument[]
   clientFiles                ClientFile[]
   products                   ClientProduct[]
+  portalNotifications        PortalNotification[]
+  // Per-kind "last viewed" cursors for the client's own nav badges (Products, Overview —
+  // Documents and Messages already compute their badge from the content's own state, so
+  // they don't need an entry here). A small Json map (kind -> ISO timestamp) rather than
+  // one column per kind, so a new kind needs no migration — see brandKit.colors for the
+  // same pattern.
+  portalNotificationsReadAt  Json?
 
   @@index([status])
 }
@@ -862,4 +869,28 @@ model ClientProductVariant {
   product ClientProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
+}
+
+// A "the team sent you something" event for the client portal — feeds the live toast
+// (PortalLiveAlerts) for every kind, and the Products/Overview nav badges for those two
+// kinds specifically (Documents/Messages already have their own badge source — see
+// Client.portalNotificationsReadAt).
+enum PortalNotificationKind {
+  DOCUMENT
+  PRODUCT
+  MESSAGE
+  OVERVIEW
+}
+
+model PortalNotification {
+  id        String                 @id @default(cuid())
+  clientId  String
+  kind      PortalNotificationKind
+  message   String
+  ctaPath   String
+  createdAt DateTime               @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, createdAt])
 }

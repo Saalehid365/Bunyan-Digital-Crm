@@ -2,6 +2,7 @@ import { requirePortalUser } from "@/lib/portal-auth";
 import { prisma } from "@/lib/prisma";
 import { toAttributesRecord, toPhotosArray } from "@/lib/products";
 import { PortalProducts } from "@/components/portal/portal-products";
+import { MarkNotificationsRead } from "@/components/portal/mark-notifications-read";
 
 export default async function PortalProductsPage() {
   const portalUser = await requirePortalUser();
@@ -14,6 +15,7 @@ export default async function PortalProductsPage() {
 
   return (
     <div className="space-y-6">
+      <MarkNotificationsRead kind="PRODUCT" />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Products</h1>
         <p className="mt-1 text-sm text-muted-foreground">

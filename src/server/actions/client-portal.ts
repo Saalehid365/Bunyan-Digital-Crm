@@ -121,6 +121,7 @@ export async function addClientResult(formData: FormData) {
   path(data.clientId);
   await notifyPortalUsersByEmail({
     clientId: data.clientId,
+    kind: "OVERVIEW",
     heading: "New result for you",
     body: `${user.name ?? user.email} added a new result — ${data.label} for ${data.period}: ${data.value}.`,
     ctaLabel: "View results",
@@ -176,6 +177,7 @@ export async function addClientCampaign(formData: FormData) {
   path(data.clientId);
   await notifyPortalUsersByEmail({
     clientId: data.clientId,
+    kind: "OVERVIEW",
     heading: "New campaign added",
     body: `${user.name ?? user.email} added a new campaign — ${data.name} on ${data.platform}.`,
     ctaLabel: "View campaigns",
@@ -227,6 +229,7 @@ export async function addClientReport(formData: FormData) {
   path(data.clientId);
   await notifyPortalUsersByEmail({
     clientId: data.clientId,
+    kind: "OVERVIEW",
     heading: "New report ready",
     body: `${user.name ?? user.email} added a new report — ${data.title}${data.period ? ` (${data.period})` : ""}.`,
     ctaLabel: "View reports",
@@ -332,6 +335,7 @@ export async function sendTeamMessage(formData: FormData) {
   path(data.clientId);
   await notifyPortalUsersByEmail({
     clientId: data.clientId,
+    kind: "MESSAGE",
     heading: `New message from ${user.name ?? "Nabna Tech"}`,
     body: data.body.length > 200 ? `${data.body.slice(0, 200)}…` : data.body,
     ctaLabel: "Reply",
@@ -378,6 +382,7 @@ export async function addClientDocument(formData: FormData) {
   path(data.clientId);
   await notifyPortalUsersByEmail({
     clientId: data.clientId,
+    kind: "DOCUMENT",
     heading: "New document to review",
     body: `${user.name ?? user.email} sent you a document — ${data.title}.${data.dueDate ? ` Due ${new Date(data.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.` : ""}`,
     ctaLabel: "View document",
@@ -446,14 +451,35 @@ export async function addClientProduct(formData: FormData) {
     },
   });
   path(data.clientId);
+  await notifyPortalUsersByEmail({
+    clientId: data.clientId,
+    kind: "PRODUCT",
+    heading: "A product was added for you",
+    body: `${user.name ?? user.email} added a product to your portal — ${data.name}.`,
+    ctaLabel: "View product",
+    ctaPath: "/portal/products",
+  });
   return { ok: true };
 }
 
 export async function setClientProductStatus(id: string, clientId: string, status: "PENDING" | "LISTED" | "DECLINED") {
   const user = await requirePermission("MANAGE_CLIENTS");
   if (!(await canAccessClient(user, clientId))) return { error: "You don't have access to this client." };
-  await prisma.clientProduct.update({ where: { id }, data: { status } });
+  const existing = await prisma.clientProduct.update({ where: { id }, data: { status }, select: { name: true } });
   path(clientId);
+  if (status === "LISTED" || status === "DECLINED") {
+    await notifyPortalUsersByEmail({
+      clientId,
+      kind: "PRODUCT",
+      heading: status === "LISTED" ? "Your product was listed" : "Update on your product",
+      body:
+        status === "LISTED"
+          ? `"${existing.name}" has been listed — nice one!`
+          : `"${existing.name}" wasn't listed this time — check the notes in your portal for why.`,
+      ctaLabel: "View product",
+      ctaPath: "/portal/products",
+    });
+  }
 }
 
 export async function setClientProductNotes(id: string, clientId: string, notes: string) {

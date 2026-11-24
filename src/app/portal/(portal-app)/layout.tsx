@@ -2,12 +2,14 @@ import Image from "next/image";
 import { requirePortalUser } from "@/lib/portal-auth";
 import { prisma } from "@/lib/prisma";
 import { PortalNav } from "@/components/portal/portal-nav";
+import { PortalLiveAlerts } from "@/components/portal/portal-live-alerts";
+import { getNewPortalNotifications, getPortalNotificationBadges } from "@/lib/portal-notifications";
 import mark from "@/components/brand/nabna-mark-light.png";
 
 export default async function PortalAppLayout({ children }: { children: React.ReactNode }) {
   const portalUser = await requirePortalUser();
 
-  const [unread, pendingDocuments] = await Promise.all([
+  const [unread, pendingDocuments, client, newNotifications] = await Promise.all([
     prisma.clientMessage.count({
       where: {
         clientId: portalUser.clientId,
@@ -16,10 +18,14 @@ export default async function PortalAppLayout({ children }: { children: React.Re
       },
     }),
     prisma.clientDocument.count({ where: { clientId: portalUser.clientId, status: "PENDING" } }),
+    prisma.client.findUnique({ where: { id: portalUser.clientId }, select: { portalNotificationsReadAt: true } }),
+    getNewPortalNotifications(portalUser.clientId),
   ]);
+  const badges = await getPortalNotificationBadges(portalUser.clientId, client?.portalNotificationsReadAt);
 
   return (
     <>
+      <PortalLiveAlerts initial={newNotifications.items} />
       <div className="auth-midnight flex min-h-screen flex-col">
         <header className="sticky top-0 z-20 border-b border-white/10 bg-background/90 backdrop-blur">
           <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-5">
@@ -27,7 +33,13 @@ export default async function PortalAppLayout({ children }: { children: React.Re
               <Image src={mark} alt="" className="h-6 w-auto" priority />
               <span className="hidden text-sm font-semibold tracking-tight sm:inline">Nabna Tech</span>
             </div>
-            <PortalNav clientName={portalUser.clientName} unreadMessages={unread} pendingDocuments={pendingDocuments} />
+            <PortalNav
+              clientName={portalUser.clientName}
+              unreadMessages={unread}
+              pendingDocuments={pendingDocuments}
+              unreadProducts={badges.PRODUCT ?? 0}
+              unreadOverview={badges.OVERVIEW ?? 0}
+            />
           </div>
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8">{children}</main>
