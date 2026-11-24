@@ -1,12 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion";
+
+const ledgerContainer = { hidden: {}, show: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } } };
+const ledgerContainerReduced = { hidden: {}, show: {} };
+const ledgerItem = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.2, 0.7, 0.1, 1] as const } },
+};
+const ledgerItemReduced = { hidden: { opacity: 1, y: 0 }, show: { opacity: 1, y: 0 } };
 
 function useCountUp(target: number | null, duration = 900) {
   const [value, setValue] = useState(0);
+  const reduceMotion = useSafeReducedMotion();
 
   useEffect(() => {
-    if (target === null) return;
+    if (target === null || reduceMotion) return;
     const finalValue = target;
     let raf = 0;
     let start: number | null = null;
@@ -27,8 +38,9 @@ function useCountUp(target: number | null, duration = 900) {
       clearTimeout(timeout);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [target, duration]);
+  }, [target, duration, reduceMotion]);
 
+  if (reduceMotion && target !== null) return target;
   return value;
 }
 
@@ -65,6 +77,7 @@ export function MetricPanel({
   heroSublabel?: string;
   ledger: { label: string; value: string }[];
 }) {
+  const reduceMotion = useSafeReducedMotion();
   return (
     <div className="grid gap-8 border-t border-white/15 pt-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.85fr)] lg:gap-12">
       <div>
@@ -74,22 +87,26 @@ export function MetricPanel({
         </p>
         {heroSublabel ? <p className="mt-3 text-sm text-white/60">{heroSublabel}</p> : null}
       </div>
-      <dl
+      <motion.dl
         className="grid grid-cols-2 self-end sm:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
         style={{ "--cols": ledger.length } as React.CSSProperties}
+        variants={reduceMotion ? ledgerContainerReduced : ledgerContainer}
+        initial="hidden"
+        animate="show"
       >
         {ledger.map((item, i) => (
-          <div
+          <motion.div
             key={item.label}
+            variants={reduceMotion ? ledgerItemReduced : ledgerItem}
             className={`flex flex-col-reverse justify-end border-l border-white/15 py-2 pl-5 ${i === 0 ? "sm:border-l-0 sm:pl-0" : ""} ${i % 2 === 0 ? "border-l-0 pl-0 sm:border-l" : ""}`}
           >
             <dt className="mt-2 font-mono text-[0.66rem] tracking-[0.12em] text-white/55 uppercase">{item.label}</dt>
             <dd className="font-serif text-4xl font-semibold tracking-[-0.04em] tabular-nums text-white sm:text-5xl">
               <AnimatedValue raw={item.value} />
             </dd>
-          </div>
+          </motion.div>
         ))}
-      </dl>
+      </motion.dl>
     </div>
   );
 }

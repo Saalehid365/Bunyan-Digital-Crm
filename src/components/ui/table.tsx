@@ -1,7 +1,26 @@
 "use client"
 
 import * as React from "react"
+import { motion } from "motion/react"
 import { cn } from "cn"
+import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
+
+// A restrained entrance for table rows — plays once per row on mount (a fresh page load,
+// or a brand-new row appearing), not on every re-render, since variants only replay when
+// a component actually (re)mounts. MotionConfig's reducedMotion="user" only covers layout
+// animations (e.g. the sidebar's active-pill), not plain variant tweens like these, so
+// prefers-reduced-motion is checked directly here instead — the reveal collapses to an
+// instant, un-offset appearance rather than merely a shorter version of itself.
+const tbodyVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.035, delayChildren: 0.03 } },
+}
+const tbodyVariantsReduced = { hidden: {}, show: {} }
+const trVariants = {
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.2, 0.7, 0.1, 1] as const } },
+}
+const trVariantsReduced = { hidden: { opacity: 1, y: 0 }, show: { opacity: 1, y: 0 } }
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
@@ -28,11 +47,15 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   )
 }
 
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+function TableBody({ className, ...props }: Omit<React.ComponentProps<"tbody">, "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart">) {
+  const reduceMotion = useSafeReducedMotion()
   return (
-    <tbody
+    <motion.tbody
       data-slot="table-body"
       className={cn("[&_tr:last-child]:border-0", className)}
+      variants={reduceMotion ? tbodyVariantsReduced : tbodyVariants}
+      initial="hidden"
+      animate="show"
       {...props}
     />
   )
@@ -51,14 +74,16 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+function TableRow({ className, ...props }: Omit<React.ComponentProps<"tr">, "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart">) {
+  const reduceMotion = useSafeReducedMotion()
   return (
-    <tr
+    <motion.tr
       data-slot="table-row"
       className={cn(
         "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
         className
       )}
+      variants={reduceMotion ? trVariantsReduced : trVariants}
       {...props}
     />
   )

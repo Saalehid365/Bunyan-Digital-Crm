@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope, JetBrains_Mono, Urbanist, Reem_Kufi } from "next/font/google";
+import { MotionConfig } from "motion/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthSessionProvider } from "@/components/auth-session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -51,12 +52,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem={false}
           disableTransitionOnChange
         >
-          <AuthSessionProvider>
-            <TooltipProvider>
-              {children}
-              <Toaster />
-            </TooltipProvider>
-          </AuthSessionProvider>
+          {/* Every `motion` component in the app — table rows, the sidebar's active pill,
+              page transitions — automatically renders its final state instantly under
+              prefers-reduced-motion, with no per-component opt-in needed. */}
+          <MotionConfig reducedMotion="user">
+            <AuthSessionProvider>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+              </TooltipProvider>
+            </AuthSessionProvider>
+          </MotionConfig>
         </ThemeProvider>
       </body>
     </html>

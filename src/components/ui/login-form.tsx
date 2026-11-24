@@ -1,7 +1,18 @@
 "use client";
 
 import { useActionState, useEffect, useId, useRef } from "react";
+import { motion } from "motion/react";
+import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion";
 import { ArrowRight, Lock, User } from "lucide-react";
+
+// The form's own entrance — heading, then each field, then the button — one beat apart.
+const formContainer = { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } };
+const formContainerReduced = { hidden: {}, show: {} };
+const formItem = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.2, 0.7, 0.1, 1] as const } },
+};
+const formItemReduced = { hidden: { opacity: 1, y: 0 }, show: { opacity: 1, y: 0 } };
 
 // Vertex shader: a single full-screen quad.
 const vertexSmokeySource = `
@@ -217,33 +228,39 @@ export function LoginForm({
   footer,
 }: LoginFormProps) {
   const id = useId();
+  const reduceMotion = useSafeReducedMotion();
   const [state, formAction, pending] = useActionState(
     async (_prev: LoginState, formData: FormData): Promise<LoginState> => (await action(formData)) ?? {},
     { error: initialError ?? undefined },
   );
 
   return (
-    <div className="w-full max-w-sm space-y-6 rounded-2xl border border-white/15 bg-[#082315]/60 p-8 shadow-2xl backdrop-blur-lg">
-      <div className="text-center">
+    <motion.div
+      className="w-full max-w-sm space-y-6 rounded-2xl border border-white/15 bg-[#082315]/60 p-8 shadow-2xl backdrop-blur-lg"
+      variants={reduceMotion ? formContainerReduced : formContainer}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={reduceMotion ? formItemReduced : formItem} className="text-center">
         <h1 className="font-serif text-3xl font-bold tracking-tight text-white">{title}</h1>
         <p className="mt-2 text-sm text-[#b8bfcc]">{subtitle}</p>
-      </div>
+      </motion.div>
       <form action={formAction} className="space-y-8">
-        <div className="relative z-0">
+        <motion.div variants={reduceMotion ? formItemReduced : formItem} className="relative z-0">
           <input id={`${id}-email`} name="email" type="email" autoComplete="email" className={inputClass} placeholder=" " required />
           <label htmlFor={`${id}-email`} className={labelClass}>
             <User className="-mt-1 mr-2 inline-block" size={16} aria-hidden />
             {emailLabel}
           </label>
-        </div>
+        </motion.div>
         {showPassword ? (
-          <div className="relative z-0">
+          <motion.div variants={reduceMotion ? formItemReduced : formItem} className="relative z-0">
             <input id={`${id}-password`} name="password" type="password" autoComplete="current-password" className={inputClass} placeholder=" " required />
             <label htmlFor={`${id}-password`} className={labelClass}>
               <Lock className="-mt-1 mr-2 inline-block" size={16} aria-hidden />
               Password
             </label>
-          </div>
+          </motion.div>
         ) : null}
 
         {forgotHref ? (
@@ -260,17 +277,18 @@ export function LoginForm({
           </p>
         ) : null}
 
-        <button
+        <motion.button
+          variants={reduceMotion ? formItemReduced : formItem}
           type="submit"
           disabled={pending}
           className="group flex w-full items-center justify-center rounded-lg bg-[#0a5c32] px-4 py-3 font-semibold text-white transition-colors duration-200 hover:bg-[#0a3d23] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#64c492] focus-visible:ring-offset-2 focus-visible:ring-offset-[#082315] disabled:cursor-progress disabled:opacity-70"
         >
           {pending ? pendingLabel : submitLabel}
           {!pending ? <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden /> : null}
-        </button>
+        </motion.button>
       </form>
       {afterForm}
       {footer ? <div className="text-center text-xs text-[#b8bfcc]">{footer}</div> : null}
-    </div>
+    </motion.div>
   );
 }
