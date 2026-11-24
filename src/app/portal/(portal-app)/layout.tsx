@@ -4,12 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { PortalNav } from "@/components/portal/portal-nav";
 import { PortalLiveAlerts } from "@/components/portal/portal-live-alerts";
 import { getNewPortalNotifications, getPortalNotificationBadges } from "@/lib/portal-notifications";
+import { toOnboardingAnswers, isOnboardingComplete } from "@/lib/onboarding";
 import mark from "@/components/brand/nabna-mark-light.png";
 
 export default async function PortalAppLayout({ children }: { children: React.ReactNode }) {
   const portalUser = await requirePortalUser();
 
-  const [unread, pendingDocuments, client, newNotifications] = await Promise.all([
+  const [unread, pendingDocuments, client, newNotifications, onboarding] = await Promise.all([
     prisma.clientMessage.count({
       where: {
         clientId: portalUser.clientId,
@@ -20,8 +21,10 @@ export default async function PortalAppLayout({ children }: { children: React.Re
     prisma.clientDocument.count({ where: { clientId: portalUser.clientId, status: "PENDING" } }),
     prisma.client.findUnique({ where: { id: portalUser.clientId }, select: { portalNotificationsReadAt: true } }),
     getNewPortalNotifications(portalUser.clientId),
+    prisma.clientOnboardingSubmission.findUnique({ where: { clientId: portalUser.clientId }, select: { answers: true, submittedAt: true } }),
   ]);
   const badges = await getPortalNotificationBadges(portalUser.clientId, client?.portalNotificationsReadAt);
+  const onboardingIncomplete = !onboarding?.submittedAt && !isOnboardingComplete(toOnboardingAnswers(onboarding?.answers));
 
   return (
     <>
@@ -39,6 +42,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
               pendingDocuments={pendingDocuments}
               unreadProducts={badges.PRODUCT ?? 0}
               unreadOverview={badges.OVERVIEW ?? 0}
+              onboardingIncomplete={onboardingIncomplete}
             />
           </div>
         </header>

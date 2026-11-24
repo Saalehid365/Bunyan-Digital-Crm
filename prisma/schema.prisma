@@ -218,6 +218,7 @@ model Client {
   // one column per kind, so a new kind needs no migration — see brandKit.colors for the
   // same pattern.
   portalNotificationsReadAt  Json?
+  onboardingSubmission       ClientOnboardingSubmission?
 
   @@index([status])
 }
@@ -893,4 +894,21 @@ model PortalNotification {
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@index([clientId, createdAt])
+}
+
+// The client's store-onboarding questionnaire (rebuilt from the team's old Google Form,
+// now native to the portal). One row per client; answers is a flat { [questionKey]:
+// string | string[] } map rather than 33 columns — see ONBOARDING_SECTIONS in
+// src/lib/onboarding-form.ts for the question list each key corresponds to. Saved
+// section-by-section as the client moves through the wizard, so progress survives a
+// reload; submittedAt is only set once they reach the end and submit.
+model ClientOnboardingSubmission {
+  id          String    @id @default(cuid())
+  clientId    String    @unique
+  answers     Json
+  submittedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 }

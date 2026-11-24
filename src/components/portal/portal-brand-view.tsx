@@ -155,7 +155,7 @@ export function PortalBrandView({
               <Input id="fileUrlInput" name="fileUrl" placeholder="https://drive.google.com/…" />
             )}
             <div className="flex items-center gap-2">
-              <FileUploadField label={uploadedFile ? "Replace file" : "Or upload a file"} onUploaded={(f) => setUploadedFile(f)} />
+              <FileUploadField label={uploadedFile ? "Replace file" : "Or upload a file"} onUploaded={(f) => setUploadedFile(f)} hint={false} />
               {uploadedFile ? (
                 <Button type="button" variant="ghost" size="sm" onClick={() => setUploadedFile(null)}>Use a link instead</Button>
               ) : null}

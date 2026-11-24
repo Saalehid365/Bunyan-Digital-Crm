@@ -12,10 +12,13 @@ import { PortalDocumentsSection, type DocumentRow } from "@/components/clients/p
 import { PortalProductsSection, type ProductRow } from "@/components/clients/portal/portal-products-section";
 import { PortalBrandSection, type AssetRow, type BrandKit } from "@/components/clients/portal/portal-brand-section";
 import { PortalMessagesSection, type MessageRow } from "@/components/clients/portal/portal-messages-section";
+import { PortalOnboardingSection } from "@/components/clients/portal/portal-onboarding-section";
+import type { OnboardingAnswers } from "@/lib/onboarding";
 
-const TABS = ["access", "results", "campaigns", "reports", "products", "documents", "brand", "messages"] as const;
+const TABS = ["onboarding", "access", "results", "campaigns", "reports", "products", "documents", "brand", "messages"] as const;
 type Tab = (typeof TABS)[number];
 const TAB_LABEL: Record<Tab, string> = {
+  onboarding: "Onboarding",
   access: "Logins",
   results: "Results",
   campaigns: "Campaigns",
@@ -38,6 +41,7 @@ export function ClientPortalManagement({
   assets,
   brandKit,
   messages,
+  onboarding,
 }: {
   clientId: string;
   canManageClients: boolean;
@@ -50,6 +54,7 @@ export function ClientPortalManagement({
   assets: AssetRow[];
   brandKit: BrandKit | null;
   messages: MessageRow[];
+  onboarding: { answers: OnboardingAnswers; submittedAt: string | null };
 }) {
   const [tab, setTab] = useState<Tab>("access");
   const router = useRouter();
@@ -85,6 +90,7 @@ export function ClientPortalManagement({
         ))}
       </div>
 
+      {tab === "onboarding" ? <PortalOnboardingSection answers={onboarding.answers} submittedAt={onboarding.submittedAt} /> : null}
       {tab === "access" ? <PortalAccessSection clientId={clientId} users={portalUsers} canManage={canManageClients} /> : null}
       {tab === "results" ? <PortalResultsSection clientId={clientId} results={results} canManage={canManageClients} /> : null}
       {tab === "campaigns" ? <PortalCampaignsSection clientId={clientId} campaigns={campaigns} canManage={canManageClients} /> : null}

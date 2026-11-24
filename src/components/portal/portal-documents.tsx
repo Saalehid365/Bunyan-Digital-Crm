@@ -71,7 +71,7 @@ function DocumentRow({ doc }: { doc: Document }) {
               <Button size="sm" onClick={() => markDone()} disabled={pending}>
                 <CheckCircle2 className="h-3.5 w-3.5" /> {pending ? "Saving…" : "Mark as done"}
               </Button>
-              <FileUploadField label="Or upload your signed copy" onUploaded={(f) => markDone(f)} />
+              <FileUploadField label="Or upload your signed copy" onUploaded={(f) => markDone(f)} hint={false} />
             </>
           ) : (
             <Badge className="border-0 bg-success/15 text-success">Done</Badge>

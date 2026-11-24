@@ -11,6 +11,7 @@ import { sendPortalInviteEmail } from "@/lib/email/send-portal-invite";
 import { portalBrandPageSchema, clientMessageSchema, portalTeammateInviteSchema, clientProductSchema } from "@/lib/validations/portal";
 import { readProductAttributes, parseProductPhotos, parseProductVariants } from "@/lib/products";
 import { markPortalNotificationsRead } from "@/lib/portal-notifications";
+import { readSectionAnswers, missingRequiredFields, isOnboardingComplete, toOnboardingAnswers } from "@/lib/onboarding";
 import type { PortalNotificationKind } from "@prisma/client";
 
 function emptyToUndefined(v: string | undefined) {
@@ -328,4 +329,39 @@ export async function deletePortalProduct(id: string) {
 export async function markPortalTabRead(kind: PortalNotificationKind) {
   const portalUser = await requirePortalUser();
   await markPortalNotificationsRead(portalUser.clientId, kind);
+}
+
+/** Saves one wizard section's answers, merged into whatever's already saved — so
+ * progress survives a reload. On the final section (isFinal), also checks every
+ * required answer across the whole form is present and stamps submittedAt. */
+export async function saveOnboardingSection(sectionIndex: number, formData: FormData, isFinal: boolean) {
+  const portalUser = await requirePortalUser();
+  const sectionAnswers = readSectionAnswers(formData, sectionIndex);
+  const missing = missingRequiredFields(sectionIndex, sectionAnswers);
+  if (missing.length > 0) {
+    return { error: `Please answer: ${missing.map((f) => f.label).join(", ")}` };
+  }
+
+  const existing = await prisma.clientOnboardingSubmission.findUnique({
+    where: { clientId: portalUser.clientId },
+    select: { answers: true },
+  });
+  const merged = { ...toOnboardingAnswers(existing?.answers), ...sectionAnswers };
+
+  if (isFinal && !isOnboardingComplete(merged)) {
+    return { error: "A few required answers are still missing from earlier sections — please go back and check." };
+  }
+
+  await prisma.clientOnboardingSubmission.upsert({
+    where: { clientId: portalUser.clientId },
+    create: { clientId: portalUser.clientId, answers: merged, submittedAt: isFinal ? new Date() : undefined },
+    update: { answers: merged, submittedAt: isFinal ? new Date() : undefined },
+  });
+
+  if (isFinal) {
+    await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} completed the store onboarding form`);
+  }
+
+  revalidatePath("/portal/onboarding");
+  return { ok: true, answers: merged, submitted: isFinal };
 }

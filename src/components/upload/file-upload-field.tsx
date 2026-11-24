@@ -19,6 +19,7 @@ export function FileUploadField({
   onUploaded,
   accept,
   label = "Upload a file",
+  hint = true,
 }: {
   // Only required for team uploads — the server authorizes against canAccessClient().
   // Portal uploads always use the signed-in portal user's own clientId server-side, so
@@ -27,6 +28,9 @@ export function FileUploadField({
   onUploaded: (file: UploadedFile) => void;
   accept?: string;
   label?: string;
+  // Off when this sits inline next to other buttons (e.g. "Open" / "Mark as done") — the
+  // caption's extra line throws off their shared baseline otherwise.
+  hint?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState(false);
@@ -63,7 +67,7 @@ export function FileUploadField({
         {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
         {pending ? "Uploading…" : label}
       </Button>
-      <p className="mt-1 text-[11px] text-muted-foreground">Images, PDFs and office files, up to {MAX_UPLOAD_LABEL}.</p>
+      {hint ? <p className="mt-1 text-[11px] text-muted-foreground">Images, PDFs and office files, up to {MAX_UPLOAD_LABEL}.</p> : null}
     </div>
   );
 }

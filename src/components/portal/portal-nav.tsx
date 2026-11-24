@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { portalSignOut } from "@/server/actions/portal-session";
 
 const TABS = [
+  { href: "/portal/onboarding", label: "Onboarding", exact: false, badgeKey: "onboarding" },
   { href: "/portal", label: "Overview", exact: true, badgeKey: "overview" },
   { href: "/portal/products", label: "Products", exact: false, badgeKey: "products" },
   { href: "/portal/documents", label: "Documents", exact: false, badgeKey: "documents" },
@@ -21,12 +22,14 @@ export function PortalNav({
   pendingDocuments,
   unreadProducts,
   unreadOverview,
+  onboardingIncomplete,
 }: {
   clientName: string;
   unreadMessages: number;
   pendingDocuments: number;
   unreadProducts: number;
   unreadOverview: number;
+  onboardingIncomplete: boolean;
 }) {
   const pathname = usePathname();
   const badgeCounts: Record<string, number> = {
@@ -34,6 +37,7 @@ export function PortalNav({
     documents: pendingDocuments,
     products: unreadProducts,
     overview: unreadOverview,
+    onboarding: onboardingIncomplete ? 1 : 0,
   };
 
   return (

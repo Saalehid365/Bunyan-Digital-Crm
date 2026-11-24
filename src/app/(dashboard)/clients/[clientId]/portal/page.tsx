@@ -3,6 +3,7 @@ import { requireUser, getClientForUser, hasPermission } from "@/lib/permissions"
 import { prisma } from "@/lib/prisma";
 import { toColorsArray } from "@/lib/brand-colors";
 import { toAttributesRecord, toPhotosArray } from "@/lib/products";
+import { toOnboardingAnswers } from "@/lib/onboarding";
 import { ClientPortalManagement } from "@/components/clients/portal/client-portal-management";
 
 export default async function ClientPortalPage({ params }: { params: Promise<{ clientId: string }> }) {
@@ -12,7 +13,7 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ c
   if (!client) notFound();
   const canManageClients = await hasPermission(user, "MANAGE_CLIENTS");
 
-  const [portalUsers, results, campaigns, reports, documents, products, assets, brandKit, messages] = await Promise.all([
+  const [portalUsers, results, campaigns, reports, documents, products, assets, brandKit, messages, onboarding] = await Promise.all([
     prisma.clientPortalUser.findMany({ where: { clientId }, orderBy: { createdAt: "asc" } }),
     prisma.clientResult.findMany({ where: { clientId }, orderBy: [{ period: "desc" }, { position: "asc" }] }),
     prisma.clientCampaign.findMany({ where: { clientId }, orderBy: { createdAt: "desc" } }),
@@ -30,6 +31,7 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ c
       orderBy: { createdAt: "asc" },
       include: { senderUser: { select: { name: true } }, senderPortalUser: { select: { name: true } } },
     }),
+    prisma.clientOnboardingSubmission.findUnique({ where: { clientId }, select: { answers: true, submittedAt: true } }),
   ]);
 
   return (
@@ -88,6 +90,10 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ c
           senderName: m.senderKind === "TEAM" ? (m.senderUser?.name ?? "Team") : (m.senderPortalUser?.name ?? "Client"),
           createdAt: m.createdAt.toISOString(),
         }))}
+        onboarding={{
+          answers: toOnboardingAnswers(onboarding?.answers),
+          submittedAt: onboarding?.submittedAt?.toISOString() ?? null,
+        }}
       />
     </div>
   );
