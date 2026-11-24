@@ -10,6 +10,12 @@ export default async function PortalOnboardingPage() {
     where: { clientId: portalUser.clientId },
     select: { answers: true, submittedAt: true },
   });
+  const answers = toOnboardingAnswers(submission?.answers);
+  // Pre-fill what we already know from their own login — they shouldn't have to
+  // re-type an email/name they already gave us. Only fills a blank, never overrides
+  // something they've since typed over it.
+  if (!answers.email) answers.email = portalUser.email;
+  if (!answers.fullName) answers.fullName = portalUser.name;
 
   return (
     <div className="space-y-6">
@@ -20,7 +26,7 @@ export default async function PortalOnboardingPage() {
         </p>
       </div>
       <PortalOnboarding
-        initialAnswers={toOnboardingAnswers(submission?.answers)}
+        initialAnswers={answers}
         initialSubmitted={Boolean(submission?.submittedAt)}
       />
     </div>
