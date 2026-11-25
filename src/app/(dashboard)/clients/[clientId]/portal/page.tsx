@@ -89,6 +89,7 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ c
           senderKind: m.senderKind,
           senderName: m.senderKind === "TEAM" ? (m.senderUser?.name ?? "Team") : (m.senderPortalUser?.name ?? "Client"),
           createdAt: m.createdAt.toISOString(),
+          channel: m.channel,
         }))}
         onboarding={{
           answers: toOnboardingAnswers(onboarding?.answers),

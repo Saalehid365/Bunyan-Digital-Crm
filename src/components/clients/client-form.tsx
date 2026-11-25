@@ -25,6 +25,7 @@ type ClientDefaults = {
   contactName?: string | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
+  whatsappOptIn?: boolean;
   status?: ClientStatus;
   notes?: string | null;
 };
@@ -104,6 +105,13 @@ export function ClientForm({
           <Label htmlFor="contactPhone">Contact phone</Label>
           <Input id="contactPhone" name="contactPhone" defaultValue={client?.contactPhone ?? ""} />
         </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Checkbox id="whatsappOptIn" name="whatsappOptIn" defaultChecked={client?.whatsappOptIn ?? false} />
+        <Label htmlFor="whatsappOptIn" className="text-sm font-normal">
+          Client has agreed to get a WhatsApp alert when the team sends them a portal message
+        </Label>
       </div>
 
       <div className="space-y-2">

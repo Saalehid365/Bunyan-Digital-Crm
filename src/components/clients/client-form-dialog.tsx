@@ -19,6 +19,7 @@ type ClientDefaults = {
   contactName?: string | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
+  whatsappOptIn?: boolean;
   status: ClientStatus;
   notes?: string | null;
 };

@@ -11,7 +11,14 @@ import { MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendPortalMessage } from "@/server/actions/portal-actions";
 
-type Message = { id: string; body: string; senderKind: "TEAM" | "CLIENT"; senderName: string; createdAt: string };
+type Message = {
+  id: string;
+  body: string;
+  senderKind: "TEAM" | "CLIENT";
+  senderName: string;
+  createdAt: string;
+  channel: "PORTAL" | "WHATSAPP";
+};
 
 const initial: { error?: string; ok?: boolean } = {};
 
@@ -49,6 +56,7 @@ export function PortalMessages({ messages }: { messages: Message[] }) {
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   {m.senderName} &middot; {format(new Date(m.createdAt), "d MMM, HH:mm")}
+                  {m.channel === "WHATSAPP" ? <span className="text-success"> &middot; via WhatsApp</span> : null}
                 </p>
               </div>
             ))

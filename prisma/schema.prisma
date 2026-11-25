@@ -181,6 +181,15 @@ model Client {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
+  // WhatsApp alert when the team sends a portal message (see src/lib/whatsapp.ts) — opt-in
+  // only, and rate-limited using the timestamp below.
+  whatsappOptIn         Boolean   @default(false)
+  lastWhatsappAlertAt   DateTime?
+  // Last time this client actually messaged on WhatsApp — opens a 24-hour window in
+  // which a team reply can go out as a real WhatsApp text instead of the template
+  // alert. See src/lib/whatsapp-conversation.ts.
+  lastWhatsappInboundAt DateTime?
+
   services                  ClientService[]
   members                   ClientMember[]
   jobs                      Job[]
@@ -723,17 +732,31 @@ enum ClientMessageSender {
   CLIENT
 }
 
+/// PORTAL: typed in the CRM's Messages tab or the client's own portal. WHATSAPP: a
+/// client's reply received over the WhatsApp webhook, or a team message that went out
+/// as a real WhatsApp text because the 24-hour conversation window was open (see
+/// src/lib/whatsapp-conversation.ts) — outside that window a team message still only
+/// goes out as the portal_message_alert template, so it stays channel PORTAL.
+enum ClientMessageChannel {
+  PORTAL
+  WHATSAPP
+}
+
 /// A single flat message thread per client — simplest shape for "communicate with
 /// them", not a multi-subject inbox. Shown on both the team's Portal tab and the
 /// client's own Messages page.
 model ClientMessage {
-  id                 String              @id @default(cuid())
+  id                 String               @id @default(cuid())
   clientId           String
-  body               String              @db.Text
+  body               String               @db.Text
   senderKind         ClientMessageSender
   senderUserId       String?
   senderPortalUserId String?
-  createdAt          DateTime            @default(now())
+  channel            ClientMessageChannel @default(PORTAL)
+  // Meta's own message id on an inbound WhatsApp message — de-dupes webhook retries.
+  // Never set for anything else.
+  whatsappMessageId  String?              @unique
+  createdAt          DateTime             @default(now())
 
   client           Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   senderUser       User?             @relation(fields: [senderUserId], references: [id], onDelete: SetNull)

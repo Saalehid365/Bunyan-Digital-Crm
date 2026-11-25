@@ -27,6 +27,7 @@ export default async function PortalMessagesPage() {
           senderKind: m.senderKind,
           senderName: m.senderKind === "TEAM" ? (m.senderUser?.name ?? "Nabna Tech") : (m.senderPortalUser?.name ?? portalUser.name),
           createdAt: m.createdAt.toISOString(),
+          channel: m.channel,
         }))}
       />
     </div>

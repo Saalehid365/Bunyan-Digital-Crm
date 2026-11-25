@@ -11,7 +11,14 @@ import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
 import { sendTeamMessage, markPortalMessagesReadByTeam } from "@/server/actions/client-portal";
 
-export type MessageRow = { id: string; body: string; senderKind: "TEAM" | "CLIENT"; senderName: string; createdAt: string };
+export type MessageRow = {
+  id: string;
+  body: string;
+  senderKind: "TEAM" | "CLIENT";
+  senderName: string;
+  createdAt: string;
+  channel: "PORTAL" | "WHATSAPP";
+};
 
 const initial: { error?: string; ok?: boolean } = {};
 
@@ -59,6 +66,7 @@ export function PortalMessagesSection({ clientId, messages }: { clientId: string
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   {m.senderName} &middot; {format(new Date(m.createdAt), "d MMM, HH:mm")}
+                  {m.channel === "WHATSAPP" ? <span className="text-success"> &middot; via WhatsApp</span> : null}
                 </p>
               </div>
             ))

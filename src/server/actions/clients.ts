@@ -20,6 +20,7 @@ export async function createClient(formData: FormData) {
     contactName: formData.get("contactName"),
     contactEmail: formData.get("contactEmail"),
     contactPhone: formData.get("contactPhone"),
+    whatsappOptIn: formData.get("whatsappOptIn") ?? undefined,
     status: formData.get("status") || "LEAD",
     notes: formData.get("notes"),
     createPortalLogin: formData.get("createPortalLogin") ?? undefined,
@@ -54,6 +55,7 @@ export async function createClient(formData: FormData) {
         contactName: emptyToUndefined(data.contactName),
         contactEmail: emptyToUndefined(data.contactEmail),
         contactPhone: emptyToUndefined(data.contactPhone),
+        whatsappOptIn: Boolean(data.whatsappOptIn),
         status: data.status,
         notes: emptyToUndefined(data.notes),
         activities: {
@@ -107,6 +109,7 @@ export async function updateClient(clientId: string, formData: FormData) {
     contactName: formData.get("contactName"),
     contactEmail: formData.get("contactEmail"),
     contactPhone: formData.get("contactPhone"),
+    whatsappOptIn: formData.get("whatsappOptIn") ?? undefined,
     status: formData.get("status") || "LEAD",
     notes: formData.get("notes"),
   });
@@ -123,6 +126,7 @@ export async function updateClient(clientId: string, formData: FormData) {
       contactName: emptyToUndefined(data.contactName),
       contactEmail: emptyToUndefined(data.contactEmail),
       contactPhone: emptyToUndefined(data.contactPhone),
+      whatsappOptIn: Boolean(data.whatsappOptIn),
       status: data.status,
       notes: emptyToUndefined(data.notes),
       activities: {

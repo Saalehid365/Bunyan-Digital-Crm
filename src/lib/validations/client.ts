@@ -8,6 +8,7 @@ export const clientSchema = z.object({
   contactName: z.string().trim().max(120).optional().or(z.literal("")),
   contactEmail: z.string().trim().email("Enter a valid email").optional().or(z.literal("")),
   contactPhone: z.string().trim().max(40).optional().or(z.literal("")),
+  whatsappOptIn: z.union([z.literal("on"), z.literal("true")]).optional(),
   status: clientStatusEnum.default("LEAD"),
   notes: z.string().trim().max(4000).optional().or(z.literal("")),
   // Optional "set up the client's portal login now" fields — only present on create,

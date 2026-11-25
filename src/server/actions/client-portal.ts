@@ -6,6 +6,9 @@ import { requireUser, requirePermission, canAccessClient } from "@/lib/permissio
 import { hashPassword } from "@/lib/password";
 import { deleteBlob } from "@/lib/blob-store";
 import { notifyPortalUsersByEmail } from "@/lib/portal-notify";
+import { sendPortalMessageWhatsAppAlert } from "@/lib/whatsapp-message-alert";
+import { sendWhatsAppTextMessage } from "@/lib/whatsapp";
+import { isConversationWindowOpen } from "@/lib/whatsapp-conversation";
 import {
   portalUserSchema,
   clientResultSchema,
@@ -328,8 +331,31 @@ export async function sendTeamMessage(formData: FormData) {
   const data = parsed.data;
   if (!(await canAccessClient(user, data.clientId))) return { error: "You don't have access to this client." };
 
+  // If the client has an open WhatsApp conversation (they messaged us in the last 24h),
+  // send this exact text as a real WhatsApp message instead of just the portal copy —
+  // and skip the template nudge below, since they're already mid-conversation there.
+  const whatsappClient = await prisma.client.findUnique({
+    where: { id: data.clientId },
+    select: { contactPhone: true, whatsappOptIn: true, lastWhatsappInboundAt: true },
+  });
+  const canSendViaWhatsApp = Boolean(whatsappClient?.whatsappOptIn && whatsappClient.contactPhone);
+  const conversationOpen = canSendViaWhatsApp && isConversationWindowOpen(whatsappClient!.lastWhatsappInboundAt);
+
+  let sentViaWhatsApp = false;
+  if (conversationOpen) {
+    const result = await sendWhatsAppTextMessage({ to: whatsappClient!.contactPhone!, body: data.body });
+    if (result.ok) sentViaWhatsApp = true;
+    else console.error(`[whatsapp] free-form send failed for client ${data.clientId}: ${result.error}`);
+  }
+
   await prisma.clientMessage.create({
-    data: { clientId: data.clientId, body: data.body, senderKind: "TEAM", senderUserId: user.id },
+    data: {
+      clientId: data.clientId,
+      body: data.body,
+      senderKind: "TEAM",
+      senderUserId: user.id,
+      channel: sentViaWhatsApp ? "WHATSAPP" : "PORTAL",
+    },
   });
   await prisma.client.update({ where: { id: data.clientId }, data: { portalMessagesReadByTeamAt: new Date() } });
   path(data.clientId);
@@ -341,6 +367,9 @@ export async function sendTeamMessage(formData: FormData) {
     ctaLabel: "Reply",
     ctaPath: "/portal/messages",
   });
+  if (!sentViaWhatsApp) {
+    await sendPortalMessageWhatsAppAlert(data.clientId);
+  }
   return { ok: true };
 }
 
