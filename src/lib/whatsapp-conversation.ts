@@ -14,11 +14,11 @@ export function isConversationWindowOpen(lastWhatsappInboundAt: Date | null): bo
  * client's contactPhone, normalized the same way. The agency's own client list is small
  * enough that fetching candidates and comparing in memory is simpler than trying to
  * normalize phone formats inside SQL. */
-export async function findClientByWhatsAppPhone(fromDigits: string): Promise<{ id: string } | null> {
+export async function findClientByWhatsAppPhone(fromDigits: string): Promise<{ id: string; name: string } | null> {
   const candidates = await prisma.client.findMany({
     where: { contactPhone: { not: null } },
-    select: { id: true, contactPhone: true },
+    select: { id: true, name: true, contactPhone: true },
   });
   const match = candidates.find((c) => c.contactPhone && normalizePhoneForWhatsApp(c.contactPhone) === fromDigits);
-  return match ? { id: match.id } : null;
+  return match ? { id: match.id, name: match.name } : null;
 }

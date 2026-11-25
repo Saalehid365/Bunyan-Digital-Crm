@@ -12,6 +12,7 @@ import { portalBrandPageSchema, clientMessageSchema, portalTeammateInviteSchema,
 import { readProductAttributes, parseProductPhotos, parseProductVariants } from "@/lib/products";
 import { markPortalNotificationsRead } from "@/lib/portal-notifications";
 import { readSectionAnswers, missingRequiredFields, isOnboardingComplete, toOnboardingAnswers } from "@/lib/onboarding";
+import { sendTeamWhatsAppAlert } from "@/lib/whatsapp-team-alert";
 import type { PortalNotificationKind } from "@prisma/client";
 
 function emptyToUndefined(v: string | undefined) {
@@ -174,6 +175,7 @@ export async function sendPortalMessage(formData: FormData) {
     data: { clientId: portalUser.clientId, body: parsed.data.body, senderKind: "CLIENT", senderPortalUserId: portalUser.id },
   });
   await prisma.clientPortalUser.update({ where: { id: portalUser.id }, data: { messagesReadAt: new Date() } });
+  await sendTeamWhatsAppAlert(portalUser.clientName, `${portalUser.name} sent a new message`, `/clients/${portalUser.clientId}/portal`);
   revalidatePath("/portal/messages");
   return { ok: true };
 }
@@ -205,6 +207,11 @@ export async function markPortalDocumentCompleted(id: string, uploadedFile?: { i
   await notifyTeamOfPortalActivity(
     portalUser.clientId,
     `${portalUser.name} marked "${existing.title}" as done${fileUpdate ? ", with a file attached" : ""}`,
+  );
+  await sendTeamWhatsAppAlert(
+    portalUser.clientName,
+    `${portalUser.name} marked "${existing.title}" as done${fileUpdate ? " with a file attached" : ""}`,
+    `/clients/${portalUser.clientId}/portal`,
   );
   revalidatePath("/portal/documents");
   return { ok: true };

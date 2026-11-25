@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { findClientByWhatsAppPhone } from "@/lib/whatsapp-conversation";
+import { sendTeamWhatsAppAlert } from "@/lib/whatsapp-team-alert";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -128,4 +129,6 @@ async function recordInboundMessage(message: WhatsAppInboundMessage) {
     where: { id: client.id },
     data: { lastWhatsappInboundAt: new Date(Number(message.timestamp) * 1000) },
   });
+
+  await sendTeamWhatsAppAlert(client.name, "replied to you on WhatsApp", `/clients/${client.id}/portal`);
 }
