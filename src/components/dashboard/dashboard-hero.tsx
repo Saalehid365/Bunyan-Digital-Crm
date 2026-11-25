@@ -1,7 +1,6 @@
-import { AuthHero } from "@/components/auth/auth-hero";
-
-/** Dark hero band — the CRM's take on the marketing site's own dark hero: blueprint grid,
- * forest-green glow, mono eyebrow, oversized display title and the Arabic wordmark. */
+/** Dashboard page header — eyebrow, serif title, subtitle, then the metric strip below a
+ * hairline divider. Matches the plain light header every other top-level page uses
+ * (Reports, Clients), just with the metrics attached underneath. */
 export function DashboardHero({
   eyebrow,
   title,
@@ -14,22 +13,13 @@ export function DashboardHero({
   children: React.ReactNode;
 }) {
   return (
-    <section className="dark relative overflow-hidden bg-[#082315] text-foreground">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_70%_at_85%_0%,rgba(10,92,50,0.4),transparent_60%),radial-gradient(60%_60%_at_5%_100%,rgba(100,196,146,0.16),transparent_60%)]"
-      />
-      <div
-        aria-hidden
-        className="blueprint pointer-events-none absolute inset-0 opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent_100%)]"
-      />
-      <AuthHero size="band" />
-      <div className="rise relative mx-auto w-full max-w-6xl px-4 pt-9 pb-8 md:px-6 md:pt-12 md:pb-10">
+    <section className="relative">
+      <div className="rise mx-auto w-full max-w-6xl px-4 pt-6 pb-8 md:px-6 md:pt-8 md:pb-10">
         <p className="eyebrow">{eyebrow}</p>
-        <h1 className="mt-4 font-serif text-[clamp(2.6rem,6.4vw,5.2rem)] leading-[0.94] font-semibold tracking-[-0.045em] text-white">
+        <h1 className="mt-4 font-serif text-[clamp(2.2rem,4.4vw,3.4rem)] leading-[0.98] font-semibold tracking-[-0.04em] text-foreground">
           {title}
         </h1>
-        <p className="mt-3 max-w-xl text-[1.02rem] text-white/60">{subtitle}</p>
+        <p className="mt-3 max-w-xl text-[1.02rem] text-muted-foreground">{subtitle}</p>
         <div className="mt-9">{children}</div>
       </div>
     </section>

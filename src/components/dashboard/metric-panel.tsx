@@ -79,13 +79,13 @@ export function MetricPanel({
 }) {
   const reduceMotion = useSafeReducedMotion();
   return (
-    <div className="grid gap-8 border-t border-white/15 pt-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.85fr)] lg:gap-12">
+    <div className="grid gap-8 border-t border-border pt-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.85fr)] lg:gap-12">
       <div>
-        <p className="font-mono text-[0.7rem] tracking-[0.14em] text-white/55 uppercase">{heroLabel}</p>
-        <p className="mt-3 font-serif text-6xl leading-none font-semibold tracking-[-0.05em] text-white sm:text-7xl">
+        <p className="font-mono text-[0.7rem] tracking-[0.14em] text-muted-foreground uppercase">{heroLabel}</p>
+        <p className="mt-3 font-serif text-6xl leading-none font-semibold tracking-[-0.05em] text-primary sm:text-7xl">
           <AnimatedValue raw={heroValue} />
         </p>
-        {heroSublabel ? <p className="mt-3 text-sm text-white/60">{heroSublabel}</p> : null}
+        {heroSublabel ? <p className="mt-3 text-sm text-muted-foreground">{heroSublabel}</p> : null}
       </div>
       <motion.dl
         className="grid grid-cols-2 self-end sm:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
@@ -98,10 +98,10 @@ export function MetricPanel({
           <motion.div
             key={item.label}
             variants={reduceMotion ? ledgerItemReduced : ledgerItem}
-            className={`flex flex-col-reverse justify-end border-l border-white/15 py-2 pl-5 ${i === 0 ? "sm:border-l-0 sm:pl-0" : ""} ${i % 2 === 0 ? "border-l-0 pl-0 sm:border-l" : ""}`}
+            className={`flex flex-col-reverse justify-end border-l border-border py-2 pl-5 ${i === 0 ? "sm:border-l-0 sm:pl-0" : ""} ${i % 2 === 0 ? "border-l-0 pl-0 sm:border-l" : ""}`}
           >
-            <dt className="mt-2 font-mono text-[0.66rem] tracking-[0.12em] text-white/55 uppercase">{item.label}</dt>
-            <dd className="font-serif text-4xl font-semibold tracking-[-0.04em] tabular-nums text-white sm:text-5xl">
+            <dt className="mt-2 font-mono text-[0.66rem] tracking-[0.12em] text-muted-foreground uppercase">{item.label}</dt>
+            <dd className="font-serif text-4xl font-semibold tracking-[-0.04em] tabular-nums text-foreground sm:text-5xl">
               <AnimatedValue raw={item.value} />
             </dd>
           </motion.div>

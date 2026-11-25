@@ -29,8 +29,8 @@ export default async function PortalAppLayout({ children }: { children: React.Re
   return (
     <>
       <PortalLiveAlerts initial={newNotifications.items} />
-      <div className="auth-midnight flex min-h-screen flex-col">
-        <header className="sticky top-0 z-20 border-b border-white/10 bg-background/90 backdrop-blur">
+      <div className="flex min-h-screen flex-col">
+        <header className="auth-midnight sticky top-0 z-20 border-b border-white/10 bg-background/90 backdrop-blur">
           <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-5">
             <div className="flex items-center gap-2.5">
               <Image src={mark} alt="" className="h-6 w-auto" priority />

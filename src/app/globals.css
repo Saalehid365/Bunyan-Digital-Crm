@@ -316,7 +316,7 @@ main h1.font-serif {
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #1db868;
+  color: var(--primary);
 }
 .eyebrow::before {
   content: "";
