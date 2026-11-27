@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { sendTeamWhatsAppAlert } from "@/lib/whatsapp-team-alert";
 
 export type NewPortalActivity = {
   id: string;
@@ -10,11 +11,14 @@ export type NewPortalActivity = {
 
 export type NewPortalActivities = { count: number; items: NewPortalActivity[] };
 
-/** Logs a client-side portal action (brand kit saved, asset added, access submitted) as
- * an ordinary Activity entry — userId is deliberately left unset, which is what
- * getNewPortalActivity() uses to tell a client's own edit apart from a team member's. */
-export async function notifyTeamOfPortalActivity(clientId: string, message: string) {
+/** Logs a client-side portal action (brand kit saved, asset added, access submitted,
+ * message sent…) as an ordinary Activity entry — userId is deliberately left unset,
+ * which is what getNewPortalActivity() uses to tell a client's own edit apart from a
+ * team member's — and alerts the team's WhatsApp number with the same text, so every
+ * kind of client update reaches the team on both channels from one call site. */
+export async function notifyTeamOfPortalActivity(clientId: string, clientName: string, message: string) {
   await prisma.activity.create({ data: { clientId, type: "CLIENT_UPDATED", message } });
+  await sendTeamWhatsAppAlert(clientName, message, `/clients/${clientId}/portal`);
 }
 
 /**

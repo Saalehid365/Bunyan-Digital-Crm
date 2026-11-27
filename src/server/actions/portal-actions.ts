@@ -12,7 +12,6 @@ import { portalBrandPageSchema, clientMessageSchema, portalTeammateInviteSchema,
 import { readProductAttributes, parseProductPhotos, parseProductVariants } from "@/lib/products";
 import { markPortalNotificationsRead } from "@/lib/portal-notifications";
 import { readSectionAnswers, missingRequiredFields, isOnboardingComplete, toOnboardingAnswers } from "@/lib/onboarding";
-import { sendTeamWhatsAppAlert } from "@/lib/whatsapp-team-alert";
 import type { PortalNotificationKind } from "@prisma/client";
 
 function emptyToUndefined(v: string | undefined) {
@@ -161,7 +160,7 @@ export async function savePortalBrandPage(formData: FormData) {
     sent.push(`access to "${data.accessLabel!.trim()}"`);
   }
 
-  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} sent ${sent.join(", ")}`);
+  await notifyTeamOfPortalActivity(portalUser.clientId, portalUser.clientName, `${portalUser.name} sent ${sent.join(", ")}`);
   revalidatePath("/portal/brand");
   return { ok: true };
 }
@@ -177,9 +176,9 @@ export async function sendPortalMessage(formData: FormData) {
   await prisma.clientPortalUser.update({ where: { id: portalUser.id }, data: { messagesReadAt: new Date() } });
   await notifyTeamOfPortalActivity(
     portalUser.clientId,
+    portalUser.clientName,
     `${portalUser.name} sent a message: "${parsed.data.body.length > 140 ? `${parsed.data.body.slice(0, 140)}…` : parsed.data.body}"`,
   );
-  await sendTeamWhatsAppAlert(portalUser.clientName, `${portalUser.name} sent a new message`, `/clients/${portalUser.clientId}/portal`);
   revalidatePath("/portal/messages");
   return { ok: true };
 }
@@ -210,12 +209,8 @@ export async function markPortalDocumentCompleted(id: string, uploadedFile?: { i
   });
   await notifyTeamOfPortalActivity(
     portalUser.clientId,
-    `${portalUser.name} marked "${existing.title}" as done${fileUpdate ? ", with a file attached" : ""}`,
-  );
-  await sendTeamWhatsAppAlert(
     portalUser.clientName,
-    `${portalUser.name} marked "${existing.title}" as done${fileUpdate ? " with a file attached" : ""}`,
-    `/clients/${portalUser.clientId}/portal`,
+    `${portalUser.name} marked "${existing.title}" as done${fileUpdate ? ", with a file attached" : ""}`,
   );
   revalidatePath("/portal/documents");
   return { ok: true };
@@ -259,7 +254,7 @@ export async function invitePortalTeammate(formData: FormData) {
     return { error: `Added, but the invite email failed to send: ${emailResult.error}` };
   }
 
-  await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} invited ${name} (${email}) to the portal`);
+  await notifyTeamOfPortalActivity(portalUser.clientId, portalUser.clientName, `${portalUser.name} invited ${name} (${email}) to the portal`);
   revalidatePath("/portal/team");
   return { ok: true };
 }
@@ -319,6 +314,7 @@ export async function addPortalProduct(formData: FormData) {
   });
   await notifyTeamOfPortalActivity(
     portalUser.clientId,
+    portalUser.clientName,
     `${portalUser.name} added a product to list — "${data.name}"${variants.length > 0 ? ` (${variants.length} variant${variants.length === 1 ? "" : "s"})` : ""}`,
   );
   revalidatePath("/portal/products");
@@ -370,7 +366,7 @@ export async function saveOnboardingSection(sectionIndex: number, formData: Form
   });
 
   if (isFinal) {
-    await notifyTeamOfPortalActivity(portalUser.clientId, `${portalUser.name} completed the store onboarding form`);
+    await notifyTeamOfPortalActivity(portalUser.clientId, portalUser.clientName, `${portalUser.name} completed the store onboarding form`);
   }
 
   revalidatePath("/portal/onboarding");
