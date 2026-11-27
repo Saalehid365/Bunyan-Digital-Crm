@@ -175,6 +175,10 @@ export async function sendPortalMessage(formData: FormData) {
     data: { clientId: portalUser.clientId, body: parsed.data.body, senderKind: "CLIENT", senderPortalUserId: portalUser.id },
   });
   await prisma.clientPortalUser.update({ where: { id: portalUser.id }, data: { messagesReadAt: new Date() } });
+  await notifyTeamOfPortalActivity(
+    portalUser.clientId,
+    `${portalUser.name} sent a message: "${parsed.data.body.length > 140 ? `${parsed.data.body.slice(0, 140)}…` : parsed.data.body}"`,
+  );
   await sendTeamWhatsAppAlert(portalUser.clientName, `${portalUser.name} sent a new message`, `/clients/${portalUser.clientId}/portal`);
   revalidatePath("/portal/messages");
   return { ok: true };

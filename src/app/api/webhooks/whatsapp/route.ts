@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { findClientByWhatsAppPhone } from "@/lib/whatsapp-conversation";
 import { sendTeamWhatsAppAlert } from "@/lib/whatsapp-team-alert";
+import { notifyTeamOfPortalActivity } from "@/lib/portal-activity";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -130,5 +131,10 @@ async function recordInboundMessage(message: WhatsAppInboundMessage) {
     data: { lastWhatsappInboundAt: new Date(Number(message.timestamp) * 1000) },
   });
 
+  const body = message.text!.body;
+  await notifyTeamOfPortalActivity(
+    client.id,
+    `${client.name} sent a WhatsApp message: "${body.length > 140 ? `${body.slice(0, 140)}…` : body}"`,
+  );
   await sendTeamWhatsAppAlert(client.name, "replied to you on WhatsApp", `/clients/${client.id}/portal`);
 }
