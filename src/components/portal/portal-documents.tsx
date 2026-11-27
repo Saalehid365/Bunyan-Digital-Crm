@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/empty-state";
 import { FileUploadField, type UploadedFile } from "@/components/upload/file-upload-field";
 import { cn } from "@/lib/utils";
@@ -34,15 +35,21 @@ const KIND_LABEL: Record<Document["kind"], string> = {
 
 function DocumentRow({ doc }: { doc: Document }) {
   const [pending, startTransition] = useTransition();
+  const [showPayDialog, setShowPayDialog] = useState(false);
   const overdue = doc.status === "PENDING" && doc.dueDate && isPast(new Date(doc.dueDate));
   const isAgreement = doc.kind === "AGREEMENT";
 
   function markDone(uploadedFile?: UploadedFile) {
     startTransition(async () => {
       const result = await markPortalDocumentCompleted(doc.id, uploadedFile);
-      if (result?.error) toast.error(result.error);
-      else if (isAgreement) toast.success("Thanks — you've agreed to the terms");
-      else toast.success(uploadedFile ? "Uploaded and marked as done — thank you" : "Marked as done — thank you");
+      if (result?.error) {
+        toast.error(result.error);
+      } else if (isAgreement) {
+        toast.success("Thanks — you've agreed to the terms");
+        if (doc.paymentLink) setShowPayDialog(true);
+      } else {
+        toast.success(uploadedFile ? "Uploaded and marked as done — thank you" : "Marked as done — thank you");
+      }
     });
   }
 
@@ -96,6 +103,19 @@ function DocumentRow({ doc }: { doc: Document }) {
           )}
         </div>
       </CardContent>
+      <Dialog open={showPayDialog} onOpenChange={setShowPayDialog}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Thanks for agreeing</DialogTitle>
+            <DialogDescription>The next step for &ldquo;{doc.title}&rdquo; is payment.</DialogDescription>
+          </DialogHeader>
+          <Button asChild className="w-full">
+            <a href={doc.paymentLink ?? "#"} target="_blank" rel="noopener noreferrer" onClick={() => setShowPayDialog(false)}>
+              <CreditCard className="h-3.5 w-3.5" /> Pay now
+            </a>
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
