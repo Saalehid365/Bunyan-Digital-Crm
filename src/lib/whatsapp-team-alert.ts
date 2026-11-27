@@ -1,6 +1,10 @@
 import { sendWhatsAppTemplateMessage } from "@/lib/whatsapp";
 
 const TEMPLATE_NAME = "team_activity_alert";
+// This template was approved under plain "English" (code "en"), not "English (UK)"
+// (en_GB) like portal_message_alert — so it needs its own explicit language code rather
+// than following WHATSAPP_TEMPLATE_LANGUAGE.
+const TEMPLATE_LANGUAGE = "en";
 
 /**
  * Alerts the team's own WhatsApp number (TEAM_WHATSAPP_NOTIFY_NUMBER) when a client sends
@@ -18,6 +22,7 @@ export async function sendTeamWhatsAppAlert(clientName: string, eventText: strin
     const result = await sendWhatsAppTemplateMessage({
       to,
       templateName: TEMPLATE_NAME,
+      languageCode: TEMPLATE_LANGUAGE,
       variables: [clientName, eventText, ctaUrl],
     });
     if (!result.ok) console.error(`[whatsapp] team_activity_alert failed: ${result.error}`);
