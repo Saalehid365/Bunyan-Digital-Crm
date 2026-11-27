@@ -100,6 +100,7 @@ export const clientDocumentSchema = z.object({
   fileId: z.string().trim().optional().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().or(z.literal("")),
   dueDate: z.string().trim().optional().or(z.literal("")),
+  paymentLink: z.string().trim().max(600).optional().or(z.literal("")),
 });
 
 export const portalTeammateInviteSchema = z.object({

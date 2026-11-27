@@ -392,6 +392,7 @@ export async function addClientDocument(formData: FormData) {
     fileId: formData.get("fileId") || undefined,
     notes: formData.get("notes"),
     dueDate: formData.get("dueDate") || undefined,
+    paymentLink: formData.get("paymentLink") || undefined,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
   const data = parsed.data;
@@ -406,6 +407,7 @@ export async function addClientDocument(formData: FormData) {
       fileId: emptyToUndefined(data.fileId),
       notes: emptyToUndefined(data.notes),
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+      paymentLink: emptyToUndefined(data.paymentLink),
     },
   });
   path(data.clientId);
@@ -428,6 +430,16 @@ export async function setClientDocumentStatus(id: string, clientId: string, stat
     data: { status, completedAt: status === "COMPLETED" ? new Date() : null },
   });
   path(clientId);
+}
+
+/** Settable any time, before or after the client agrees — only shown to them once the
+ * document's own status is COMPLETED (see PortalDocuments). */
+export async function setClientDocumentPaymentLink(id: string, clientId: string, paymentLink: string) {
+  const user = await requirePermission("MANAGE_CLIENTS");
+  if (!(await canAccessClient(user, clientId))) return { error: "You don't have access to this client." };
+  await prisma.clientDocument.update({ where: { id }, data: { paymentLink: paymentLink.trim() || null } });
+  path(clientId);
+  return { ok: true };
 }
 
 export async function deleteClientDocument(id: string, clientId: string) {

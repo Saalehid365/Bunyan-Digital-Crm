@@ -795,6 +795,9 @@ model ClientDocument {
   status      ClientDocumentStatus @default(PENDING)
   dueDate     DateTime?
   completedAt DateTime?
+  // Only ever shown to the client once this AGREEMENT document's status is COMPLETED —
+  // the team can set or change it any time before or after that.
+  paymentLink String?
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 

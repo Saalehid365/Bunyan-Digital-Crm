@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/empty-state";
 import { FileUploadField, type UploadedFile } from "@/components/upload/file-upload-field";
-import { addClientDocument, setClientDocumentStatus, deleteClientDocument } from "@/server/actions/client-portal";
+import { addClientDocument, setClientDocumentStatus, setClientDocumentPaymentLink, deleteClientDocument } from "@/server/actions/client-portal";
 
 export type DocumentRow = {
   id: string;
@@ -24,6 +24,7 @@ export type DocumentRow = {
   status: "PENDING" | "COMPLETED";
   dueDate: string | null;
   completedAt: string | null;
+  paymentLink: string | null;
 };
 
 const KIND_LABEL: Record<DocumentRow["kind"], string> = {
@@ -38,6 +39,7 @@ const initial: { error?: string; ok?: boolean } = {};
 function AddDialog({ clientId }: { clientId: string }) {
   const [open, setOpen] = useState(false);
   const [uploaded, setUploaded] = useState<UploadedFile | null>(null);
+  const [kind, setKind] = useState<DocumentRow["kind"]>("AGREEMENT");
   const [state, formAction, pending] = useActionState(
     async (_prev: typeof initial, formData: FormData) => (await addClientDocument(formData)) ?? {},
     initial,
@@ -48,6 +50,7 @@ function AddDialog({ clientId }: { clientId: string }) {
     if (state.ok) {
       setOpen(false);
       setUploaded(null);
+      setKind("AGREEMENT");
     }
   }
 
@@ -66,7 +69,7 @@ function AddDialog({ clientId }: { clientId: string }) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="d-kind">Type</Label>
-              <Select name="kind" defaultValue="AGREEMENT">
+              <Select name="kind" value={kind} onValueChange={(v) => setKind(v as DocumentRow["kind"])}>
                 <SelectTrigger id="d-kind" className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(Object.keys(KIND_LABEL) as DocumentRow["kind"][]).map((k) => (
@@ -103,9 +106,45 @@ function AddDialog({ clientId }: { clientId: string }) {
             <Label htmlFor="d-notes">Notes for the client</Label>
             <Textarea id="d-notes" name="notes" rows={2} placeholder="What this is and why we need it" />
           </div>
+          {kind === "AGREEMENT" ? (
+            <div className="space-y-2">
+              <Label htmlFor="d-payment-link">Payment link (optional)</Label>
+              <Input id="d-payment-link" name="paymentLink" placeholder="https://…" />
+              <p className="text-xs text-muted-foreground">Only shown to the client after they agree to this — you can also add it later.</p>
+            </div>
+          ) : null}
           {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
           <Button type="submit" className="w-full" disabled={pending}>{pending ? "Sending…" : "Send"}</Button>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PaymentLinkButton({ clientId, documentId, paymentLink }: { clientId: string; documentId: string; paymentLink: string | null }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(paymentLink ?? "");
+  const [pending, startTransition] = useTransition();
+
+  function save() {
+    startTransition(async () => {
+      await setClientDocumentPaymentLink(documentId, clientId, value);
+      setOpen(false);
+    });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
+        {paymentLink ? "Edit payment link" : "Add payment link"}
+      </Button>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader><DialogTitle>Payment link</DialogTitle></DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="payment-link">Shown to the client once they agree to this document</Label>
+          <Input id="payment-link" value={value} onChange={(e) => setValue(e.target.value)} placeholder="https://…" />
+        </div>
+        <Button onClick={save} disabled={pending} className="w-full">{pending ? "Saving…" : "Save"}</Button>
       </DialogContent>
     </Dialog>
   );
@@ -164,6 +203,9 @@ export function PortalDocumentsSection({ clientId, documents, canManage }: { cli
                 </div>
                 {canManage ? (
                   <div className="flex shrink-0 items-center gap-2">
+                    {d.kind === "AGREEMENT" ? (
+                      <PaymentLinkButton clientId={clientId} documentId={d.id} paymentLink={d.paymentLink} />
+                    ) : null}
                     <Button
                       variant={d.status === "COMPLETED" ? "secondary" : "outline"}
                       size="sm"

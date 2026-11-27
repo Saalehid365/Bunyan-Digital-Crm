@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { format, isPast } from "date-fns";
-import { FileSignature, ExternalLink, CheckCircle2 } from "lucide-react";
+import { FileSignature, ExternalLink, CheckCircle2, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ type Document = {
   dueDate: string | null;
   completedAt: string | null;
   createdAt: string;
+  paymentLink: string | null;
 };
 
 const KIND_LABEL: Record<Document["kind"], string> = {
@@ -34,11 +35,13 @@ const KIND_LABEL: Record<Document["kind"], string> = {
 function DocumentRow({ doc }: { doc: Document }) {
   const [pending, startTransition] = useTransition();
   const overdue = doc.status === "PENDING" && doc.dueDate && isPast(new Date(doc.dueDate));
+  const isAgreement = doc.kind === "AGREEMENT";
 
   function markDone(uploadedFile?: UploadedFile) {
     startTransition(async () => {
       const result = await markPortalDocumentCompleted(doc.id, uploadedFile);
       if (result?.error) toast.error(result.error);
+      else if (isAgreement) toast.success("Thanks — you've agreed to the terms");
       else toast.success(uploadedFile ? "Uploaded and marked as done — thank you" : "Marked as done — thank you");
     });
   }
@@ -67,14 +70,29 @@ function DocumentRow({ doc }: { doc: Document }) {
             </a>
           </Button>
           {doc.status === "PENDING" ? (
-            <>
+            isAgreement ? (
               <Button size="sm" onClick={() => markDone()} disabled={pending}>
-                <CheckCircle2 className="h-3.5 w-3.5" /> {pending ? "Saving…" : "Mark as done"}
+                <CheckCircle2 className="h-3.5 w-3.5" /> {pending ? "Saving…" : "Agree to terms & conditions"}
               </Button>
-              <FileUploadField label="Or upload your signed copy" onUploaded={(f) => markDone(f)} hint={false} />
-            </>
+            ) : (
+              <>
+                <Button size="sm" onClick={() => markDone()} disabled={pending}>
+                  <CheckCircle2 className="h-3.5 w-3.5" /> {pending ? "Saving…" : "Mark as done"}
+                </Button>
+                <FileUploadField label="Or upload your signed copy" onUploaded={(f) => markDone(f)} hint={false} />
+              </>
+            )
           ) : (
-            <Badge className="border-0 bg-success/15 text-success">Done</Badge>
+            <div className="flex items-center gap-2">
+              <Badge className="border-0 bg-success/15 text-success">{isAgreement ? "Agreed" : "Done"}</Badge>
+              {isAgreement && doc.paymentLink ? (
+                <Button size="sm" asChild>
+                  <a href={doc.paymentLink} target="_blank" rel="noopener noreferrer">
+                    <CreditCard className="h-3.5 w-3.5" /> Pay now
+                  </a>
+                </Button>
+              ) : null}
+            </div>
           )}
         </div>
       </CardContent>
