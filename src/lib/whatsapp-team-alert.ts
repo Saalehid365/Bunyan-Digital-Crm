@@ -19,6 +19,10 @@ const TEMPLATE_LANGUAGE = "en";
 export async function sendTeamWhatsAppAlert(clientName: string, eventText: string, ctaPath: string): Promise<void> {
   try {
     const to = process.env.TEAM_WHATSAPP_NOTIFY_NUMBER;
+    // TEMPORARY: unconditional log so we can see in Netlify's function logs whether this
+    // ever gets called and whether the env var is actually visible at runtime — remove
+    // once the "no WhatsApp alert" issue is confirmed fixed.
+    console.log(`[whatsapp] sendTeamWhatsAppAlert called for "${clientName}" — TEAM_WHATSAPP_NOTIFY_NUMBER is ${to ? `set (ends …${to.slice(-4)})` : "MISSING"}`);
     if (!to) return;
 
     const ctaUrl = `${process.env.AUTH_URL ?? "http://localhost:3000"}${ctaPath}`;
@@ -28,7 +32,7 @@ export async function sendTeamWhatsAppAlert(clientName: string, eventText: strin
       languageCode: TEMPLATE_LANGUAGE,
       variables: [`${clientName}: ${eventText} — ${ctaUrl}`],
     });
-    if (!result.ok) console.error(`[whatsapp] team_activity_alert failed: ${result.error}`);
+    console.log(`[whatsapp] team_activity_alert send result: ${JSON.stringify(result)}`);
   } catch (err) {
     console.error("[whatsapp] team_activity_alert threw:", err);
   }
